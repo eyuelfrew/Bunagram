@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+:root {
+  --dark-bg-color: #1e1e1e;
+  --light-dark-color: #343434;
+  --medium-dard: #2d2d30;
+  --hard-dark: #252526;
+  --message-bg: #46464c;
+  --messge-input-dark: #41414a;
+  --search-result-bg: #151517;
+  --menu-button: #d0d0d4;
+}
+.scrollbar::-webkit-scrollbar {
+  width: 10px;
+}
+.scrollbar::-webkit-scrollbar-track {
+  @apply bg-gray-600;
+}
+.scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-gray-900 rounded;
+}
+.typing-indicator {
+  width: 60px;
+  height: 30px;
+  position: relative;
+  z-index: 4;
+}
+
+.typing-circle {
+  width: 8px;
+  height: 8px;
+  position: absolute;
+  border-radius: 50%;
+  --tw-text-opacity: 1;
+  background-color: rgb(37 99 235 / var(--tw-text-opacity));
+  left: 15%;
+  transform-origin: 50%;
+  animation: typing-circle7124 0.5s alternate infinite ease;
+}
+
+@keyframes typing-circle7124 {
+  0% {
+    top: 15px;
+    height: 5px;
+    border-radius: 50px 50px 25px 25px;
+    transform: scaleX(1.7);
+  }
+
+  40% {
+    height: 6px;
+    border-radius: 50%;
+    transform: scaleX(1);
+  }
+
+  100% {
+    top: 0%;
+  }
+}
+
+.typing-circle:nth-child(2) {
+  left: 45%;
+  animation-delay: 0.2s;
+}
+
+.typing-circle:nth-child(3) {
+  left: auto;
+  right: 15%;
+  animation-delay: 0.3s;
+}
+
+.typing-shadow {
+  width: 5px;
+  height: 4px;
+  border-radius: 50%;
+  --tw-text-opacity: 1;
+  background-color: rgb(37 99 235 / var(--tw-text-opacity));
+  position: absolute;
+  top: 17px;
+  transform-origin: 50%;
+  z-index: 3;
+  left: 15%;
+  filter: blur(1px);
+  animation: typing-shadow046 0.5s alternate infinite ease;
+}
+
+@keyframes typing-shadow046 {
+  0% {
+    transform: scaleX(1.5);
+  }
+
+  40% {
+    transform: scaleX(1);
+    opacity: 0.7;
+  }
+
+  100% {
+    transform: scaleX(0.2);
+    opacity: 10.4;
+  }
+}
+
+.typing-shadow:nth-child(4) {
+  left: 45%;
+  animation-delay: 0.2s;
+}
+
+.typing-shadow:nth-child(5) {
+  left: auto;
+  right: 15%;
+  animation-delay: 0.3s;
+}
+
+/*
+/=== * Menu Bar Component  
+*/
+.menu_bar_animation {
+  transition: ease-in 7s;
+}
+
+.menu_bar_animation {
+  transition: ease-out 50s;
+}
