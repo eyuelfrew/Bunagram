@@ -1,11 +1,19 @@
-//Login actions
+/*
+----  User login action types
+*/
+export const INIT_LOGIN_REQUEST = "INIT_LOGIN_REQUEST";
+export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
+export const LOGIN_FAILD = "LOGIN_FAILD";
+export const LOGOUT_REQUEST = "LOGOUT_REQUEST";
+export const ACCOUNT_NOT_FOUND = "ACCOUNT_NOT_FOUND";
+export const RESET_LOGIN_STATE = "RESET_LOGIN_STATE";
 
-import { LoginForm } from "../../types/Types";
+/*
+-- Loged in user state ations
+*/
+export const SET_USER = "SET_USER";
+export const RESET_USER = "RESET_USER";
 
-export const LOGIN_USER_INIT = "LOGIN_USER";
-export const LOGIN_USER_FAILD = "LOGIN_USER_FAILD";
-export const LOGIN_USER_SUCCESS = "LOGIN_USER_SUCCESS";
-export const LOGOUT_USER = "LOGOUT_USER";
 //get user detail
 export const GET_USER_DETAIL_INT = "GET_USER_DETAIL_INT";
 export const GET_USER_DETAIL_SUCCESS = "GET_USER_DETAIL_SUCCESS";
@@ -14,11 +22,6 @@ export const GET_USER_DETAIL_SUCCESS = "GET_USER_DETAIL_SUCCESS";
 export const SET_SOCKET_CONNECTION_INIT = "SET_SOCKET_CONNECTION_INIT";
 export const SET_SOCKET_CONNECTION_SUCCESS = "SET_SOCKET_CONNECTION";
 
-//
-export interface LoginUserInitAction {
-  type: typeof LOGIN_USER_INIT;
-  payload: LoginForm;
-}
 export interface SocketConnectionAction {
   type: typeof SET_SOCKET_CONNECTION_INIT;
   payload: string;

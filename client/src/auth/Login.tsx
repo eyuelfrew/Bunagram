@@ -1,113 +1,163 @@
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { LoginForm } from "../types/Types";
+import { Link, useNavigate } from "react-router-dom";
 import { Root_State } from "../store/store";
-import { useNavigate } from "react-router-dom";
-import { LoginRequest } from "../store/actions/Login";
-const LoginPage = () => {
+import axios, { AxiosResponse } from "axios";
+import toast from "react-hot-toast";
+import { LoginRequest, ResetLoginState } from "../store/actions/Login";
+
+const Login = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const { LoginStatus, isLoading, error, account_not_found } = useSelector(
+    (state: Root_State) => state.LoginReducer
+  );
   const navigateTo = useNavigate();
-  const isLoading = useSelector(
-    (state: Root_State) => state.LoginReducer.isLoading
-  );
-  const loginStatus = useSelector(
-    (state: Root_State) => state.LoginReducer.LoginStatus
-  );
-  console.log(loginStatus);
   const dispatch = useDispatch();
-  const [Form, setLoginForm] = useState<LoginForm>({
+  const [rememberMe, setRememberMe] = useState(false);
+  const [loginForm, setLoginForm] = useState({
     email: "",
     password: "",
+    rememberMe: rememberMe,
   });
-  const handleChage = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setLoginForm({ ...Form, [name]: value });
+    setLoginForm({ ...loginForm, [name]: value });
   };
-  const handleLogin = async (e: ChangeEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    dispatch(LoginRequest(Form));
+  const handleLogin = async (
+    event: FormEvent<HTMLFormElement>
+  ): Promise<void> => {
+    event.preventDefault();
+    dispatch(LoginRequest(loginForm));
   };
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (loginStatus && token) {
-      console.log("Testing Router");
+    if (LoginStatus && token) {
+      toast.success("Login Success");
       navigateTo("/chat");
     }
-  }, [loginStatus, navigateTo]);
+    if (error) {
+      toast.error("Invalid credentials");
+      return;
+    }
+    if (account_not_found) {
+      toast.error("User not found!");
+
+      dispatch(ResetLoginState());
+      return;
+    }
+  }, [LoginStatus, account_not_found, dispatch, error]);
+  useEffect(() => {
+    //
+    // * check usre autencity
+    //
+    const checkAuth = async () => {
+      try {
+        const response: AxiosResponse = await axios.get(
+          `${import.meta.env.VITE_BACK_END_API}/api/check-auth`,
+          { withCredentials: true }
+        );
+        if (response.data?.status === 1) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.log(error);
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  /*
+  -- Loading UI till the user is autenticated or state changed
+  */
+  if (isAuthenticated === null) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-[var(--light-dark-color)]">
+        <div className="rounded-full h-20 w-20 bg-violet-800 animate-ping"></div>
+      </div>
+    );
+  }
   return (
-    <section className="bg-gray-50 dark:bg-gray-200">
+    <section className="bg-[var(--medium-dard)] dark:bg-[var(--medium-dard)]">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
-        <div className="w-full bg-white rounded-lg shadow dark:border md:mt-0 sm:max-w-md xl:p-0 dark:bg-gray-800 dark:border-gray-700">
+        <div className="w-full  rounded-lg shadow bg-[var(--light-dark-color)] dark:border md:mt-0 sm:max-w-md xl:p-0 dark:border-gray-700">
           <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
-            <h1 className="text-center text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white">
-              Login in to your account
+            <h1 className="text-center text-xl font-light leading-tight tracking-tight  text-gray-500 dark:text-gray-400">
+              Login
             </h1>
             <form className="space-y-4 md:space-y-6" onSubmit={handleLogin}>
               <div>
                 <label
                   htmlFor="email"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                  className="block mb-2 text-sm font-light text-gray-500 dark:text-gray-400"
                 >
                   Your email
                 </label>
                 <input
+                  autoComplete="off"
                   type="email"
                   name="email"
                   id="email"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="focus:outline-none text-gray-900 rounded-3xl  block w-full p-2.5 bg-[var(--hard-dark)]  border-0 dark:placeholder-gray-400 dark:text-white"
                   placeholder="name@company.com"
                   required
-                  onChange={handleChage}
-                  value={Form?.email}
+                  onChange={handleChange}
+                  value={loginForm?.email}
                 />
               </div>
               <div>
                 <label
                   htmlFor="password"
-                  className="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                  className="block mb-2 text-sm  text-gray-500 dark:text-gray-400 font-light"
                 >
                   Password
                 </label>
                 <input
+                  autoComplete="off"
                   type="password"
                   name="password"
                   id="password"
                   placeholder="••••••••"
-                  className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                  className="focus:outline-none text-gray-900 rounded-3xl  block w-full p-2.5 bg-[var(--hard-dark)]  border-0 dark:placeholder-gray-400 dark:text-white"
                   required
-                  onChange={handleChage}
-                  value={Form?.password}
+                  onChange={handleChange}
+                  value={loginForm?.password}
                 />
               </div>
               <div className="flex items-center justify-between">
                 <div className="flex items-start">
                   <div className="flex items-center h-5">
                     <input
+                      onChange={(e) => setRememberMe(e.target.checked)}
                       id="remember"
                       aria-describedby="remember"
                       type="checkbox"
-                      className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
+                      className=" rounded-full w-4 h-4 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
                     />
                   </div>
                   <div className="ml-3 text-sm">
                     <label
                       htmlFor="remember"
-                      className="text-gray-500 dark:text-gray-300"
+                      className="text-gray-500 dark:text-gray-300 font-light"
                     >
                       Remember me
                     </label>
                   </div>
                 </div>
-                <a
-                  href="#"
-                  className="disabled text-sm font-medium text-primary-600 hover:underline dark:text-primary-500"
+                <Link
+                  to={"/veri"}
+                  className="disabled text-sm font-light text-primary-600 hover:underline dark:text-primary-500 text-gray-500 dark:text-gray-300"
                 >
                   Forgot password?
-                </a>
+                </Link>
               </div>
               <button
                 disabled={false}
                 type="submit"
-                className="w-full text-white bg-blue-400 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+                className="w-full transition ease-in  delay-150 text-white  hover:bg-[var(--dark-bg-color)] focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
               >
                 {isLoading ? (
                   <div
@@ -138,12 +188,12 @@ const LoginPage = () => {
               </button>
               <p className="text-sm font-light text-gray-500 dark:text-gray-400">
                 Don’t have an account yet?{" "}
-                <a
-                  href="#"
+                <Link
+                  to={"/signup"}
                   className="font-medium text-primary-600 hover:underline dark:text-primary-500"
                 >
                   Sign up
-                </a>
+                </Link>
               </p>
             </form>
           </div>
@@ -153,4 +203,4 @@ const LoginPage = () => {
   );
 };
 
-export default LoginPage;
+export default Login;

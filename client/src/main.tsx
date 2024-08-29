@@ -1,14 +1,16 @@
-import React from "react";
 import ReactDOM from "react-dom/client";
 import "./index.css";
-import { RouterProvider } from "react-router-dom";
-import router from "./routes/index.tsx";
+import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store/store";
+import App from "./App.tsx";
+import { SocketProvider } from "./context/SocketContext.tsx";
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
+  <SocketProvider>
     <Provider store={store}>
-      <RouterProvider router={router}></RouterProvider>
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
     </Provider>
-  </React.StrictMode>
+  </SocketProvider>
 );

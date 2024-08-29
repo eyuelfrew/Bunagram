@@ -10,10 +10,11 @@ export interface User {
   _id: string;
   name: string;
   email: string;
+  isVerified: null;
   profile_pic: string;
-  token: string;
-  onLineUsers: string[];
-  SocketConnection: Socket | null;
+  user_name: string;
+  bio: string;
+  phone_number: string;
 }
 export interface UserState {
   user: User;

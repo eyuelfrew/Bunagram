@@ -1,9 +1,16 @@
-import { call, takeEvery, put } from "redux-saga/effects";
-import { LOGIN_USER_INIT, LoginUserInitAction } from "../actions/actionTypes";
-import axios, { AxiosResponse } from "axios";
-import { loginFaild, loginSuccess } from "../actions/login";
+import { call, put, takeLatest } from "redux-saga/effects";
 
-function* loginUser(action: LoginUserInitAction) {
+import axios, { AxiosResponse } from "axios";
+
+import { SetUserInfo } from "../actions/UserAction";
+import { LoginSuccess, NoAccountError, LoginError } from "../actions/Login";
+import { INIT_LOGIN_REQUEST } from "../actionTypes/actionTypes";
+
+export interface LoginAction {
+  type: string;
+  payload: { email: string; password: string };
+}
+function* login(action: LoginAction) {
   try {
     const response: AxiosResponse = yield call(
       axios.post,
@@ -11,33 +18,20 @@ function* loginUser(action: LoginUserInitAction) {
       action.payload,
       { withCredentials: true }
     );
-    if (response.data?.success) {
+    if (response.data?.status === 1) {
       localStorage.setItem("token", response.data?.token);
-      yield put(loginSuccess(response.data?.user));
-    }
-    if (response.data?.notFound) {
-      yield put(loginFaild(response.data?.message));
-    }
-    if (response.data?.notVerified) {
-      yield put(loginFaild(response.data?.message));
+      yield put(LoginSuccess());
+      yield put(SetUserInfo(response.data?.user));
+    } else if (response.data?.notFound) {
+      yield put(NoAccountError());
+    } else if (response.data?.status === 0) {
+      yield put(LoginError(response.data?.message));
     }
   } catch (error) {
-    return console.log(error);
+    yield console.log(error);
   }
 }
 
-export default function* loginSaga() {
-  yield takeEvery<LoginUserInitAction>(LOGIN_USER_INIT, loginUser);
+export default function* LoginSaga() {
+  yield takeLatest(INIT_LOGIN_REQUEST, login);
 }
-// const response: AxiosResponse = await axios.post(`${URL}/api/login`, Form);
-// console.log(response);
-// if (response.data.notVerified) {
-//   return alert("Wrong Password");
-// }
-// if (response.data.success) {
-//   localStorage.setItem("token", response?.data?.success);
-//   return alert("Login Success");
-// }
-// if (response.data.notFound) {
-//   return alert("User Not Found");
-// }

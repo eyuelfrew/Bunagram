@@ -3,7 +3,7 @@ import {
   GET_USER_DETAIL_SUCCESS,
   GET_USER_DETAIL_INT,
   SET_SOCKET_CONNECTION_SUCCESS,
-} from "./actionTypes";
+} from "../actionTypes/actionTypes";
 
 export const getUserDetail = () => {
   return { type: GET_USER_DETAIL_INT };

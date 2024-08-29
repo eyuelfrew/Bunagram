@@ -12,6 +12,7 @@ import axios, { AxiosResponse } from "axios";
 import SeachResult from "./SeachResult";
 import notifSound from "/Iphone 14 Notification Ringtone Download - MobCup.Com.Co.mp3";
 import { ViewMenu } from "../store/actions/MenuControllers";
+import { UseSocket } from "../context/SocketContext";
 interface User {
   _id: string;
   name: string;
@@ -25,7 +26,6 @@ interface ConversationWithUserDetails extends Conversation {
 const Sidebar = () => {
   const notificationSound = new Audio(notifSound);
   const URL = import.meta.env.VITE_BACK_END_URL;
-  const { onlineUsers } = useSelector((state: Root_State) => state.socket);
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const [viewResult, setViewSearchResult] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -33,9 +33,8 @@ const Sidebar = () => {
   const [searchUser, setInputValue] = useState({
     usre_search_key_word: "",
   });
-  const SocketConnection = useSelector(
-    (state: Root_State) => state.socket.socket
-  );
+  const { socket, onlineUsers } = UseSocket();
+  const SocketConnection = socket;
   const dispatch = useDispatch();
   const params = useParams();
   const [allUsers, setAllUsers] = useState<
@@ -68,7 +67,7 @@ const Sidebar = () => {
     if (SocketConnection && user?._id) {
       SocketConnection.emit("sidebar", user._id);
       SocketConnection.on("notif", () => {
-        console.log("Notification Test");
+        // console.log("Notification Test ==", data.Id);
         notificationSound.play().catch((error) => {
           console.log("error: ", error);
         });

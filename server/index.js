@@ -95,9 +95,9 @@ io.on("connection", async (socket) => {
         .sort({ updatedAt: -1 });
       console.log("please work for me", data?.receiver?.toString());
       socket.emit("message", {
-        messages: getConversationMessage?.messages || [],
-        convID: getConversationMessage?._id || "",
         reciver: data?.receiver?.toString(),
+        convID: getConversationMessage?._id || "",
+        messages: getConversationMessage?.messages || [],
       });
     } catch (error) {
       return console.log(error.message);
@@ -143,6 +143,7 @@ io.on("connection", async (socket) => {
         .sort({ updatedAt: -1 });
       // Emit the updated messages to both sender and receiver
       io.to(data?.sender.toString()).emit("message", {
+        reciver: data?.receiver?.toString(),
         messages: getConversationMessage?.messages || [],
         convID: getConversationMessage?._id,
       });
@@ -152,7 +153,10 @@ io.on("connection", async (socket) => {
         convID: getConversationMessage?._id,
       });
       console.log("Recever = ", data?.receiver.toString());
-      io.to(data?.receiver.toString()).emit("notif", { noti: true });
+      io.to(data?.receiver.toString()).emit("notif", {
+        noti: true,
+        Id: data?.receiver.toString(),
+      });
       // io.to(data?.sender.toString()).emit("notif");
       io.to(data?.sender.toString()).emit("receverID", data?.sender.toString());
       const conversationSiender = await getConversations(data?.sender);

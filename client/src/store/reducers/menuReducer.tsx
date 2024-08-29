@@ -1,5 +1,8 @@
 import { MenuBar } from "../../types/Types";
-import { VIEW_MENU_DISABLE, VIEW_MENU_ENABLED } from "../actions/actionTypes";
+import {
+  VIEW_MENU_DISABLE,
+  VIEW_MENU_ENABLED,
+} from "../actionTypes/actionTypes";
 
 const initialState: MenuBar = {
   isView: false,

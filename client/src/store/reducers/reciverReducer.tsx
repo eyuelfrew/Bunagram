@@ -3,7 +3,7 @@ import {
   CLEAR_RECEVIER_STATE,
   GET_RECEVER_INIT,
   UPDATE_RECIVER_INFO,
-} from "../actions/actionTypes";
+} from "../actionTypes/actionTypes";
 
 const initState: Recevier = {
   full_name: "",

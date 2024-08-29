@@ -1,4 +1,7 @@
-import { VIEW_MENU_DISABLE, VIEW_MENU_ENABLED } from "./actionTypes";
+import {
+  VIEW_MENU_DISABLE,
+  VIEW_MENU_ENABLED,
+} from "../actionTypes/actionTypes";
 export const ViewMenu = () => {
   return { type: VIEW_MENU_ENABLED };
 };

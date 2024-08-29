@@ -5,21 +5,19 @@ import Sidebar from "../components/Sidebar";
 import { getUserDetail } from "../store/actions/getUserDetail";
 import { io } from "socket.io-client";
 import ChatBox from "../components/ChatBox";
-import {
-  setSocket,
-  setOnlineUsers,
-  clearSocket,
-} from "../store/slices/socketSlice";
+
 import { Root_State } from "../store/store";
 import MenuLayout from "../layout/MenuLayout";
+import { UseSocket } from "../context/SocketContext";
 const Home = () => {
+  const { setSocket, setOnlineUsers, clearSocketState } = UseSocket();
   const location = useLocation();
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const dispatch = useDispatch();
   const navigateTo = useNavigate();
   const token = localStorage.getItem("token");
   const loginStatus = useSelector(
-    (state: Root_State) => state.setLoginReducer.login
+    (state: Root_State) => state.LoginReducer.LoginStatus
   );
   //redired the usre to login page if not loged in
   useEffect(() => {
@@ -36,16 +34,16 @@ const Home = () => {
       });
 
       socketConnection.on("connect", () => {
-        dispatch(setSocket(socketConnection));
+        setSocket(socketConnection);
       });
 
       socketConnection.on("onlineuser", (data) => {
-        dispatch(setOnlineUsers(data));
+        setOnlineUsers(data);
       });
 
       return () => {
         socketConnection.disconnect();
-        dispatch(clearSocket());
+        clearSocketState();
       };
     }
   }, [dispatch, token]);

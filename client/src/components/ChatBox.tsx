@@ -14,6 +14,7 @@ import { updateReceiver } from "../store/actions/getRecever";
 import { CiMenuKebab } from "react-icons/ci";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import { UseSocket } from "../context/SocketContext";
 
 // import { FaPlus, FaImage, FaVideo } from "react-icons/fa";
 
@@ -35,9 +36,7 @@ const ChatBox = () => {
   const [istyping, setIsTyping] = useState(false);
   const [typerId, setTyperID] = useState<string>();
   const user = useSelector((state: Root_State) => state.userReducer.user);
-  const { socket, onlineUsers } = useSelector(
-    (state: Root_State) => state.socket
-  );
+  const { socket, onlineUsers } = UseSocket();
   const SocketConnection = socket;
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const currentMessage = useRef<HTMLDivElement | null>(null);
@@ -93,7 +92,7 @@ const ChatBox = () => {
         messages: React.SetStateAction<AllMessage[]>;
       }) => {
         const test = data.convID === Recever.conversation_id;
-        console.log(data.reciver);
+        console.log("Recevier ID = ", data.reciver);
         if (test) {
           setAllMessage(data.messages);
           SocketConnection.emit("seen", Recever.recever_id);
@@ -126,7 +125,7 @@ const ChatBox = () => {
         receiver: Recever.recever_id,
         text: message.text,
         msgByUserId: user?._id,
-        conversation_id: Recever.conversation_id,
+        conversation_id: Recever.conversation_id || "",
       });
       setMessage({ ...message, text: "" });
     }

@@ -36,7 +36,7 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
           rece_email: user.email,
           profile_pic: user.profile_pic,
           messageByUser: "",
-          conversation_id: "conv._id",
+          conversation_id: "",
           recever_id: user._id,
           sender_id: lodedInUser,
         })

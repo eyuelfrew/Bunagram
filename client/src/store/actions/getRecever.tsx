@@ -3,7 +3,7 @@ import {
   CLEAR_RECEVIER_STATE,
   GET_RECEVER_INIT,
   UPDATE_RECIVER_INFO,
-} from "./actionTypes";
+} from "../actionTypes/actionTypes";
 
 export const getReceiverInit = (payload: Recevier) => {
   return { type: GET_RECEVER_INIT, payload: payload };

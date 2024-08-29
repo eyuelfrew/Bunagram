@@ -1,6 +1,6 @@
 import axios, { AxiosResponse } from "axios";
 import { call, put, takeLatest } from "redux-saga/effects";
-import { GET_USER_DETAIL_INT } from "../actions/actionTypes";
+import { GET_USER_DETAIL_INT } from "../actionTypes/actionTypes";
 import { userDetaiSuccess } from "../actions/getUserDetail";
 
 export default function* getUserInfoSaga() {

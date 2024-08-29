@@ -3,7 +3,7 @@ import {
   GET_USER_DETAIL_INT,
   GET_USER_DETAIL_SUCCESS,
   SET_SOCKET_CONNECTION_SUCCESS,
-} from "../actions/actionTypes";
+} from "../actionTypes/actionTypes";
 
 const initialUserState: User = {
   _id: "",

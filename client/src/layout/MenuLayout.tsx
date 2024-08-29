@@ -4,7 +4,7 @@ import { Root_State } from "../store/store";
 import { CloseMenu } from "../store/actions/MenuControllers";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { logoutAction } from "../store/actions/login";
+import { LogoutReq } from "../store/actions/Login";
 import { clearReciver } from "../store/actions/getRecever";
 const MenuLayout = () => {
   const navigateTo = useNavigate();
@@ -14,7 +14,7 @@ const MenuLayout = () => {
     dispatch(CloseMenu());
   };
   const HandleLogout = async () => {
-    dispatch(logoutAction());
+    dispatch(LogoutReq());
 
     localStorage.clear();
     await axios.get("http://localhost:5000/api/logout", {
