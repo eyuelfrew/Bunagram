@@ -10,7 +10,7 @@ const Login = async (req, res) => {
     const user = await UserModel.findOne({ email });
     if (!user) {
       return res.json({
-        message: "Usre not found!",
+        message: "User not found!",
         status: 0,
         notFound: true,
       });
@@ -37,14 +37,14 @@ const Login = async (req, res) => {
       id: user._id,
       email: user.email,
     };
-    const tokenOption = rememberMe ? { expiresIn: "30d" } : { expiresIn: "1h" };
+    const tokenOption = rememberMe ? { expiresIn: "30d" } : { expiresIn: "1d" };
     const token = jwt.sign(tokenData, process.env.JWT_SECRET_KEY, tokenOption);
 
     return res
       .cookie("token", token, {
         httpOnly: true,
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        maxAge: 2 * 60 * 60 * 1000,
         path: "/",
       })
       .json({

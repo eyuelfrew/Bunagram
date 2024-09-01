@@ -69,3 +69,11 @@ export interface Conversation {
 export interface MenuBar {
   isView: boolean;
 }
+
+export interface ContactMenu {
+  isContactOpen: boolean;
+  isEditNameOpen: boolean;
+  isPhoneEdit: boolean;
+  isUserNameEdit: boolean;
+  isDeleteAccount: boolean;
+}

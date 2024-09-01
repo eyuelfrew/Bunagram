@@ -1,15 +1,17 @@
 import { combineReducers } from "@reduxjs/toolkit";
 import LoginReducer from "./reducers/LoginReducer";
-import userReducer from "./reducers/userReducer";
+
 import receiverReducer from "./reducers/reciverReducer";
-import socketReducer from "./slices/socketSlice";
+
 import menuReducer from "./reducers/menuReducer";
+import UserReducers from "./reducers/UserReducer";
+import ContactMenuReducer from "./reducers/ContactMenuReducer";
 const RootReducer = combineReducers({
   LoginReducer,
-  userReducer,
+  UserReducers,
   receiverReducer,
   menuReducer,
-  socket: socketReducer,
+  ContactMenuReducer,
 });
 
 export default RootReducer;

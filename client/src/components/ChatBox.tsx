@@ -35,7 +35,7 @@ const ChatBox = () => {
   const [typing, setTyping] = useState(false);
   const [istyping, setIsTyping] = useState(false);
   const [typerId, setTyperID] = useState<string>();
-  const user = useSelector((state: Root_State) => state.userReducer.user);
+  const user = useSelector((state: Root_State) => state.UserReducers);
   const { socket, onlineUsers } = UseSocket();
   const SocketConnection = socket;
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
@@ -92,7 +92,6 @@ const ChatBox = () => {
         messages: React.SetStateAction<AllMessage[]>;
       }) => {
         const test = data.convID === Recever.conversation_id;
-        console.log("Recevier ID = ", data.reciver);
         if (test) {
           setAllMessage(data.messages);
           SocketConnection.emit("seen", Recever.recever_id);
@@ -170,30 +169,55 @@ const ChatBox = () => {
               </Link>
             </div>
             <div className="relative">
-              <img
-                className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
-                src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
-                alt={`${Recever.full_name}`}
-              />
-              {isOnline ? (
-                <div className="absolute w-4 h-4 rounded-full bg-green-400 right-0 top-10 lg:top-14"></div>
+              {user._id === Recever.recever_id ? (
+                <>
+                  <img
+                    className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
+                    src={`/savedmessage.jpg`}
+                    alt={`${Recever.full_name}`}
+                  />
+                </>
               ) : (
                 <>
-                  <div className="absolute w-4 h-4 rounded-full bg-red-500 right-0 top-10 lg:top-14"></div>
+                  <img
+                    className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
+                    src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
+                    alt={`${Recever.full_name}`}
+                  />
+                </>
+              )}
+
+              {user._id !== Recever.recever_id && (
+                <>
+                  {isOnline ? (
+                    <div className="absolute w-4 h-4 rounded-full bg-green-400 right-0 top-10 lg:top-14"></div>
+                  ) : (
+                    <>
+                      <div className="absolute w-4 h-4 rounded-full bg-red-500 right-0 top-10 lg:top-14"></div>
+                    </>
+                  )}
                 </>
               )}
             </div>
             <div className="">
-              <p className="text-xl lg:text-2xl ml-4">{Recever.full_name}</p>
-              <div className=" h-6">
-                {istyping && typerId == Recever.recever_id ? (
-                  <>
-                    <Typing />
-                  </>
+              <p className="text-xl lg:text-2xl ml-4">
+                {user._id === Recever.recever_id ? (
+                  <>Saved Messages</>
                 ) : (
-                  <></>
+                  <> {Recever.full_name}</>
                 )}
-              </div>
+              </p>
+              {user._id !== Recever.recever_id && (
+                <div className=" h-6">
+                  {istyping && typerId == Recever.recever_id ? (
+                    <>
+                      <Typing />
+                    </>
+                  ) : (
+                    <></>
+                  )}
+                </div>
+              )}
             </div>
           </div>
           <div className=" h-fit text-white p-2 rounded-lg">
@@ -218,7 +242,7 @@ const ChatBox = () => {
                 >
                   <p className="break-words">{msg.text}</p>
                   <p className="text-xs">
-                    {moment(msg.createdAt).format("hh:mm")}
+                    {moment("2024-09-06T09:57:58.030Z").format("hh:mm")}
                   </p>
                 </div>
               );

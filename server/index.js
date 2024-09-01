@@ -59,25 +59,9 @@ io.on("connection", async (socket) => {
 
   socket.on("message-page", async (data) => {
     console.log(data);
-    // const userid = userId.toString();
-    // return console.log(data);
-    if (!data.sender) return console.log("no id found", data.sender);
-    // const userDetail = await UserModel.findById(userid).select("-password");
-    // const payload = {
-    //   _id: userDetail._id,
-    //   name: userDetail.name,
-    //   email: userDetail.email,
-    //   profile_pic: userDetail.profile_pic,
-    //   online: onLineUser.has(userid),
-    // };
-    // socket.emit("message-user", payload);
 
-    // const getConversationMessage = await ConversationModel.findOne({
-    //   $or: [
-    //     { sender: user?._id, receiver: userid },
-    //     { sender: userid, receiver: user?._id },
-    //   ],
-    // })
+    if (!data.sender) return console.log("no id found", data.sender);
+
     try {
       const getConversationMessage = await ConversationModel.findOne({
         $or: [
@@ -93,7 +77,6 @@ io.on("connection", async (socket) => {
       })
         .populate("messages")
         .sort({ updatedAt: -1 });
-      console.log("please work for me", data?.receiver?.toString());
       socket.emit("message", {
         reciver: data?.receiver?.toString(),
         convID: getConversationMessage?._id || "",
@@ -152,7 +135,6 @@ io.on("connection", async (socket) => {
         messages: getConversationMessage?.messages || [],
         convID: getConversationMessage?._id,
       });
-      console.log("Recever = ", data?.receiver.toString());
       io.to(data?.receiver.toString()).emit("notif", {
         noti: true,
         Id: data?.receiver.toString(),

@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Root_State } from "../store/store";
 import axios, { AxiosResponse } from "axios";
 import toast from "react-hot-toast";
@@ -47,15 +47,13 @@ const Login = () => {
     }
   }, [LoginStatus, account_not_found, dispatch, error]);
   useEffect(() => {
-    //
-    // * check usre autencity
-    //
     const checkAuth = async () => {
       try {
         const response: AxiosResponse = await axios.get(
-          `${import.meta.env.VITE_BACK_END_API}/api/check-auth`,
+          `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
           { withCredentials: true }
         );
+        console.log(response.data);
         if (response.data?.status === 1) {
           setIsAuthenticated(true);
         } else {
@@ -80,7 +78,9 @@ const Login = () => {
       </div>
     );
   }
-  return (
+  return isAuthenticated ? (
+    <Navigate to="/chat" replace />
+  ) : (
     <section className="bg-[var(--medium-dard)] dark:bg-[var(--medium-dard)]">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
         <div className="w-full  rounded-lg shadow bg-[var(--light-dark-color)] dark:border md:mt-0 sm:max-w-md xl:p-0 dark:border-gray-700">
@@ -97,7 +97,6 @@ const Login = () => {
                   Your email
                 </label>
                 <input
-                  autoComplete="off"
                   type="email"
                   name="email"
                   id="email"

@@ -40,7 +40,7 @@ const Sidebar = () => {
   const [allUsers, setAllUsers] = useState<
     ConversationWithUserDetails[] | null
   >(null);
-  const user = useSelector((state: Root_State) => state.userReducer?.user);
+  const user = useSelector((state: Root_State) => state.UserReducers);
   // const [editUserInfo, setEditUserInfo] = useState(false);
 
   const handleSearchUser = async (e: ChangeEvent<HTMLInputElement>) => {
@@ -116,8 +116,6 @@ const Sidebar = () => {
   const handleSideNavBar = () => {
     dispatch(ViewMenu());
   };
-
-  // menu side bar controller function
 
   return (
     <>
@@ -210,7 +208,7 @@ const Sidebar = () => {
                     sender_id: "",
                   })
                 }
-                to={"/chat/message"}
+                to={""}
                 key={index}
               >
                 <div
@@ -222,29 +220,49 @@ const Sidebar = () => {
                 >
                   <div className="flex">
                     <div className="flex px-2 py-1 relative">
-                      <img
-                        className="w-12 h-12 rounded-full"
-                        src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
-                        alt=""
-                      />
-                      {onlineUsers.includes(conv?.userDetails._id) ? (
+                      {user._id === conv?.userDetails._id ? (
                         <>
-                          <div className="absolute w-3 h-3 rounded-full bg-green-400 right-1 top-10 lg:top-8"></div>
+                          {" "}
+                          <img
+                            className="w-16 h-16 rounded-full "
+                            src={`/savedmessage.jpg`}
+                            alt={`${Recever.full_name}`}
+                          />
                         </>
                       ) : (
                         <>
-                          <div className="absolute w-3 h-3 rounded-full bg-red-400 right-1 top-10 lg:top-8"></div>
+                          <img
+                            className="w-16 h-16 rounded-full"
+                            src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
+                            alt=""
+                          />
+                        </>
+                      )}
+                      {user._id !== conv?.userDetails._id && (
+                        <>
+                          {onlineUsers.includes(conv?.userDetails._id) ? (
+                            <>
+                              <div className="absolute w-3 h-3 rounded-full bg-green-400 right-1 top-11 "></div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="absolute w-3 h-3 rounded-full bg-red-400 right-1 top-11  "></div>
+                            </>
+                          )}
                         </>
                       )}
                     </div>
                     <div>
                       <p className="text-lg font-semibold">
-                        {conv?.userDetails?.name}
+                        {user._id !== conv?.userDetails._id ? (
+                          <>{conv?.userDetails?.name}</>
+                        ) : (
+                          <>Saved Message</>
+                        )}
                       </p>
                       <p className="truncate ... w-36 text-sm">
                         {conv?.lastMessage?.text}
                       </p>
-                      {/* <p className="truncate">{conv?.lastMessage?.text}</p> */}
                     </div>
                   </div>
                   <div>

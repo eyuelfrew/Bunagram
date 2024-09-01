@@ -1,4 +1,4 @@
-import { SignUpForm } from "../models/SignupModel";
+import { SignUpForm } from "../model/SignupModel";
 
 export const validateSignUp = (
   name: string,

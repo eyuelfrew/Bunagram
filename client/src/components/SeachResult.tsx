@@ -3,6 +3,7 @@ import { Root_State } from "../store/store";
 import { getReceiverInit } from "../store/actions/getRecever";
 import { Recevier } from "../types/Types";
 import { Link } from "react-router-dom";
+import { UseSocket } from "../context/SocketContext";
 
 interface User {
   name: string;
@@ -15,13 +16,11 @@ interface SearchUserProps {
   onClose: () => void;
 }
 const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
-  const lodedInUser = useSelector(
-    (state: Root_State) => state.userReducer.user._id
+  const logedInUser = useSelector(
+    (state: Root_State) => state.UserReducers._id
   );
   const dispatch = useDispatch();
-  const onlineUser: string[] = useSelector(
-    (state: Root_State) => state?.socket.onlineUsers
-  );
+  const onlineUser: string[] = UseSocket().onlineUsers;
   const isOnline = onlineUser.includes(user._id);
   const handleStartChat = (payload: Recevier) => {
     console.log(payload);
@@ -38,34 +37,59 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
           messageByUser: "",
           conversation_id: "",
           recever_id: user._id,
-          sender_id: lodedInUser,
+          sender_id: logedInUser,
         })
       }
-      to={"/chat/message"}
+      to={"#"}
       className="hover:bg-blue-400 cursor-pointer shadow rounded-md py-3  max-w-sm w-full mx-auto mb-2"
     >
       <div className=" flex space-x-4 items-center justify-between px-2">
         <div className="rounded-[100%]  flex items-center gap-2">
-          <img
-            className="w-[25%] rounded-full"
-            src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
-            alt="buna chat"
-          />
+          {logedInUser === user._id ? (
+            <img
+              className="w-[25%] rounded-full"
+              src={`/savedmessage.jpg`}
+              alt="buna chat"
+            />
+          ) : (
+            <>
+              <img
+                className="w-[25%] rounded-full"
+                src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
+                alt="buna chat"
+              />
+            </>
+          )}
+
           <div className="block">
-            <p>{user.name}</p>
-            {isOnline ? (
-              <>
-                <div className="bg-green-600 w-fit px-2  mt-0">
-                  <p className="text-[12px] text-white">online</p>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="bg-red-600 w-fit">
-                  <p className="text-[12px] text-white">offline</p>
-                </div>
-              </>
-            )}
+            <p>
+              {logedInUser === user._id ? (
+                <>
+                  <span className="text-lg">Saved Message</span>
+                </>
+              ) : (
+                <>{user.name}</>
+              )}
+            </p>
+            <>
+              {logedInUser !== user._id && (
+                <>
+                  {isOnline ? (
+                    <>
+                      <div className="bg-green-600 w-fit px-2  mt-0">
+                        <p className="text-[12px] text-white">online</p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="bg-red-600 w-fit">
+                        <p className="text-[12px] text-white">offline</p>
+                      </div>
+                    </>
+                  )}
+                </>
+              )}
+            </>
           </div>
         </div>
       </div>

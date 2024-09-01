@@ -1,37 +1,27 @@
-import { User, UserState } from "../../types/Types";
-import {
-  GET_USER_DETAIL_INT,
-  GET_USER_DETAIL_SUCCESS,
-  SET_SOCKET_CONNECTION_SUCCESS,
-} from "../actionTypes/actionTypes";
+import { User } from "../../types/Types";
+import { SET_USER, RESET_USER } from "../actionTypes/actionTypes";
 
-const initialUserState: User = {
+const initState: User = {
   _id: "",
   name: "",
   email: "",
+  isVerified: null,
   profile_pic: "",
-  token: "",
-  onLineUsers: [],
-  SocketConnection: null,
+  user_name: "",
+  bio: "",
+  phone_number: "",
 };
-const initialState: UserState = {
-  user: initialUserState,
-  isLoading: false,
-  error: "",
-};
-const userReducer = (
-  state = initialState,
+const UserReducers = (
+  state = initState,
   action: { type: string; payload: User }
 ) => {
   switch (action.type) {
-    case GET_USER_DETAIL_INT:
-      return { ...state, isLoading: true };
-    case GET_USER_DETAIL_SUCCESS:
-      return { ...state, user: action.payload, isLoading: false };
-    case SET_SOCKET_CONNECTION_SUCCESS:
-      return { ...state, SocketConnection: action.payload };
+    case SET_USER:
+      return { ...state, ...action.payload };
+    case RESET_USER:
+      return { ...initState };
     default:
       return state;
   }
 };
-export default userReducer;
+export default UserReducers;

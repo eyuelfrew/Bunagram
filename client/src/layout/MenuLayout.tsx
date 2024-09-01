@@ -6,6 +6,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { LogoutReq } from "../store/actions/Login";
 import { clearReciver } from "../store/actions/getRecever";
+import { OpenConactInfo } from "../store/actions/AccountAction";
 const MenuLayout = () => {
   const navigateTo = useNavigate();
   const dispatch = useDispatch();
@@ -25,6 +26,10 @@ const MenuLayout = () => {
     dispatch(clearReciver());
   };
 
+  const handleContactInfo = () => {
+    dispatch(CloseMenu());
+    dispatch(OpenConactInfo());
+  };
   return (
     <>
       {menuBar && (
@@ -54,13 +59,10 @@ const MenuLayout = () => {
             </button>
           </div>
         </div>
-        <div className=" mt-">
-          <button
-            onClick={HandleLogout}
-            className="w-full text-white bg-[var(--dark-bg-color)] p-2 rounded-lg"
-          >
-            Logout
-          </button>
+        <div className="mx-5 mt-11 flex flex-col gap-5">
+          <button onClick={handleContactInfo}>Account</button>
+          <button>Setting</button>
+          <button onClick={HandleLogout}>Logout</button>
         </div>
       </div>
     </>
