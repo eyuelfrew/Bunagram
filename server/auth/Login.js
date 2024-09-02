@@ -45,6 +45,7 @@ const Login = async (req, res) => {
         httpOnly: true,
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
+        domain: "http://localhost:5173/",
         path: "/",
       })
       .json({

@@ -63,7 +63,6 @@ const Sidebar = () => {
     }
   };
   useEffect(() => {
-    console.log("Reciver Test ==", Recever?.recever_id);
     if (SocketConnection && user?._id) {
       SocketConnection.emit("sidebar", user._id);
       SocketConnection.on("notif", () => {
@@ -82,7 +81,7 @@ const Sidebar = () => {
         }
       });
       SocketConnection.on("conversation", (data) => {
-        const conversationUserData: ConversationWithUserDetails[] = data.map(
+        const conversationUserData: ConversationWithUserDetails[] = data?.map(
           (conversationUser: Conversation) => {
             if (
               // menu side bar controller function

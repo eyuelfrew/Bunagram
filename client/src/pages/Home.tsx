@@ -35,7 +35,7 @@ const Home = () => {
   //start socket connetion if the user has loged in
   useEffect(() => {
     if (token) {
-      const socketConnection = io(import.meta.env.VITE_BACK_END_URL, {
+      const socketConnection = io("https://bunagram-1.onrender.com/", {
         auth: { token },
       });
 
@@ -56,7 +56,7 @@ const Home = () => {
 
   useEffect(() => {
     dispatch(getUserDetail());
-  }, [dispatch]);
+  }, []);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -65,7 +65,6 @@ const Home = () => {
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
           { withCredentials: true }
         );
-        console.log("Use Effect ");
         if (response.data?.status === 1) {
           dispatch(SetUserInfo(response?.data?.user));
         } else {
@@ -76,8 +75,8 @@ const Home = () => {
       }
     };
 
-    checkAuth();
-  }, [dispatch, navigateTo]);
+    // checkAuth();
+  }, []);
 
   const basePath = location.pathname === "/chat";
 

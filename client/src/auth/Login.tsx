@@ -54,6 +54,7 @@ const Login = () => {
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
           { withCredentials: true }
         );
+        console.log(response.data);
         if (response.data?.status === 1) {
           setIsAuthenticated(true);
         } else {
@@ -66,7 +67,7 @@ const Login = () => {
     };
 
     checkAuth();
-  }, [user]);
+  }, []);
 
   /*
   -- Loading UI till the user is autenticated or state changed

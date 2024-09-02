@@ -18,7 +18,7 @@ const MenuLayout = () => {
     dispatch(LogoutReq());
 
     localStorage.clear();
-    await axios.get("http://localhost:5000/api/logout", {
+    await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
       withCredentials: true,
     });
     navigateTo("/");
