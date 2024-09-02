@@ -2,7 +2,6 @@ import UserModel from "../models/UserModels.js";
 
 const DeleteAccount = async (req, res) => {
   const { id } = req.params;
-  console.log(id);
 
   try {
     const user = await UserModel.findById(id);

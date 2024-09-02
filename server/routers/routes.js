@@ -16,6 +16,10 @@ import {
 } from "../controllers/UpdateUser.js";
 import ForgotPassword from "../auth/ForgotPassword.js";
 import ResetPassword from "../auth/ResetPassword.js";
+import BlockUser from "../controllers/BlockUser.js";
+import UnblockUser from "../controllers/UnblockUser.js";
+import UpdateProfilePicture from "../controllers/UpdateProfilePic.js";
+import DeletProfilePic from "../controllers/Profile Picture/DeleteProfilePicture.js";
 const router = express.Router();
 
 // checking if user is verifyed
@@ -38,6 +42,13 @@ router.post("/forgot-pass", ForgotPassword);
 
 // reset password
 router.post("/reset-password/:token", ResetPassword);
+
+// block user
+router.post("/block-user", VerifiyToken, BlockUser);
+
+//unblock users
+router.post("/unblock-user", VerifiyToken, UnblockUser);
+
 /*
 --- Update User Inforation End-Points
 */
@@ -47,6 +58,8 @@ router.post("/update-bio", VerifiyToken, EditBio);
 router.post("/update-user-name", VerifiyToken, EditUserName);
 router.post("/check-user-name", CheckUserName);
 router.delete("/del-acc/:id", VerifiyToken, DeleteAccount);
+router.post("/update-pp", VerifiyToken, UpdateProfilePicture);
+router.delete("/delete-profile/:user_id", VerifiyToken, DeletProfilePic);
 
 //searh users
 router.post("/search", searchUser);

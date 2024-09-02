@@ -10,6 +10,7 @@ import getUserDetailFromToken from "./helpers/getUserDetailsFromToken.js";
 import { ConversationModel, MessageModel } from "./models/ConversationModel.js";
 import getConversations from "./helpers/getConversation.js";
 import bodyParser from "body-parser";
+import UserModel from "./models/UserModels.js";
 dotenv.config();
 const app = express();
 const corsOptions = {
@@ -58,8 +59,6 @@ io.on("connection", async (socket) => {
   io.emit("onlineuser", Array.from(onLineUser));
 
   socket.on("message-page", async (data) => {
-    console.log(data);
-
     if (!data.sender) return console.log("no id found", data.sender);
 
     try {
@@ -89,6 +88,7 @@ io.on("connection", async (socket) => {
 
   //new message
   socket.on("newmessage", async (data) => {
+    console.log(data);
     try {
       let conversation = await ConversationModel.findOne({
         $or: [
@@ -135,10 +135,7 @@ io.on("connection", async (socket) => {
         messages: getConversationMessage?.messages || [],
         convID: getConversationMessage?._id,
       });
-      io.to(data?.receiver.toString()).emit("notif", {
-        noti: true,
-        Id: data?.receiver.toString(),
-      });
+      io.to(data?.receiver.toString()).emit("notif");
       // io.to(data?.sender.toString()).emit("notif");
       io.to(data?.sender.toString()).emit("receverID", data?.sender.toString());
       const conversationSiender = await getConversations(data?.sender);
@@ -187,6 +184,76 @@ io.on("connection", async (socket) => {
       conversationRecevier || []
     );
   });
+  /*
+  --- block user update onversation web socket
+  */
+  socket.on("blockuser", async (data) => {
+    const blocker_id = data?.blocker;
+    const blocked_id = data?.blocked;
+    console.log(data);
+    const blockerFullInfo = await UserModel.findById(blocker_id);
+    const conversationSender = await getConversations(blocker_id.toString());
+    const conversationRecevier = await getConversations(blocked_id.toString());
+    io.to(blocker_id.toString()).emit("conversation", conversationSender || []);
+    io.to(blocked_id.toString()).emit(
+      "conversation",
+      conversationRecevier || []
+    );
+    console.log(blockerFullInfo);
+    io.to(blocked_id.toString()).emit("blockedby", blockerFullInfo);
+  });
+
+  /*
+  --- unbock user request
+  */
+  socket.on("unblockuser", async (data) => {
+    const blocker_id = data?.blocker;
+    const blocked_id = data?.blocked;
+    console.log(data);
+    const blockerFullInfo = await UserModel.findById(blocker_id);
+    const conversationSender = await getConversations(blocker_id.toString());
+    const conversationRecevier = await getConversations(blocked_id.toString());
+    io.to(blocker_id.toString()).emit("conversation", conversationSender || []);
+    io.to(blocked_id.toString()).emit(
+      "conversation",
+      conversationRecevier || []
+    );
+    console.log(blockerFullInfo);
+    io.to(blocked_id.toString()).emit("blockedby", blockerFullInfo);
+  });
+
+  /*
+  --- clear chat request
+  */
+  socket.on("clear-chat", async (data) => {
+    const sender = data?.sender_id;
+    const reciver = data?.reciver_id;
+    try {
+      const converstaion = await ConversationModel.findOne({
+        $or: [
+          { sender: sender, receiver: reciver },
+          { sender: reciver, receiver: sender },
+        ],
+      });
+      if (converstaion) {
+        await MessageModel.deleteMany({ _id: { $in: converstaion.messages } });
+        converstaion.messages = [];
+        const newConversation = await converstaion.save();
+        console.log(newConversation);
+        io.to(sender.toString()).emit("message", {
+          messages: newConversation?.messages || [],
+          convID: newConversation?._id,
+        });
+        io.to(reciver.toString()).emit("message", {
+          messages: newConversation?.messages || [],
+          convID: newConversation?._id,
+        });
+      }
+    } catch (error) {
+      console.log(error.message || error);
+    }
+  });
+  // socket.on("unblockuser");
   socket.on("typing", (userId) => {
     io.to(userId?.recevierId).emit("typing", userId?.typerId);
   });

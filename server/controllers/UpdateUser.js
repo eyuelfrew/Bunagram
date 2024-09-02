@@ -28,7 +28,6 @@ export const UpdateName = async (req, res) => {
 */
 export const CheckUserName = async (req, res) => {
   const { user_name } = req.body;
-  console.log("user name =", user_name);
   try {
     const user = await UserModel.findOne({ user_name });
     if (user) {
@@ -48,7 +47,6 @@ export const CheckUserName = async (req, res) => {
 */
 export const EditUserName = async (req, res) => {
   const { _id, user_name } = req.body;
-  console.log("user name =", user_name, _id);
   try {
     const user = await UserModel.findById(_id);
     if (!user) {
@@ -70,7 +68,6 @@ export const EditBio = async (req, res) => {
   const { bio, user_id } = req.body;
   try {
     const user = await UserModel.findById(user_id);
-    console.log(user);
     if (!user)
       return res.json({
         message: "User not found !",

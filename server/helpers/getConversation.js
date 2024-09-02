@@ -5,8 +5,8 @@ const getConversations = async (currentUserId) => {
       $or: [{ sender: currentUserId }, { receiver: currentUserId }],
     })
       .populate("messages")
-      .populate("sender", "name email profile_pic")
-      .populate("receiver", "name email profile_pic")
+      .populate("sender", "_id name email profile_pic blockedUsers")
+      .populate("receiver", "_id name email profile_pic blockedUsers")
       .sort({ updatedAt: -1 });
     const conversation = currentUserConversation.map((conv) => {
       const countUnseenMsg = conv?.messages?.reduce((preve, curr) => {
