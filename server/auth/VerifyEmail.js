@@ -29,7 +29,9 @@ const VerifyAccount = async (req, res) => {
     email: user.email,
   };
 
-  const token = jwt.sign(tokenData, process.env.JWT_SECRET_KEY);
+  const token = jwt.sign(tokenData, process.env.JWT_SECRET_KEY, {
+    expiresIn: "5d",
+  });
 
   // configure cookie and send response to client
   await SendWelcomeEmail(user.email, user.name);

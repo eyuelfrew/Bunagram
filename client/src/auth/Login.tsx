@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import { LoginRequest, ResetLoginState } from "../store/actions/Login";
 
 const Login = () => {
+  const user = useSelector((state: Root_State) => state.UserReducers);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const { LoginStatus, isLoading, error, account_not_found } = useSelector(
     (state: Root_State) => state.LoginReducer
@@ -53,7 +54,6 @@ const Login = () => {
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
           { withCredentials: true }
         );
-        console.log(response.data);
         if (response.data?.status === 1) {
           setIsAuthenticated(true);
         } else {
@@ -66,7 +66,7 @@ const Login = () => {
     };
 
     checkAuth();
-  }, []);
+  }, [user]);
 
   /*
   -- Loading UI till the user is autenticated or state changed
