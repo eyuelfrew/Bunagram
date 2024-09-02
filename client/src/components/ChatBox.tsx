@@ -11,12 +11,14 @@ import { Root_State } from "../store/store";
 import moment from "moment";
 import { IoMdSend } from "react-icons/io";
 import { updateReceiver } from "../store/actions/getRecever";
-import { CiMenuKebab } from "react-icons/ci";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { UseSocket } from "../context/SocketContext";
+import ChatMenu from "./ChatMenu";
 
 // import { FaPlus, FaImage, FaVideo } from "react-icons/fa";
+import LottieAnimation from "./LottieAnimation";
+import { MdOutlineAttachFile } from "react-icons/md";
 
 interface Message {
   text: string;
@@ -58,10 +60,6 @@ const ChatBox = () => {
   useEffect(() => {
     setMessage({ ...message, text: "" });
     if (SocketConnection && Recever.recever_id) {
-      // console.log({
-      //   sender: user._id,
-      //   receiver: Recever.recever_id,
-      // });
       SocketConnection.emit("message-page", {
         sender: user._id,
         receiver: Recever.recever_id,
@@ -113,9 +111,10 @@ const ChatBox = () => {
         SocketConnection.off("message", messageHandler);
       };
     }
-  }, [SocketConnection, Recever]);
+  }, [Recever, SocketConnection, dispatch]);
 
   const isOnline = onlineUsers.includes(Recever.recever_id);
+  const isBlocked = user.blockedUsers.includes(Recever.recever_id);
   const handleSendMessage = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (SocketConnection && message.text.trim() !== "") {
@@ -158,6 +157,8 @@ const ChatBox = () => {
     setMessage({ ...message, text: "" });
   }, [Recever]);
 
+  const blockedByReciver = Recever.blockedUsers.includes(user._id);
+
   return (
     <div>
       <div>
@@ -179,17 +180,29 @@ const ChatBox = () => {
                 </>
               ) : (
                 <>
-                  <img
-                    className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
-                    src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
-                    alt={`${Recever.full_name}`}
-                  />
+                  {blockedByReciver || Recever.profile_pic.trim() === "" ? (
+                    <>
+                      <img
+                        className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
+                        src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
+                        alt={`${Recever.full_name}`}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <img
+                        className="w-24 h-24 rounded-full "
+                        src={`${Recever.profile_pic}`}
+                        alt=""
+                      />
+                    </>
+                  )}
                 </>
               )}
 
               {user._id !== Recever.recever_id && (
                 <>
-                  {isOnline ? (
+                  {isOnline && !blockedByReciver ? (
                     <div className="absolute w-4 h-4 rounded-full bg-green-400 right-0 top-10 lg:top-14"></div>
                   ) : (
                     <>
@@ -209,6 +222,15 @@ const ChatBox = () => {
               </p>
               {user._id !== Recever.recever_id && (
                 <div className=" h-6">
+                  {blockedByReciver ? (
+                    <>
+                      <p className="mx-2 text-slate-400">
+                        lastseen long time ago
+                      </p>
+                    </>
+                  ) : (
+                    <></>
+                  )}
                   {istyping && typerId == Recever.recever_id ? (
                     <>
                       <Typing />
@@ -221,13 +243,18 @@ const ChatBox = () => {
             </div>
           </div>
           <div className=" h-fit text-white p-2 rounded-lg">
-            <button className="text-white text-2xl">
-              <CiMenuKebab />
-            </button>
+            <ChatMenu />
           </div>
         </header>
         <section className="h-[calc(100vh-160px)] bg-[var(--light-dark-color)] overflow-x-hidden overflow-y-scroll scrollbar  ">
-          {allMessages &&
+          {allMessages.length === 0 && (
+            <>
+              <div className=" h-full flex items-center">
+                <LottieAnimation />
+              </div>
+            </>
+          )}
+          {allMessages.length > 0 &&
             allMessages.map((msg, index) => {
               return (
                 <div
@@ -250,24 +277,58 @@ const ChatBox = () => {
         </section>
 
         <section className="flex items-center h-16 bg-[var(--medium-dard)] p-4">
-          <form
-            className="h-full w-full flex justify-around items-center "
-            onSubmit={handleSendMessage}
-          >
-            <div className=" w-full flex items-center">
-              <input
-                type="text"
-                name="text"
-                className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white"
-                placeholder="Write a message..."
-                value={message.text}
-                onChange={handleOnMessageChange}
-              />
-              <button type="submit" className="h-12 px-4 text-white">
-                <IoMdSend size={25} />
-              </button>
-            </div>
-          </form>
+          {isBlocked ? (
+            <>
+              <div className="h-full w-full flex justify-around items-center ">
+                <div className=" w-full flex items-center">
+                  <button className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-red-400">
+                    unblock user
+                  </button>
+                </div>
+              </div>
+            </>
+          ) : (
+            <>
+              {blockedByReciver ? (
+                <>
+                  <div className=" w-full flex items-center justify-center ">
+                    <p className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white text-center flex items-center justify-center">
+                      can't send message
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div>
+                    <button className="hover:bg-slate-800 px-4 py-2">
+                      <MdOutlineAttachFile size={30} className="text-white" />
+                    </button>
+                  </div>
+                  <form
+                    className="h-full w-full flex justify-around items-center "
+                    onSubmit={handleSendMessage}
+                  >
+                    <div className=" w-full flex items-center">
+                      <input
+                        type="text"
+                        name="text"
+                        className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white"
+                        placeholder="Write a message..."
+                        value={message.text}
+                        onChange={handleOnMessageChange}
+                      />
+                      <button
+                        type="submit"
+                        className="h-12 px-4 text-white hover:bg-slate-800"
+                      >
+                        <IoMdSend size={25} />
+                      </button>
+                    </div>
+                  </form>
+                </>
+              )}
+            </>
+          )}
         </section>
       </div>
     </div>

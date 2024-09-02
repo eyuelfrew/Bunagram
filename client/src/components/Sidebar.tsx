@@ -1,10 +1,8 @@
-// import { BiLogOut } from "react-icons/bi";
 import { IoMenu } from "react-icons/io5";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useParams } from "react-router-dom";
 import { Root_State } from "../store/store";
 import { ChangeEvent, useEffect, useState } from "react";
-// import EditUser from "./EditUser";
 import { FiArrowUpLeft } from "react-icons/fi";
 import { getReceiverInit } from "../store/actions/getRecever";
 import { Conversation, Recevier } from "../types/Types";
@@ -18,6 +16,7 @@ interface User {
   name: string;
   email: string;
   profile_pic: string;
+  blockedUsers: string[];
 }
 
 interface ConversationWithUserDetails extends Conversation {
@@ -64,18 +63,29 @@ const Sidebar = () => {
     }
   };
   useEffect(() => {
+    console.log("Reciver Test ==", Recever?.recever_id);
     if (SocketConnection && user?._id) {
       SocketConnection.emit("sidebar", user._id);
       SocketConnection.on("notif", () => {
-        // console.log("Notification Test ==", data.Id);
-        notificationSound.play().catch((error) => {
-          console.log("error: ", error);
-        });
+        console.log("Notification Test ==", user?._id);
+        console.log("Notification Test ==", Recever?.recever_id);
+
+        if (user?._id && Recever?.recever_id) {
+          // Compare the IDs
+          if (user._id.trim() !== Recever.recever_id.trim()) {
+            notificationSound.play().catch((error) => {
+              console.log("Error playing notification sound:", error);
+            });
+          }
+        } else {
+          console.log("User ID or Receiver ID is undefined");
+        }
       });
       SocketConnection.on("conversation", (data) => {
         const conversationUserData: ConversationWithUserDetails[] = data.map(
           (conversationUser: Conversation) => {
             if (
+              // menu side bar controller function
               conversationUser?.sender?._id === conversationUser?.receiver?._id
             ) {
               return {
@@ -98,7 +108,7 @@ const Sidebar = () => {
         setAllUsers(conversationUserData);
       });
     }
-  }, [SocketConnection, user]);
+  }, [Recever.recever_id, SocketConnection, user._id]);
 
   const handleStartChat = (payload: Recevier) => {
     dispatch(getReceiverInit(payload));
@@ -202,18 +212,19 @@ const Sidebar = () => {
                     full_name: conv?.userDetails.name,
                     rece_email: conv?.userDetails.email,
                     profile_pic: conv?.userDetails.profile_pic,
-                    messageByUser: conv.lastMessage.msgByUserId,
+                    messageByUser: conv?.lastMessage?.msgByUserId,
                     conversation_id: conv._id,
                     recever_id: conv?.userDetails._id,
                     sender_id: "",
+                    blockedUsers: conv?.userDetails.blockedUsers,
                   })
                 }
-                to={""}
+                to={"#"}
                 key={index}
               >
                 <div
                   className={`${
-                    Recever.recever_id === conv?.userDetails._id
+                    Recever.recever_id === conv?.userDetails?._id
                       ? "bg-[var(--light-dark-color)] "
                       : ""
                   } hover:bg-[var(--medium-dard)] flex px-2 py-1 justify-between items-center`}
@@ -222,20 +233,33 @@ const Sidebar = () => {
                     <div className="flex px-2 py-1 relative">
                       {user._id === conv?.userDetails._id ? (
                         <>
-                          {" "}
-                          <img
-                            className="w-16 h-16 rounded-full "
-                            src={`/savedmessage.jpg`}
-                            alt={`${Recever.full_name}`}
-                          />
+                          <>
+                            <img
+                              className="w-16 h-16 rounded-full "
+                              src={`/savedmessage.jpg`}
+                              alt={`${Recever.full_name}`}
+                            />
+                          </>
                         </>
                       ) : (
                         <>
-                          <img
-                            className="w-16 h-16 rounded-full"
-                            src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
-                            alt=""
-                          />
+                          {conv?.userDetails.profile_pic.trim() === "" ? (
+                            <>
+                              <img
+                                className="w-16 h-16 rounded-full"
+                                src={`../../public/userpic.png`}
+                                alt=""
+                              />
+                            </>
+                          ) : (
+                            <>
+                              <img
+                                className="w-16 h-16 rounded-full"
+                                src={`${conv?.userDetails.profile_pic}`}
+                                alt=""
+                              />
+                            </>
+                          )}
                         </>
                       )}
                       {user._id !== conv?.userDetails._id && (

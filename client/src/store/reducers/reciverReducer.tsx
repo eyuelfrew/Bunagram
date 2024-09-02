@@ -13,6 +13,7 @@ const initState: Recevier = {
   profile_pic: "",
   recever_id: "",
   sender_id: "",
+  blockedUsers: [],
 };
 const receiverReducer = (
   state = initState,

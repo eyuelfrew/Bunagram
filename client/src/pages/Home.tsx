@@ -31,7 +31,7 @@ const Home = () => {
     if (!loginStatus && !token) {
       navigateTo("/");
     }
-  }, [loginStatus, navigateTo, token]);
+  }, []);
   //start socket connetion if the user has loged in
   useEffect(() => {
     if (token) {

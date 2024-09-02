@@ -15,6 +15,8 @@ export interface User {
   user_name: string;
   bio: string;
   phone_number: string;
+  blockedUsers: string[];
+  public_id: string;
 }
 export interface UserState {
   user: User;
@@ -38,6 +40,7 @@ export interface Recevier {
   profile_pic: string;
   recever_id: string;
   sender_id: string;
+  blockedUsers: string[];
 }
 
 export interface SocketState {

@@ -10,6 +10,8 @@ const initState: User = {
   user_name: "",
   bio: "",
   phone_number: "",
+  blockedUsers: [],
+  public_id: "",
 };
 const UserReducers = (
   state = initState,
