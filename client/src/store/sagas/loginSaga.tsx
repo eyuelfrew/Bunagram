@@ -3,7 +3,7 @@ import { call, put, takeLatest } from "redux-saga/effects";
 import axios, { AxiosResponse } from "axios";
 
 import { SetUserInfo } from "../actions/UserAction";
-import { LoginSuccess, NoAccountError, LoginError } from "../actions/Login";
+import { LoginSuccess, NoAccountError, LoginError } from "../actions/login";
 import { INIT_LOGIN_REQUEST } from "../actionTypes/actionTypes";
 
 export interface LoginAction {

@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { LoginForm } from "../types/Types";
 import { Root_State } from "../store/store";
 import { useNavigate } from "react-router-dom";
-import { LoginRequest } from "../store/actions/Login";
+import { LoginRequest } from "../store/actions/login";
 const LoginPage = () => {
   const navigateTo = useNavigate();
   const isLoading = useSelector(

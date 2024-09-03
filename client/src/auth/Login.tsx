@@ -4,7 +4,7 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Root_State } from "../store/store";
 import axios, { AxiosResponse } from "axios";
 import toast from "react-hot-toast";
-import { LoginRequest, ResetLoginState } from "../store/actions/Login";
+import { LoginRequest, ResetLoginState } from "../store/actions/login";
 
 const Login = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
