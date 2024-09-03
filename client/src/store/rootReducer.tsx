@@ -1,5 +1,5 @@
 import { combineReducers } from "@reduxjs/toolkit";
-import LoginReducer from "./reducers/LoginReducer";
+import LoginReducer from "./reducers/loginReducer";
 
 import receiverReducer from "./reducers/reciverReducer";
 
