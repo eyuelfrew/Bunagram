@@ -1,16 +1,17 @@
 import { useDispatch, useSelector } from "react-redux";
 import { Root_State } from "../store/store";
 import { getReceiverInit } from "../store/actions/getRecever";
-import { Recevier } from "../types/Types";
+import { Recevier, User } from "../types/Types";
 import { Link } from "react-router-dom";
 import { UseSocket } from "../context/SocketContext";
 
-interface User {
-  name: string;
-  email: string;
-  _id: string;
-  profile_pic: string;
-}
+// interface User {
+//   name: string;
+//   email: string;
+//   _id: string;
+//   profile_pic: string;
+//   blockedUsers: string;
+// }
 interface SearchUserProps {
   user: User;
   onClose: () => void;
@@ -38,6 +39,7 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
           conversation_id: "",
           recever_id: user._id,
           sender_id: logedInUser,
+          blockedUsers: user.blockedUsers,
         })
       }
       to={"#"}

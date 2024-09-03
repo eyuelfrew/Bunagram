@@ -7,7 +7,6 @@ import toast from "react-hot-toast";
 import { LoginRequest, ResetLoginState } from "../store/actions/Login";
 
 const Login = () => {
-  const user = useSelector((state: Root_State) => state.UserReducers);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const { LoginStatus, isLoading, error, account_not_found } = useSelector(
     (state: Root_State) => state.LoginReducer
