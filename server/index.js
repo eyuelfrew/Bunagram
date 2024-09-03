@@ -14,7 +14,7 @@ import UserModel from "./models/UserModels.js";
 dotenv.config();
 const app = express();
 const corsOptions = {
-  origin: ["https://bunagram-1.onrender.com"],
+  origin: "http://localhost:5173",
   credentials: true,
 };
 app.use(bodyParser.urlencoded({ extended: true }));

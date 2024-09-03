@@ -39,14 +39,12 @@ const Login = async (req, res) => {
     };
     const tokenOption = rememberMe ? { expiresIn: "30d" } : { expiresIn: "5d" };
     const token = jwt.sign(tokenData, process.env.JWT_SECRET_KEY, tokenOption);
-
+    console.log(token);
     return res
       .cookie("token", token, {
         httpOnly: true,
-        sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        domain: "localhost",
-        path: "/",
+        secure: true,
       })
       .json({
         message: "Login Successfull",
