@@ -4,7 +4,7 @@ import LoginReducer from "./reducers/loginReducer";
 import receiverReducer from "./reducers/reciverReducer";
 
 import menuReducer from "./reducers/menuReducer";
-import UserReducers from "./reducers/UserReducer";
+import UserReducers from "./reducers/userReducer";
 import ContactMenuReducer from "./reducers/ContactMenuReducer";
 export const RootReducer = combineReducers({
   LoginReducer,
