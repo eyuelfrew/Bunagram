@@ -64,7 +64,7 @@ const VerifyAccount: React.FC = () => {
           { verification_code },
           { withCredentials: true }
         );
-        console.log(response);
+        console.log();
         if (response.data.status === 200) {
           toast.success("Email verified successfully");
           navigateTo("/chat");
