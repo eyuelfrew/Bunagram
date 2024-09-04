@@ -246,7 +246,7 @@ const Sidebar = () => {
                             <>
                               <img
                                 className="w-16 h-16 rounded-full"
-                                src={`../../public/userpic.png`}
+                                src={`/userpic.png`}
                                 alt=""
                               />
                             </>
