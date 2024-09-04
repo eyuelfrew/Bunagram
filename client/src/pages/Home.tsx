@@ -85,7 +85,7 @@ const Home = () => {
       <div className=" h-96   flex w-full">
         <MenuLayout />
         <section
-          className={`h-screen w-[100%] lg:w-[25%] bg-[var(--hard-dark)] ${
+          className={`h-screen  w-[25%] bg-[var(--hard-dark)] ${
             !basePath && "hidden"
           } lg:block`}
         >
@@ -96,9 +96,7 @@ const Home = () => {
 
         {Recever.recever_id.trim().length === 0 ? (
           <>
-            <section
-              className={`bg-[var(--light-dark-color)] w-[100%] lg:w-[75%]`}
-            >
+            <section className={`bg-[var(--light-dark-color)] w-[75%]`}>
               <div className="h-screen bg-[var(--light-dark-color)] w-full flex justify-center items-center">
                 <h1 className="text-xl text-white font-light">
                   select a chat to start messaging
@@ -108,9 +106,7 @@ const Home = () => {
           </>
         ) : (
           <>
-            <section
-              className={`bg-[var(--light-dark-color)] w-[100%] lg:w-[75%]`}
-            >
+            <section className={`bg-[var(--light-dark-color)] w-[75%]`}>
               <ChatBox />
             </section>
           </>

@@ -8,22 +8,14 @@ import { getReceiverInit } from "../store/actions/getRecever";
 import { Conversation, Recevier, User } from "../types/Types";
 import axios, { AxiosResponse } from "axios";
 import SeachResult from "./SeachResult";
-// import notifSound from "/Iphone 14 Notification Ringtone Download - MobCup.Com.Co.mp3";
 import { ViewMenu } from "../store/actions/MenuControllers";
 import { UseSocket } from "../context/SocketContext";
-// interface User {
-//   _id: string;
-//   name: string;
-//   email: string;
-//   profile_pic: string;
-//   blockedUsers: string[];
-// }
 
 interface ConversationWithUserDetails extends Conversation {
   userDetails: User;
 }
 const Sidebar = () => {
-  // const notificationSound = new Audio(notifSound);
+  const notificationSound = new Audio("/discord_notification.mp3");
   const URL = import.meta.env.VITE_BACK_END_URL;
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const [viewResult, setViewSearchResult] = useState(false);
@@ -70,11 +62,10 @@ const Sidebar = () => {
         console.log("Notification Test ==", Recever?.recever_id);
 
         if (user?._id && Recever?.recever_id) {
-          // Compare the IDs
           if (user._id.trim() !== Recever.recever_id.trim()) {
-            // notificationSound.play().catch((error) => {
-            //   console.log("Error playing notification sound:", error);
-            // });
+            notificationSound.play().catch((error) => {
+              console.log("Error playing notification sound:", error);
+            });
           }
         } else {
           console.log("User ID or Receiver ID is undefined");
@@ -189,7 +180,6 @@ const Sidebar = () => {
             )}
           </div>
         </div>
-        {/* <div className="bg-slate-400 p-[.5px] w-full"></div> */}
         <div className="h-[calc(100vh-74px)] overflow-x-hidden overflow-y-auto scrollbar">
           {allUsers && allUsers.length === 0 && (
             <div>
@@ -275,7 +265,7 @@ const Sidebar = () => {
                         </>
                       )}
                     </div>
-                    <div>
+                    <div className="mt-2">
                       <p className="text-lg font-semibold">
                         {user._id !== conv?.userDetails._id ? (
                           <>{conv?.userDetails?.name}</>
@@ -283,8 +273,12 @@ const Sidebar = () => {
                           <>Saved Message</>
                         )}
                       </p>
-                      <p className="truncate ... w-36 text-sm">
-                        {conv?.lastMessage?.text}
+                      <p className="truncate w-36 text-sm">
+                        {conv?.lastMessage?.text ? (
+                          conv.lastMessage.text
+                        ) : (
+                          <>say hi 👋</>
+                        )}
                       </p>
                     </div>
                   </div>

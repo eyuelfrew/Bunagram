@@ -8,6 +8,7 @@ import { LogoutReq } from "../store/actions/login";
 import { clearReciver } from "../store/actions/getRecever";
 import { OpenConactInfo } from "../store/actions/AccountAction";
 const MenuLayout = () => {
+  const user = useSelector((state: Root_State) => state.UserReducers);
   const navigateTo = useNavigate();
   const dispatch = useDispatch();
   const menuBar = useSelector((state: Root_State) => state.menuReducer.isView);
@@ -44,14 +45,31 @@ const MenuLayout = () => {
         } transition-transform duration-300 ease-in-out absolute z-[3000] bg-[var(--medium-dard)] w-[25%]  h-screen p-3 text-white`}
       >
         <div className="flex justify-between items-center">
-          <div className="">
-            <img
-              className="w-16 rounded-full"
-              src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
-              alt=""
-            />
+          <div>
+            {user ? (
+              user?.profile_pic ? (
+                <>
+                  <img
+                    className="w-20 h-20  rounded-full"
+                    src={`${user.profile_pic}`}
+                    alt={`${user.profile_pic}`}
+                  />
+                </>
+              ) : (
+                <>
+                  <img
+                    className="w-20 h-20  rounded-full"
+                    src={"/userpic.png"}
+                    alt={`${user.profile_pic}`}
+                  />
+                </>
+              )
+            ) : (
+              <></>
+            )}
             <p className="text-xl">Eyuel Frew</p>
           </div>
+
           <div>
             <button onClick={handleMenuCancel}>
               {" "}
