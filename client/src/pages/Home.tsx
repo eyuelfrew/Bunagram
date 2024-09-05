@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Sidebar from "../components/Sidebar";
@@ -18,7 +18,6 @@ import EditUserName from "../components/Modals/EditUserName";
 import DeleteAccount from "../components/Modals/DeleteAccount";
 const Home = () => {
   const { setSocket, setOnlineUsers, clearSocketState } = UseSocket();
-  const location = useLocation();
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const dispatch = useDispatch();
   const navigateTo = useNavigate();
@@ -78,25 +77,23 @@ const Home = () => {
     checkAuth();
   }, []);
 
-  const basePath = location.pathname === "/chat";
-
   return (
     <>
       <div className=" h-96   flex w-full">
         <MenuLayout />
         <section
-          className={`h-screen  w-[25%] bg-[var(--hard-dark)] ${
-            !basePath && "hidden"
-          } lg:block`}
+          className={`${
+            Recever.full_name ? "hidden lg:flex " : "w-[100%]"
+          } h-screen   lg:w-[25%] bg-[var(--hard-dark)] `}
         >
           <Sidebar />
         </section>
-
         {/* message box component */}
-
         {Recever.recever_id.trim().length === 0 ? (
           <>
-            <section className={`bg-[var(--light-dark-color)] w-[75%]`}>
+            <section
+              className={`hidden lg:block bg-[var(--light-dark-color)] lg:w-[75%]`}
+            >
               <div className="h-screen bg-[var(--light-dark-color)] w-full flex justify-center items-center">
                 <h1 className="text-xl text-white font-light">
                   select a chat to start messaging
@@ -107,14 +104,17 @@ const Home = () => {
         ) : (
           <>
             <section
-              className={`bg-[var(--light-dark-color)] w-[75%] relative`}
+              className={`${
+                Recever.full_name
+                  ? "translate-x-0 block w-[100%] lg:block"
+                  : "-translate-x-full"
+              } transition-transform duration-1000 ease-in-out bg-[var(--light-dark-color)] lg:block lg:w-[75%] relative `}
             >
               <ChatBox />
             </section>
           </>
         )}
-        {/* Modal Components  */}
-        <ContactInfo />
+        {/* Modal Components  */} <ContactInfo />
         <EditName />
         <EditYourNumber />
         <EditUserName />

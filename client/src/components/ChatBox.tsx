@@ -10,7 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Root_State } from "../store/store";
 import moment from "moment";
 import { IoMdSend } from "react-icons/io";
-import { updateReceiver } from "../store/actions/getRecever";
+import { clearReciver, updateReceiver } from "../store/actions/getRecever";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { UseSocket } from "../context/SocketContext";
@@ -173,188 +173,190 @@ const ChatBox = () => {
   };
 
   return (
-    <div>
-      <div className="">
-        <header className="sticky top-0 bg-[var(--dark-bg-color)] text-white h-24 flex items-center justify-between px-3 lg:px-8">
-          <div className="flex items-center">
-            <div className="lg:hidden ml-1 me-4">
-              <Link to={"/chat"} className="bg-red-400 ">
-                <FaArrowLeft />
-              </Link>
-            </div>
-            <div className="relative">
-              {user._id === Recever.recever_id ? (
-                <>
-                  <img
-                    className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
-                    src={`/savedmessage.jpg`}
-                    alt={`${Recever.full_name}`}
-                  />
-                </>
-              ) : (
-                <>
-                  {blockedByReciver || Recever.profile_pic.trim() === "" ? (
-                    <>
-                      <img
-                        className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
-                        src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
-                        alt={`${Recever.full_name}`}
-                      />
-                    </>
-                  ) : (
-                    <>
-                      <img
-                        className="w-24 h-24 rounded-full "
-                        src={`${Recever.profile_pic}`}
-                        alt=""
-                      />
-                    </>
-                  )}
-                </>
-              )}
-
-              {user._id !== Recever.recever_id && (
-                <>
-                  {isOnline && !blockedByReciver ? (
-                    <div className="absolute w-4 h-4 rounded-full bg-green-400 right-0 top-10 lg:top-14"></div>
-                  ) : (
-                    <>
-                      <div className="absolute w-4 h-4 rounded-full bg-red-500 right-0 top-10 lg:top-14"></div>
-                    </>
-                  )}
-                </>
-              )}
-            </div>
-            <div className="">
-              <p className="text-xl lg:text-2xl ml-4">
-                {user._id === Recever.recever_id ? (
-                  <>Saved Messages</>
-                ) : (
-                  <> {Recever.full_name}</>
-                )}
-              </p>
-              {user._id !== Recever.recever_id && (
-                <div className=" h-6">
-                  {blockedByReciver ? (
-                    <>
-                      <p className="mx-2 text-slate-400">
-                        lastseen long time ago
-                      </p>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                  {istyping && typerId == Recever.recever_id ? (
-                    <>
-                      <Typing />
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                </div>
-              )}
-            </div>
+    <div className="">
+      <header className="sticky top-0 bg-[var(--dark-bg-color)] text-white h-24 flex items-center justify-between px-3 lg:px-8">
+        <div className="flex items-center">
+          <div className="lg:hidden ml-1 me-4">
+            <Link
+              onClick={() => dispatch(clearReciver())}
+              className="bg-red-400 "
+              to={""}
+            >
+              <FaArrowLeft />
+            </Link>
           </div>
-          <div className=" h-fit text-white p-2 rounded-lg z-[9000]">
-            <ChatMenu />
-          </div>
-        </header>
-        <div className="">
-          <section className=" h-[calc(100vh-160px)] bg-[var(--light-dark-color)] overflow-x-hidden overflow-y-scroll scrollbar  ">
-            {allMessages.length === 0 && (
+          <div className="relative">
+            {user._id === Recever.recever_id ? (
               <>
-                <div className=" h-full flex items-center">
-                  <LottieAnimation />
-                </div>
+                <img
+                  className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
+                  src={`/savedmessage.jpg`}
+                  alt={`${Recever.full_name}`}
+                />
+              </>
+            ) : (
+              <>
+                {blockedByReciver || Recever.profile_pic.trim() === "" ? (
+                  <>
+                    <img
+                      className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
+                      src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
+                      alt={`${Recever.full_name}`}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <img
+                      className="w-24 h-24 rounded-full "
+                      src={`${Recever.profile_pic}`}
+                      alt=""
+                    />
+                  </>
+                )}
               </>
             )}
-            {allMessages.length > 0 &&
-              allMessages.map((msg, index) => {
-                return (
-                  <div
-                    ref={currentMessage}
-                    key={index}
-                    className={`text-gray-300 min-w-28 max-w-48 lg:max-w-96 mx-4 bg-[var(--message-bg)]  mb-2
+
+            {user._id !== Recever.recever_id && (
+              <>
+                {isOnline && !blockedByReciver ? (
+                  <div className="absolute w-4 h-4 rounded-full bg-green-400 right-0 top-10 lg:top-14"></div>
+                ) : (
+                  <>
+                    <div className="absolute w-4 h-4 rounded-full bg-red-500 right-0 top-10 lg:top-14"></div>
+                  </>
+                )}
+              </>
+            )}
+          </div>
+          <div className="">
+            <p className="text-xl lg:text-2xl ml-4">
+              {user._id === Recever.recever_id ? (
+                <>Saved Messages</>
+              ) : (
+                <> {Recever.full_name}</>
+              )}
+            </p>
+            {user._id !== Recever.recever_id && (
+              <div className=" h-6">
+                {blockedByReciver ? (
+                  <>
+                    <p className="mx-2 text-slate-400">
+                      lastseen long time ago
+                    </p>
+                  </>
+                ) : (
+                  <></>
+                )}
+                {istyping && typerId == Recever.recever_id ? (
+                  <>
+                    <Typing />
+                  </>
+                ) : (
+                  <></>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+        <div className=" h-fit text-white p-2 rounded-lg z-[9000]">
+          <ChatMenu />
+        </div>
+      </header>
+      <div className="">
+        <section className=" h-[calc(100vh-160px)] bg-[var(--light-dark-color)] overflow-x-hidden overflow-y-scroll scrollbar  ">
+          {allMessages.length === 0 && (
+            <>
+              <div className=" h-full flex items-center">
+                <LottieAnimation />
+              </div>
+            </>
+          )}
+          {allMessages.length > 0 &&
+            allMessages.map((msg, index) => {
+              return (
+                <div
+                  ref={currentMessage}
+                  key={index}
+                  className={`text-gray-300 min-w-28 max-w-48 lg:max-w-96 mx-4 bg-[var(--message-bg)]  mb-2
                    p-3 py-1 rounded w-fit h-fit ${
                      user._id === msg.msgByUserId
                        ? "ml-auto bg-[var(--message-bg)]"
                        : ""
                    }`}
-                  >
-                    {msg.imageURL ? (
-                      <img src={`${msg.imageURL}`} alt="" />
-                    ) : (
-                      <></>
-                    )}
-                    <p className="break-words">{msg.text}</p>
-                    <p className="text-x flex justify-between mt-1 items-center">
-                      {moment("2024-09-06T09:57:58.030Z").format("hh:mm")}
-                      <span>
-                        <MdDelete
-                          onClick={() => handleDeleteMessage(msg._id)}
-                          className=" hover:scale-[2] cursor-pointer"
-                        />
-                      </span>
-                    </p>
-                  </div>
-                );
-              })}
-          </section>
-        </div>
-
-        <section className="flex items-center h-16 bg-[var(--medium-dard)] p-4">
-          {isBlocked ? (
-            <>
-              <div className="h-full w-full flex justify-around items-center ">
-                <div className=" w-full flex items-center">
-                  <button className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-red-400">
-                    unblock user
-                  </button>
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              {blockedByReciver ? (
-                <>
-                  <div className=" w-full flex items-center justify-center ">
-                    <p className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white text-center flex items-center justify-center">
-                      can't send message
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className=" flex justify-around items-center ">
-                    <SendImage />
-                  </div>
-                  <form
-                    className="h-full w-full flex justify-around items-center "
-                    onSubmit={handleSendMessage}
-                  >
-                    <div className=" w-full flex items-center">
-                      <input
-                        type="text"
-                        name="text"
-                        className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white"
-                        placeholder="Write a message..."
-                        value={message.text}
-                        onChange={handleOnMessageChange}
+                >
+                  {msg.imageURL ? (
+                    <img src={`${msg.imageURL}`} alt="" />
+                  ) : (
+                    <></>
+                  )}
+                  <p className="break-words">{msg.text}</p>
+                  <p className="text-x flex justify-between mt-1 items-center">
+                    {moment("2024-09-06T09:57:58.030Z").format("hh:mm")}
+                    <span>
+                      <MdDelete
+                        onClick={() => handleDeleteMessage(msg._id)}
+                        className=" hover:scale-[2] cursor-pointer"
                       />
-                      <button
-                        type="submit"
-                        className="h-12 px-4 text-white hover:bg-slate-800 rounded-full"
-                      >
-                        <IoMdSend size={25} />
-                      </button>
-                    </div>
-                  </form>
-                </>
-              )}
-            </>
-          )}
+                    </span>
+                  </p>
+                </div>
+              );
+            })}
         </section>
       </div>
+
+      <section className="flex items-center h-16 bg-[var(--medium-dard)] p-4">
+        {isBlocked ? (
+          <>
+            <div className="h-full w-full flex justify-around items-center ">
+              <div className=" w-full flex items-center">
+                <button className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-red-400">
+                  unblock user
+                </button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <>
+            {blockedByReciver ? (
+              <>
+                <div className=" w-full flex items-center justify-center ">
+                  <p className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white text-center flex items-center justify-center">
+                    can't send message
+                  </p>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className=" flex justify-around items-center ">
+                  <SendImage />
+                </div>
+                <form
+                  className="h-full w-full flex justify-around items-center "
+                  onSubmit={handleSendMessage}
+                >
+                  <div className=" w-full flex items-center">
+                    <input
+                      type="text"
+                      name="text"
+                      className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white"
+                      placeholder="Write a message..."
+                      value={message.text}
+                      onChange={handleOnMessageChange}
+                    />
+                    <button
+                      type="submit"
+                      className="h-12 px-4 text-white hover:bg-slate-800 rounded-full"
+                    >
+                      <IoMdSend size={25} />
+                    </button>
+                  </div>
+                </form>
+              </>
+            )}
+          </>
+        )}
+      </section>
     </div>
   );
 };

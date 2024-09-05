@@ -10,11 +10,13 @@ import axios, { AxiosResponse } from "axios";
 import SeachResult from "./SeachResult";
 import { ViewMenu } from "../store/actions/MenuControllers";
 import { UseSocket } from "../context/SocketContext";
+import LoadingConversation from "./LoadingConversation";
 
 interface ConversationWithUserDetails extends Conversation {
   userDetails: User;
 }
 const Sidebar = () => {
+  const [isLoading, setIsLoading] = useState(false);
   const audio = new Audio(
     "https://bunagram.onrender.com/discord_notification.mp3"
   );
@@ -56,11 +58,13 @@ const Sidebar = () => {
     }
   };
   useEffect(() => {
+    setIsLoading(true);
     if (SocketConnection && user?._id) {
       SocketConnection.emit("sidebar", user._id);
       SocketConnection.on("notif", () => {
         audio.play();
       });
+      setIsLoading(true);
       SocketConnection.on("conversation", (data) => {
         const conversationUserData: ConversationWithUserDetails[] = data?.map(
           (conversationUser: Conversation) => {
@@ -86,9 +90,10 @@ const Sidebar = () => {
           }
         );
         setAllUsers(conversationUserData);
+        setIsLoading(false);
       });
     }
-  }, [Recever.recever_id, SocketConnection, user]);
+  }, [SocketConnection, user]);
 
   const handleStartChat = (payload: Recevier) => {
     dispatch(getReceiverInit(payload));
@@ -181,117 +186,130 @@ const Sidebar = () => {
               </p>
             </div>
           )}
-
-          {allUsers &&
-            allUsers.map((conv, index) => (
-              <Link
-                className="  text-white"
-                onClick={() =>
-                  handleStartChat({
-                    full_name: conv?.userDetails.name,
-                    rece_email: conv?.userDetails.email,
-                    profile_pic: conv?.userDetails.profile_pic,
-                    messageByUser: conv?.lastMessage?.msgByUserId,
-                    conversation_id: conv._id,
-                    recever_id: conv?.userDetails._id,
-                    sender_id: "",
-                    blockedUsers: conv?.userDetails.blockedUsers,
-                  })
-                }
-                to={"#"}
-                key={index}
-              >
-                <div
-                  className={`${
-                    Recever.recever_id === conv?.userDetails?._id
-                      ? "bg-[var(--light-dark-color)] "
-                      : ""
-                  } hover:bg-[var(--medium-dard)] flex px-2 py-1 justify-between items-center`}
-                >
-                  <div className="flex">
-                    <div className="flex px-2 py-1 relative">
-                      {user._id === conv?.userDetails._id ? (
-                        <>
-                          <>
-                            <img
-                              className="w-16 h-16 rounded-full "
-                              src={`/savedmessage.jpg`}
-                              alt={`${Recever.full_name}`}
-                            />
-                          </>
-                        </>
-                      ) : (
-                        <>
-                          {conv?.userDetails.profile_pic.trim() === "" ? (
-                            <>
-                              <img
-                                className="w-16 h-16 rounded-full"
-                                src={`/userpic.png`}
-                                alt=""
-                              />
-                            </>
-                          ) : (
-                            <>
-                              <img
-                                className="w-16 h-16 rounded-full"
-                                src={`${conv?.userDetails.profile_pic}`}
-                                alt=""
-                              />
-                            </>
-                          )}
-                        </>
-                      )}
-                      {user._id !== conv?.userDetails._id && (
-                        <>
-                          {onlineUsers.includes(conv?.userDetails._id) ? (
-                            <>
-                              <div className="absolute w-3 h-3 rounded-full bg-green-400 right-1 top-11 "></div>
-                            </>
-                          ) : (
-                            <>
-                              <div className="absolute w-3 h-3 rounded-full bg-red-400 right-1 top-11  "></div>
-                            </>
-                          )}
-                        </>
-                      )}
-                    </div>
-                    <div className="mt-2">
-                      <p className="text-lg font-semibold">
-                        {user._id !== conv?.userDetails._id ? (
-                          <>{conv?.userDetails?.name}</>
-                        ) : (
-                          <>Saved Message</>
-                        )}
-                      </p>
-                      <p className="truncate w-36 text-sm">
-                        {conv?.lastMessage?.text ? (
-                          conv.lastMessage.text
-                        ) : (
-                          <>say hi 👋</>
-                        )}
-                      </p>
-                    </div>
+          <>
+            {isLoading ? (
+              <>
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index}>
+                    <LoadingConversation />
                   </div>
-                  <div>
-                    {params.userId !== conv?.userDetails?._id ? (
-                      <>
-                        {conv?.unseenMessages != 0 ? (
-                          <>
-                            <p className="rounded-full w-7 h-7 flex items-center justify-center text-center text-sm bg-red-500 text-white">
-                              {conv?.unseenMessages}
+                ))}
+              </>
+            ) : (
+              <>
+                {allUsers &&
+                  allUsers.map((conv, index) => (
+                    <Link
+                      className="  text-white"
+                      onClick={() =>
+                        handleStartChat({
+                          full_name: conv?.userDetails.name,
+                          rece_email: conv?.userDetails.email,
+                          profile_pic: conv?.userDetails.profile_pic,
+                          messageByUser: conv?.lastMessage?.msgByUserId,
+                          conversation_id: conv._id,
+                          recever_id: conv?.userDetails._id,
+                          sender_id: "",
+                          blockedUsers: conv?.userDetails.blockedUsers,
+                        })
+                      }
+                      to={"#"}
+                      key={index}
+                    >
+                      <div
+                        className={`${
+                          Recever.recever_id === conv?.userDetails?._id
+                            ? "bg-[var(--light-dark-color)] "
+                            : ""
+                        } hover:bg-[var(--medium-dard)] flex px-2 py-1 justify-between items-center`}
+                      >
+                        <div className="flex">
+                          <div className="flex px-2 py-1 relative">
+                            {user._id === conv?.userDetails._id ? (
+                              <>
+                                <>
+                                  <img
+                                    className="w-16 h-16 rounded-full "
+                                    src={`/savedmessage.jpg`}
+                                    alt={`${Recever.full_name}`}
+                                  />
+                                </>
+                              </>
+                            ) : (
+                              <>
+                                {conv?.userDetails.profile_pic.trim() === "" ? (
+                                  <>
+                                    <img
+                                      className="w-16 h-16 rounded-full"
+                                      src={`/userpic.png`}
+                                      alt=""
+                                    />
+                                  </>
+                                ) : (
+                                  <>
+                                    <img
+                                      className="w-16 h-16 rounded-full"
+                                      src={`${conv?.userDetails.profile_pic}`}
+                                      alt=""
+                                    />
+                                  </>
+                                )}
+                              </>
+                            )}
+                            {user._id !== conv?.userDetails._id && (
+                              <>
+                                {onlineUsers.includes(conv?.userDetails._id) ? (
+                                  <>
+                                    <div className="absolute w-3 h-3 rounded-full bg-green-400 right-1 top-11 "></div>
+                                  </>
+                                ) : (
+                                  <>
+                                    <div className="absolute w-3 h-3 rounded-full bg-red-400 right-1 top-11  "></div>
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </div>
+                          <div className="mt-2">
+                            <p className="text-lg font-semibold">
+                              {user._id !== conv?.userDetails._id ? (
+                                <>{conv?.userDetails?.name}</>
+                              ) : (
+                                <>Saved Message</>
+                              )}
                             </p>
-                          </>
-                        ) : (
-                          <></>
-                        )}
-                      </>
-                    ) : (
-                      <></>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            ))}
+                            <p className="truncate w-36 text-sm">
+                              {conv?.lastMessage?.text ? (
+                                conv.lastMessage.text
+                              ) : (
+                                <>say hi 👋</>
+                              )}
+                            </p>
+                          </div>
+                        </div>
+                        <div>
+                          {params.userId !== conv?.userDetails?._id ? (
+                            <>
+                              {conv?.unseenMessages != 0 ? (
+                                <>
+                                  <p className="rounded-full w-7 h-7 flex items-center justify-center text-center text-sm bg-red-500 text-white">
+                                    {conv?.unseenMessages}
+                                  </p>
+                                </>
+                              ) : (
+                                <></>
+                              )}
+                            </>
+                          ) : (
+                            <></>
+                          )}
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+              </>
+            )}
+          </>
         </div>
       </div>
     </>

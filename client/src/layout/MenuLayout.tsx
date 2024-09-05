@@ -42,7 +42,7 @@ const MenuLayout = () => {
       <div
         className={`${
           menuBar ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out absolute z-[3000] bg-[var(--medium-dard)] w-[25%]  h-screen p-3 text-white`}
+        } transition-transform duration-300 ease-in-out absolute z-[3000] bg-[var(--medium-dard)] w-[50%] lg:w-[25%]  h-screen p-3 text-white`}
       >
         <div className="flex justify-between items-center">
           <div>
@@ -58,7 +58,7 @@ const MenuLayout = () => {
               ) : (
                 <>
                   <img
-                    className="w-20 h-20  rounded-full"
+                    className="w-16 h-16 lg:w-20 lg:h-20  rounded-full"
                     src={"/userpic.png"}
                     alt={`${user.profile_pic}`}
                   />

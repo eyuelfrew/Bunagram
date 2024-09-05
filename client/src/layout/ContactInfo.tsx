@@ -131,9 +131,9 @@ const ContactInfo = () => {
       <div
         className={`${
           isContactInfo ? "" : "hidden"
-        } absolute flex w-full justify-center items-center h-screen`}
+        } absolute flex w-full justify-center items-center `}
       >
-        <div className="bg-[var(--light-dark-color)] rounded-xl h-[90%] w-[25%] flex flex-col z-[2400]">
+        <div className="bg-[var(--light-dark-color)] rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]">
           <div className="flex items-center justify-between p-4">
             <div>
               <button

@@ -74,7 +74,7 @@ const SignUp = () => {
   return (
     <div className="flex h-screen items-center justify-center bg-[var(--dark-bg-color)]">
       <form
-        className="flex flex-col gap-4 w-[30%] bg-[var(--light-dark-color)]  text-white p-4 rounded-lg"
+        className="flex flex-col gap-4 w-[90%] lg:w-[30%] bg-[var(--light-dark-color)]  text-white p-4 rounded-lg"
         onSubmit={handleSubmit}
       >
         <h1 className="text-2xl text-center font-light text-gray-500 dark:text-gray-400">

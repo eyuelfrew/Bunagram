@@ -60,7 +60,7 @@ const VerifyAccount: React.FC = () => {
     try {
       try {
         const response: AxiosResponse = await axios.post(
-          `${import.meta.env.VITE_BACK_END_URL}/api/verifiy-email`,
+          `${import.meta.env.VITE_BACK_END_URL}/api/verify-email`,
           { verification_code },
           { withCredentials: true }
         );
