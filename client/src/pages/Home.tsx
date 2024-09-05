@@ -106,7 +106,9 @@ const Home = () => {
           </>
         ) : (
           <>
-            <section className={`bg-[var(--light-dark-color)] w-[75%]`}>
+            <section
+              className={`bg-[var(--light-dark-color)] w-[75%] relative`}
+            >
               <ChatBox />
             </section>
           </>

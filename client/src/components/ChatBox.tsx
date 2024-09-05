@@ -16,9 +16,9 @@ import { Link } from "react-router-dom";
 import { UseSocket } from "../context/SocketContext";
 import ChatMenu from "./ChatMenu";
 
-// import { FaPlus, FaImage, FaVideo } from "react-icons/fa";
 import LottieAnimation from "./LottieAnimation";
-import { MdOutlineAttachFile } from "react-icons/md";
+import SendImage from "./SendImage";
+import { MdDelete } from "react-icons/md";
 
 interface Message {
   text: string;
@@ -26,10 +26,12 @@ interface Message {
   videoURL: string;
 }
 interface AllMessage {
+  _id: string;
   text: string;
   createdAt: string;
   msgByUserId: string;
   seen: boolean;
+  imageURL: string;
 }
 const ChatBox = () => {
   const dispatch = useDispatch();
@@ -89,6 +91,7 @@ const ChatBox = () => {
         convID: string;
         messages: React.SetStateAction<AllMessage[]>;
       }) => {
+        console.log(data.messages);
         const test = data.convID === Recever.conversation_id;
         if (test) {
           setAllMessage(data.messages);
@@ -106,7 +109,6 @@ const ChatBox = () => {
       };
       SocketConnection.on("message", messageHandler);
       SocketConnection.on("newconversation", handleNewConveration);
-      // Clean up the event listener when the component unmounts or dependencies change
       return () => {
         SocketConnection.off("message", messageHandler);
       };
@@ -159,9 +161,20 @@ const ChatBox = () => {
 
   const blockedByReciver = Recever.blockedUsers.includes(user._id);
 
+  const handleDeleteMessage = (msgId: string) => {
+    if (SocketConnection) {
+      SocketConnection.emit("delete-message", {
+        sender_id: user._id,
+        reciver_id: Recever.recever_id,
+        message_Id: msgId,
+        conversation_id: Recever.conversation_id,
+      });
+    }
+  };
+
   return (
     <div>
-      <div>
+      <div className="">
         <header className="sticky top-0 bg-[var(--dark-bg-color)] text-white h-24 flex items-center justify-between px-3 lg:px-8">
           <div className="flex items-center">
             <div className="lg:hidden ml-1 me-4">
@@ -242,39 +255,52 @@ const ChatBox = () => {
               )}
             </div>
           </div>
-          <div className=" h-fit text-white p-2 rounded-lg">
+          <div className=" h-fit text-white p-2 rounded-lg z-[9000]">
             <ChatMenu />
           </div>
         </header>
-        <section className="h-[calc(100vh-160px)] bg-[var(--light-dark-color)] overflow-x-hidden overflow-y-scroll scrollbar  ">
-          {allMessages.length === 0 && (
-            <>
-              <div className=" h-full flex items-center">
-                <LottieAnimation />
-              </div>
-            </>
-          )}
-          {allMessages.length > 0 &&
-            allMessages.map((msg, index) => {
-              return (
-                <div
-                  ref={currentMessage}
-                  key={index}
-                  className={`text-gray-300 max-w-48 lg:max-w-96 mx-4 bg-[var(--message-bg)]  mb-2
+        <div className="">
+          <section className=" h-[calc(100vh-160px)] bg-[var(--light-dark-color)] overflow-x-hidden overflow-y-scroll scrollbar  ">
+            {allMessages.length === 0 && (
+              <>
+                <div className=" h-full flex items-center">
+                  <LottieAnimation />
+                </div>
+              </>
+            )}
+            {allMessages.length > 0 &&
+              allMessages.map((msg, index) => {
+                return (
+                  <div
+                    ref={currentMessage}
+                    key={index}
+                    className={`text-gray-300 min-w-28 max-w-48 lg:max-w-96 mx-4 bg-[var(--message-bg)]  mb-2
                    p-3 py-1 rounded w-fit h-fit ${
                      user._id === msg.msgByUserId
                        ? "ml-auto bg-[var(--message-bg)]"
                        : ""
                    }`}
-                >
-                  <p className="break-words">{msg.text}</p>
-                  <p className="text-xs">
-                    {moment("2024-09-06T09:57:58.030Z").format("hh:mm")}
-                  </p>
-                </div>
-              );
-            })}
-        </section>
+                  >
+                    {msg.imageURL ? (
+                      <img src={`${msg.imageURL}`} alt="" />
+                    ) : (
+                      <></>
+                    )}
+                    <p className="break-words">{msg.text}</p>
+                    <p className="text-x flex justify-between mt-1 items-center">
+                      {moment("2024-09-06T09:57:58.030Z").format("hh:mm")}
+                      <span>
+                        <MdDelete
+                          onClick={() => handleDeleteMessage(msg._id)}
+                          className=" hover:scale-[2] cursor-pointer"
+                        />
+                      </span>
+                    </p>
+                  </div>
+                );
+              })}
+          </section>
+        </div>
 
         <section className="flex items-center h-16 bg-[var(--medium-dard)] p-4">
           {isBlocked ? (
@@ -299,10 +325,8 @@ const ChatBox = () => {
                 </>
               ) : (
                 <>
-                  <div>
-                    <button className="hover:bg-slate-800 px-4 py-2">
-                      <MdOutlineAttachFile size={30} className="text-white" />
-                    </button>
+                  <div className=" flex justify-around items-center ">
+                    <SendImage />
                   </div>
                   <form
                     className="h-full w-full flex justify-around items-center "
@@ -319,7 +343,7 @@ const ChatBox = () => {
                       />
                       <button
                         type="submit"
-                        className="h-12 px-4 text-white hover:bg-slate-800"
+                        className="h-12 px-4 text-white hover:bg-slate-800 rounded-full"
                       >
                         <IoMdSend size={25} />
                       </button>

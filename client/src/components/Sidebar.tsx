@@ -15,7 +15,7 @@ interface ConversationWithUserDetails extends Conversation {
   userDetails: User;
 }
 const Sidebar = () => {
-  const notificationSound = new Audio("/discord_notification.mp3");
+  let isPlaying = false;
   const URL = import.meta.env.VITE_BACK_END_URL;
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const [viewResult, setViewSearchResult] = useState(false);
@@ -32,7 +32,6 @@ const Sidebar = () => {
     ConversationWithUserDetails[] | null
   >(null);
   const user = useSelector((state: Root_State) => state.UserReducers);
-  // const [editUserInfo, setEditUserInfo] = useState(false);
 
   const handleSearchUser = async (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -58,13 +57,12 @@ const Sidebar = () => {
     if (SocketConnection && user?._id) {
       SocketConnection.emit("sidebar", user._id);
       SocketConnection.on("notif", () => {
-        console.log("Notification Test ==", user?._id);
-        console.log("Notification Test ==", Recever?.recever_id);
-
         if (user?._id && Recever?.recever_id) {
-          if (user._id.trim() !== Recever.recever_id.trim()) {
-            notificationSound.play().catch((error) => {
-              console.log("Error playing notification sound:", error);
+          if (user._id.trim() !== Recever.recever_id.trim() && !isPlaying) {
+            isPlaying = true;
+            const audio = new Audio("/discord_notification.mp3");
+            audio.play().finally(() => {
+              // isPlaying = false;
             });
           }
         } else {
@@ -98,7 +96,7 @@ const Sidebar = () => {
         setAllUsers(conversationUserData);
       });
     }
-  }, [Recever.recever_id, SocketConnection, user._id]);
+  }, [Recever.recever_id, SocketConnection, user]);
 
   const handleStartChat = (payload: Recevier) => {
     dispatch(getReceiverInit(payload));

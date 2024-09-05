@@ -128,7 +128,7 @@ const ChatMenu: React.FC = () => {
     }
   };
   return (
-    <div className="relative ">
+    <div className=" ">
       <button onClick={handleOpenMenu} className="text-white text-2xl">
         <CiMenuKebab />
       </button>
@@ -136,7 +136,7 @@ const ChatMenu: React.FC = () => {
         <div
           onClick={(e) => e.stopPropagation()}
           ref={menuRef}
-          className="bg-gray-700 h-24 -ml-32 absolute p-3 flex flex-col gap-3 w-36"
+          className=" bg-gray-700 h-24 -ml-32 absolute p-3 flex flex-col gap-3 w-36"
         >
           <button
             onClick={handleClearChat}
