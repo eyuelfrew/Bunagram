@@ -67,7 +67,7 @@ const MenuLayout = () => {
             ) : (
               <></>
             )}
-            <p className="text-xl">Eyuel Frew</p>
+            <p className="text-xl">{user.name}</p>
           </div>
 
           <div>
