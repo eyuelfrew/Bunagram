@@ -1,5 +1,5 @@
 import Lottie from "react-lottie";
-import animationData from "../../public/start_chating.json";
+import animationData from "../assets/start_chating.json";
 const LottieAnimation = () => {
   const defaultOptions = {
     loop: true,

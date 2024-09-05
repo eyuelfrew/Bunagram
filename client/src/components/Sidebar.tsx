@@ -15,7 +15,9 @@ interface ConversationWithUserDetails extends Conversation {
   userDetails: User;
 }
 const Sidebar = () => {
-  let isPlaying = false;
+  const audio = new Audio(
+    "https://bunagram.onrender.com/discord_notification.mp3"
+  );
   const URL = import.meta.env.VITE_BACK_END_URL;
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const [viewResult, setViewSearchResult] = useState(false);
@@ -57,17 +59,7 @@ const Sidebar = () => {
     if (SocketConnection && user?._id) {
       SocketConnection.emit("sidebar", user._id);
       SocketConnection.on("notif", () => {
-        if (user?._id && Recever?.recever_id) {
-          if (user._id.trim() !== Recever.recever_id.trim() && !isPlaying) {
-            isPlaying = true;
-            const audio = new Audio("/discord_notification.mp3");
-            audio.play().finally(() => {
-              // isPlaying = false;
-            });
-          }
-        } else {
-          console.log("User ID or Receiver ID is undefined");
-        }
+        audio.play();
       });
       SocketConnection.on("conversation", (data) => {
         const conversationUserData: ConversationWithUserDetails[] = data?.map(
