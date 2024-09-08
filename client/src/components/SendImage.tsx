@@ -51,7 +51,7 @@ const SendImage = () => {
     <>
       <label
         htmlFor="send_pic"
-        className="hover:bg-slate-800 p-3 cursor-pointer rounded-full"
+        className="hover:bg-slate-800 p-2 cursor-pointer rounded-full"
       >
         <MdOutlineAttachFile size={30} className="text-white" />
         <input

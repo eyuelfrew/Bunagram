@@ -9,7 +9,6 @@ import { Typing } from "./Typing";
 import { useDispatch, useSelector } from "react-redux";
 import { Root_State } from "../store/store";
 import moment from "moment";
-import { IoMdSend } from "react-icons/io";
 import { clearReciver, updateReceiver } from "../store/actions/getRecever";
 import { FaArrowLeft } from "react-icons/fa";
 import { Link } from "react-router-dom";
@@ -19,6 +18,8 @@ import ChatMenu from "./ChatMenu";
 import LottieAnimation from "./LottieAnimation";
 import SendImage from "./SendImage";
 import { MdDelete } from "react-icons/md";
+import EmojiPicker from "./EmojiPicker";
+import { LiaCheckDoubleSolid } from "react-icons/lia";
 
 interface Message {
   text: string;
@@ -82,7 +83,7 @@ const ChatBox = () => {
         SocketConnection.off("stop typing", handleStopTyping);
       };
     }
-  }, [SocketConnection, Recever, socket]);
+  }, [Recever]);
 
   useEffect(() => {
     if (SocketConnection && Recever) {
@@ -91,7 +92,6 @@ const ChatBox = () => {
         convID: string;
         messages: React.SetStateAction<AllMessage[]>;
       }) => {
-        console.log(data.messages);
         const test = data.convID === Recever.conversation_id;
         if (test) {
           setAllMessage(data.messages);
@@ -108,12 +108,26 @@ const ChatBox = () => {
         dispatch(updateReceiver(newConversationId.convID));
       };
       SocketConnection.on("message", messageHandler);
+
+      SocketConnection.on("seen-message", (data) => {
+        const test = data.convID === Recever.conversation_id;
+        if (test) {
+          console.log(data.messages);
+          setAllMessage(data.messages);
+          return;
+        } else if (Recever.recever_id === data.reciver) {
+          setAllMessage(data.messages);
+          return;
+        } else {
+          return;
+        }
+      });
       SocketConnection.on("newconversation", handleNewConveration);
       return () => {
         SocketConnection.off("message", messageHandler);
       };
     }
-  }, [Recever, SocketConnection, dispatch]);
+  }, [Recever]);
 
   const isOnline = onlineUsers.includes(Recever.recever_id);
   const isBlocked = user.blockedUsers.includes(Recever.recever_id);
@@ -172,6 +186,32 @@ const ChatBox = () => {
     }
   };
 
+  /*
+-- Hundle emoji selection or picker
+*/
+  const inputRef = useRef<HTMLInputElement>(null);
+  const handleEmojiPiker = (emoji: string) => {
+    const inputElement = inputRef.current;
+    if (inputElement) {
+      const start = inputElement.selectionStart ?? 0;
+      const end = inputElement.selectionEnd ?? 0;
+
+      // Insert the emoji at the current cursor position
+      const newText =
+        message.text.slice(0, start) + emoji + message.text.slice(end);
+
+      // Update the input field value
+      setMessage({ ...message, text: newText });
+
+      // Set the cursor position after the emoji
+      setTimeout(() => {
+        const newCursorPosition = start + emoji.length;
+        inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
+        inputElement.focus(); // Keep the focus on the input
+      }, 0);
+    }
+  };
+
   return (
     <div className="">
       <header className="sticky top-0 bg-[var(--dark-bg-color)] text-white h-24 flex items-center justify-between px-3 lg:px-8">
@@ -200,14 +240,14 @@ const ChatBox = () => {
                   <>
                     <img
                       className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
-                      src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
+                      src={`/userpic.png`}
                       alt={`${Recever.full_name}`}
                     />
                   </>
                 ) : (
                   <>
                     <img
-                      className="w-24 h-24 rounded-full "
+                      className="w-[55px] h-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
                       src={`${Recever.profile_pic}`}
                       alt=""
                     />
@@ -277,7 +317,7 @@ const ChatBox = () => {
                 <div
                   ref={currentMessage}
                   key={index}
-                  className={`text-gray-300 min-w-28 max-w-48 lg:max-w-96 mx-4 bg-[var(--message-bg)]  mb-2
+                  className={`relative text-gray-300 min-w-28 max-w-48 lg:max-w-96 mx-4 bg-[var(--message-bg)]  mb-2
                    p-3 py-1 rounded w-fit h-fit ${
                      user._id === msg.msgByUserId
                        ? "ml-auto bg-[var(--message-bg)]"
@@ -291,7 +331,7 @@ const ChatBox = () => {
                   )}
                   <p className="break-words">{msg.text}</p>
                   <p className="text-x flex justify-between mt-1 items-center">
-                    {moment("2024-09-06T09:57:58.030Z").format("hh:mm")}
+                    {moment(msg.createdAt).format("hh:mm")}
                     <span>
                       <MdDelete
                         onClick={() => handleDeleteMessage(msg._id)}
@@ -299,13 +339,22 @@ const ChatBox = () => {
                       />
                     </span>
                   </p>
+                  {user._id === msg.msgByUserId && msg.seen ? (
+                    <>
+                      <div className="absolute -right-3 -mt-3">
+                        <LiaCheckDoubleSolid size={20} />
+                      </div>
+                    </>
+                  ) : (
+                    <></>
+                  )}
                 </div>
               );
             })}
         </section>
       </div>
 
-      <section className="flex items-center h-16 bg-[var(--medium-dard)] p-4">
+      <section className="flex items-center h-16 bg-[var(--medium-dard)] ">
         {isBlocked ? (
           <>
             <div className="h-full w-full flex justify-around items-center ">
@@ -337,6 +386,8 @@ const ChatBox = () => {
                 >
                   <div className=" w-full flex items-center">
                     <input
+                      ref={inputRef}
+                      id="message_input"
                       type="text"
                       name="text"
                       className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white"
@@ -344,14 +395,9 @@ const ChatBox = () => {
                       value={message.text}
                       onChange={handleOnMessageChange}
                     />
-                    <button
-                      type="submit"
-                      className="h-12 px-4 text-white hover:bg-slate-800 rounded-full"
-                    >
-                      <IoMdSend size={25} />
-                    </button>
                   </div>
                 </form>
+                <EmojiPicker onEmojiClick={handleEmojiPiker} />
               </>
             )}
           </>
@@ -362,3 +408,11 @@ const ChatBox = () => {
 };
 
 export default ChatBox;
+{
+  /* <button
+  type="submit"
+  className="h-12 px-4 text-white hover:bg-slate-800 rounded-full"
+>
+  <IoMdSend size={25} />
+</button>; */
+}

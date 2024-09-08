@@ -20,6 +20,16 @@
 .scrollbar::-webkit-scrollbar-thumb {
   @apply bg-gray-900 rounded;
 }
+
+.emoji-scroll-bar::-webkit-scrollbar {
+  width: 5px;
+}
+.emoji-scroll-bar::-webkit-scrollbar-track {
+  @apply bg-[var(--message-bg)] rounded;
+}
+.emoji-scroll-bar::-webkit-scrollbar-thumb {
+  @apply bg-gray-900 rounded;
+}
 .typing-indicator {
   width: 60px;
   height: 30px;
