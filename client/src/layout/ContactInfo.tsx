@@ -186,14 +186,14 @@ const ContactInfo = () => {
                     <>
                       <img
                         className="w-24 h-24 rounded-full "
-                        src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
+                        src="/userpic.png"
                         alt=""
                       />
                     </>
                   ) : (
                     <>
                       <img
-                        className="w-24 h-24 rounded-full "
+                        className="w-20 h-20 rounded-full "
                         src={`${profile_pic}`}
                         alt=""
                       />
@@ -203,7 +203,7 @@ const ContactInfo = () => {
                     <>
                       <label
                         htmlFor="profilepic"
-                        className="absolute bottom-5 -right-3 cursor-pointer"
+                        className="absolute bottom-5 -right-2 cursor-pointer"
                       >
                         <FaCamera size={25} className="text-slate-300 " />
                         <input
@@ -218,7 +218,7 @@ const ContactInfo = () => {
                     <>
                       <label
                         htmlFor="profilepic"
-                        className="absolute bottom-5 -right-3 cursor-pointer"
+                        className="absolute bottom-5 -right-2 cursor-pointer"
                         onClick={handleDeleteProfile}
                       >
                         <MdDelete size={25} className="text-red-500 " />
@@ -229,10 +229,10 @@ const ContactInfo = () => {
               )}
 
               <div>
-                <span className="text-xl text-slate-300">{name}</span>
+                <span className="text-md text-slate-300 ">{name}</span>
               </div>
               <div>
-                <span className="text-green-300">online</span>
+                <span className="text-green-300 text-sm">online</span>
               </div>
             </div>
           </div>
@@ -246,7 +246,7 @@ const ContactInfo = () => {
               />
               <div className="bg-black opacity-40 inset-1 px-2 w-full">
                 <div>
-                  <p className="text-gray-500">
+                  <p className="text-gray-500 text-sm">
                     Any details such as age, occupation or city. <br />
                     Example:23 y.o dev form addis
                   </p>
@@ -259,31 +259,31 @@ const ContactInfo = () => {
               onClick={() => dispatch(OpenEditName())}
               className="flex justify-between px-3 items-center hover:bg-[var(--medium-dard)] cursor-pointer py-2"
             >
-              <span className="flex gap-4 text-lg text-gray-300 items-center font-thin">
+              <span className="flex gap-4 text-md text-gray-300 items-center font-thin">
                 {" "}
                 <FaUserCircle size={25} className="" /> Name
               </span>
-              <span className="text-lg text-gray-300 font-thin">{name}</span>
+              <span className="text-md text-gray-300 font-thin ">{name}</span>
             </div>
             <div
               onClick={() => dispatch(OpenEditPhone())}
               className="flex justify-between px-3 items-center hover:bg-[var(--medium-dard)] cursor-pointer py-2"
             >
-              <span className="flex gap-4 text-lg text-gray-300 items-center font-thin">
+              <span className="flex gap-4 text-md text-gray-300 items-center font-thin">
                 {" "}
                 <FaPhoneSquareAlt size={25} className="" /> Phone number
               </span>
-              <span className="text-lg text-gray-300">{phone_number}</span>
+              <span className="text-md text-gray-300">{phone_number}</span>
             </div>
             <div
               onClick={() => dispatch(OpenEditUserName())}
               className="flex justify-between px-3 items-center hover:bg-[var(--medium-dard)] cursor-pointer py-2"
             >
-              <span className="flex gap-4 text-lg text-gray-300 items-center font-thin">
+              <span className="flex gap-4 text-md text-gray-300 items-center font-thin">
                 {" "}
                 <CiAt size={25} className="" /> Name
               </span>
-              <span className="text-xl text-gray-300 font-thin">
+              <span className="text-md text-gray-300 font-thin">
                 {user_name}
               </span>
             </div>
@@ -291,7 +291,7 @@ const ContactInfo = () => {
           <div className=" flex flex-col justify-center mt-5">
             <div className="bg-black opacity-40 inset-1 px-2 w-full">
               <div>
-                <p className="text-gray-500">
+                <p className="text-gray-500 text-sm">
                   Deleteing account may result in total removal from the
                   application. This action can not be undone
                 </p>

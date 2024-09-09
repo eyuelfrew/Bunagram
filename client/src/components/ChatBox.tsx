@@ -17,9 +17,10 @@ import ChatMenu from "./ChatMenu";
 
 import LottieAnimation from "./LottieAnimation";
 import SendImage from "./SendImage";
-import { MdDelete } from "react-icons/md";
+import { MdArrowDownward, MdCheck, MdDelete, MdEdit } from "react-icons/md";
 import EmojiPicker from "./EmojiPicker";
 import { LiaCheckDoubleSolid } from "react-icons/lia";
+import { ImCross } from "react-icons/im";
 
 interface Message {
   text: string;
@@ -43,15 +44,26 @@ const ChatBox = () => {
   const user = useSelector((state: Root_State) => state.UserReducers);
   const { socket, onlineUsers } = UseSocket();
   const SocketConnection = socket;
+  const messageEndRef = useRef<HTMLDivElement>(null);
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const currentMessage = useRef<HTMLDivElement | null>(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const [allMessages, setAllMessage] = useState<AllMessage[]>([]);
   const [message, setMessage] = useState<Message>({
     text: "",
     imageURL: "",
     videoURL: "",
   });
+
   // const [FileUpload, setFileUpload] = useState(false);
+
+  /* Edit Messag State  */
+  const [isEdit, setIsEdit] = useState(false);
+  const [editMessage, setEditMessage] = useState({ text: "", _id: "" });
+
+  /*
+  --- message scroll down effect
+  */
   useEffect(() => {
     if (currentMessage.current) {
       currentMessage.current.scrollIntoView({
@@ -60,6 +72,34 @@ const ChatBox = () => {
       });
     }
   }, [allMessages]);
+  const handleScroll = () => {
+    if (currentMessage.current) {
+      const { scrollTop, scrollHeight, clientHeight } = currentMessage.current;
+      const scrolledToBottom = scrollTop + clientHeight >= scrollHeight - 50; // Check if user is near the bottom
+
+      // Show the button if the user has scrolled up (not at the bottom)
+      setShowScrollButton(!scrolledToBottom);
+    }
+  };
+  useEffect(() => {
+    const container = currentMessage.current;
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    }
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      }
+    };
+  }, []);
+  const scrollDown = () => {
+    if (currentMessage.current) {
+      currentMessage.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  };
   useEffect(() => {
     setMessage({ ...message, text: "" });
     if (SocketConnection && Recever.recever_id) {
@@ -67,7 +107,6 @@ const ChatBox = () => {
         sender: user._id,
         receiver: Recever.recever_id,
       });
-      SocketConnection.emit("seen", Recever?.messageByUser);
 
       const handleTyping = (typerId: string) => {
         setTyperID(typerId);
@@ -99,6 +138,8 @@ const ChatBox = () => {
           return;
         } else if (Recever.recever_id === data.reciver) {
           setAllMessage(data.messages);
+          SocketConnection.emit("seen", Recever.recever_id);
+
           return;
         } else {
           return;
@@ -112,7 +153,6 @@ const ChatBox = () => {
       SocketConnection.on("seen-message", (data) => {
         const test = data.convID === Recever.conversation_id;
         if (test) {
-          console.log(data.messages);
           setAllMessage(data.messages);
           return;
         } else if (Recever.recever_id === data.reciver) {
@@ -127,13 +167,13 @@ const ChatBox = () => {
         SocketConnection.off("message", messageHandler);
       };
     }
-  }, [Recever]);
+  }, [Recever, SocketConnection]);
 
   const isOnline = onlineUsers.includes(Recever.recever_id);
   const isBlocked = user.blockedUsers.includes(Recever.recever_id);
   const handleSendMessage = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (SocketConnection && message.text.trim() !== "") {
+    if (!isEdit && SocketConnection && message.text.trim() !== "") {
       SocketConnection.emit("newmessage", {
         sender: user?._id,
         receiver: Recever.recever_id,
@@ -141,6 +181,17 @@ const ChatBox = () => {
         msgByUserId: user?._id,
         conversation_id: Recever.conversation_id || "",
       });
+      setMessage({ ...message, text: "" });
+    }
+    if (isEdit && SocketConnection && message.text.trim() !== "") {
+      const payload = {
+        message_id: editMessage._id,
+        text: message.text,
+        sender: user._id,
+        reciver: Recever.recever_id,
+      };
+      SocketConnection.emit("edit-message", payload);
+      setIsEdit(false);
       setMessage({ ...message, text: "" });
     }
   };
@@ -212,10 +263,27 @@ const ChatBox = () => {
     }
   };
 
+  /*
+  --- Hundle Edit message
+  */
+  const handleEditMessage = (msg: AllMessage) => {
+    setIsEdit(true);
+    setEditMessage({ ...editMessage, text: msg.text, _id: msg._id });
+    setMessage({ ...message, text: msg.text });
+  };
+
+  /*
+  -- hundle cancel edit
+  */
+  const handleCancelEdit = () => {
+    setIsEdit(false);
+    setEditMessage({ ...editMessage, text: "", _id: "" });
+    setMessage({ ...message, text: "" });
+  };
   return (
     <div className="">
-      <header className="sticky top-0 bg-[var(--dark-bg-color)] text-white h-24 flex items-center justify-between px-3 lg:px-8">
-        <div className="flex items-center">
+      <header className=" top-0 bg-[var(--dark-bg-color)] text-white h-24 flex items-center justify-between px-3 lg:px-8">
+        <div className="flex items-center ">
           <div className="lg:hidden ml-1 me-4">
             <Link
               onClick={() => dispatch(clearReciver())}
@@ -298,63 +366,103 @@ const ChatBox = () => {
             )}
           </div>
         </div>
-        <div className=" h-fit text-white p-2 rounded-lg z-[9000]">
+        <div className=" text-white p-2 rounded-lg ">
           <ChatMenu />
         </div>
       </header>
-      <div className="">
-        <section className=" h-[calc(100vh-160px)] bg-[var(--light-dark-color)] overflow-x-hidden overflow-y-scroll scrollbar  ">
-          {allMessages.length === 0 && (
-            <>
-              <div className=" h-full flex items-center">
-                <LottieAnimation />
-              </div>
-            </>
-          )}
-          {allMessages.length > 0 &&
-            allMessages.map((msg, index) => {
-              return (
-                <div
-                  ref={currentMessage}
-                  key={index}
-                  className={`relative text-gray-300 min-w-28 max-w-48 lg:max-w-96 mx-4 bg-[var(--message-bg)]  mb-2
+      <section className=" h-[calc(100vh-160px)] bg-[var(--light-dark-color)] overflow-x-hidden overflow-y-scroll scrollbar  ">
+        {allMessages.length === 0 && (
+          <>
+            <div className=" h-full flex items-center">
+              <LottieAnimation />
+            </div>
+          </>
+        )}
+        {allMessages.length > 0 &&
+          allMessages.map((msg, index) => {
+            return (
+              <div
+                ref={currentMessage}
+                key={index}
+                className={`relative z-[200] text-gray-300 min-w-28 max-w-48 lg:max-w-96 mx-4 bg-[var(--medium-dard)]  mb-2
                    p-3 py-1 rounded w-fit h-fit ${
                      user._id === msg.msgByUserId
                        ? "ml-auto bg-[var(--message-bg)]"
                        : ""
                    }`}
-                >
-                  {msg.imageURL ? (
-                    <img src={`${msg.imageURL}`} alt="" />
-                  ) : (
-                    <></>
-                  )}
-                  <p className="break-words">{msg.text}</p>
-                  <p className="text-x flex justify-between mt-1 items-center">
-                    {moment(msg.createdAt).format("hh:mm")}
+              >
+                {msg.imageURL ? <img src={`${msg.imageURL}`} alt="" /> : <></>}
+                <p className="break-words">{msg.text}</p>
+                <p className="text-x flex justify-between mt-1 items-center gap-8">
+                  {moment(msg.createdAt).format("hh:mm")}
+                  <span className="flex gap-1">
                     <span>
                       <MdDelete
                         onClick={() => handleDeleteMessage(msg._id)}
                         className=" hover:scale-[2] cursor-pointer"
                       />
                     </span>
-                  </p>
-                  {user._id === msg.msgByUserId && msg.seen ? (
-                    <>
-                      <div className="absolute -right-3 -mt-3">
-                        <LiaCheckDoubleSolid size={20} />
-                      </div>
-                    </>
-                  ) : (
-                    <></>
-                  )}
-                </div>
-              );
-            })}
-        </section>
-      </div>
+                    <span>
+                      {user._id === msg.msgByUserId && (
+                        <MdEdit
+                          onClick={() => handleEditMessage(msg)}
+                          className=" hover:scale-[2] cursor-pointer"
+                        />
+                      )}
+                    </span>
+                  </span>
+                </p>
+                {user._id === msg.msgByUserId && msg.seen ? (
+                  <>
+                    <div className="absolute -right-3 -mt-3">
+                      <LiaCheckDoubleSolid size={20} />
+                    </div>
+                  </>
+                ) : (
+                  <></>
+                )}
+              </div>
+            );
+          })}
+        <div ref={messageEndRef}></div>
+      </section>
 
-      <section className="flex items-center h-16 bg-[var(--medium-dard)] ">
+      <section className="relative flex items-center h-16 bg-[var(--medium-dard)] ">
+        {showScrollButton && (
+          <button
+            onClick={scrollDown}
+            className={`!{} bg-green-400 z-[3000] absolute -mt-28 rounded-full text-3xl right-8 p-3`}
+          >
+            <MdArrowDownward />
+          </button>
+        )}
+
+        {isEdit ? (
+          <div className="flex justify-between px-4  z-[5000] absolute w-[99%]  top-0 -mt-16 h-16 bg-[var(--messge-input-dark)] items-center">
+            <div className="   bg-[var(--messge-input-dark)]">
+              <div className="flex justify-between items-center">
+                <div className="flex">
+                  <div className="w-1 bg-green-300  h-6"></div>
+                  <h1 className="text-slate-300 text-md">Edit message </h1>
+                </div>
+              </div>
+
+              <p className="truncate ... text-slate-300">
+                <span>{editMessage.text}</span>
+              </p>
+            </div>
+            <div>
+              <button
+                onClick={handleCancelEdit}
+                className="rounded-full  text-md text-slate-300 hover:bg-[var(--light-dark-color)]"
+              >
+                <ImCross />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
         {isBlocked ? (
           <>
             <div className="h-full w-full flex justify-around items-center ">
@@ -380,23 +488,30 @@ const ChatBox = () => {
                 <div className=" flex justify-around items-center ">
                   <SendImage />
                 </div>
-                <form
-                  className="h-full w-full flex justify-around items-center "
-                  onSubmit={handleSendMessage}
-                >
+                <form className="h-full w-full  " onSubmit={handleSendMessage}>
                   <div className=" w-full flex items-center">
                     <input
+                      autoComplete="off"
                       ref={inputRef}
                       id="message_input"
                       type="text"
                       name="text"
-                      className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white"
+                      className="mt-2 rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white"
                       placeholder="Write a message..."
                       value={message.text}
                       onChange={handleOnMessageChange}
                     />
+                    {isEdit && (
+                      <button
+                        type="submit"
+                        className="rounded-full text-4xl text-slate-500 hover:bg-[var(--light-dark-color)]"
+                      >
+                        <MdCheck />
+                      </button>
+                    )}
                   </div>
                 </form>
+
                 <EmojiPicker onEmojiClick={handleEmojiPiker} />
               </>
             )}
@@ -408,11 +523,3 @@ const ChatBox = () => {
 };
 
 export default ChatBox;
-{
-  /* <button
-  type="submit"
-  className="h-12 px-4 text-white hover:bg-slate-800 rounded-full"
->
-  <IoMdSend size={25} />
-</button>; */
-}

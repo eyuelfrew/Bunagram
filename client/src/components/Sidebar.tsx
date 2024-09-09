@@ -1,6 +1,6 @@
 import { IoMenu } from "react-icons/io5";
 import { useSelector, useDispatch } from "react-redux";
-import { Link, useParams } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Root_State } from "../store/store";
 import { ChangeEvent, useEffect, useState } from "react";
 import { FiArrowUpLeft } from "react-icons/fi";
@@ -11,6 +11,8 @@ import SeachResult from "./SeachResult";
 import { ViewMenu } from "../store/actions/MenuControllers";
 import { UseSocket } from "../context/SocketContext";
 import LoadingConversation from "./LoadingConversation";
+import { FaCheck } from "react-icons/fa6";
+import { BiCheckDouble } from "react-icons/bi";
 
 interface ConversationWithUserDetails extends Conversation {
   userDetails: User;
@@ -31,7 +33,6 @@ const Sidebar = () => {
   const { socket, onlineUsers } = UseSocket();
   const SocketConnection = socket;
   const dispatch = useDispatch();
-  const params = useParams();
   const [allUsers, setAllUsers] = useState<
     ConversationWithUserDetails[] | null
   >(null);
@@ -125,6 +126,7 @@ const Sidebar = () => {
 
           <div className="relative w-[80%]  mx-auto rounded-full">
             <input
+              autoComplete="off"
               type="text"
               name="usre_search_key_word"
               value={searchUser.usre_search_key_word}
@@ -134,7 +136,7 @@ const Sidebar = () => {
             />
             {viewResult && (
               <button
-                onMouseDown={handleClearInput} // Using onMouseDown to prevent losing focus before clearing
+                onMouseDown={handleClearInput}
                 className=" -ml-3 mt-2 absolute inset-y-0 h-8 right-0 flex items-center justify-center  w-8"
               >
                 <svg
@@ -154,13 +156,26 @@ const Sidebar = () => {
             {viewResult && (
               <div
                 onBlur={handleBlur}
-                className="z-[1000] rounded-t-2xl p-1 absolute h-[400px] w-full bg-[var(--search-result-bg)] flex flex-col"
+                className="z-[1000] overflow-scroll emoji-scroll-bar overflow-x-hidden rounded-t-2xl p-1 absolute h-[400px] w-full bg-[var(--light-dark-color)] flex flex-col"
               >
                 {users.length !== 0 &&
                   users.map((user, index) => (
                     <div key={index}>
                       {loading ? (
-                        <>loading...</>
+                        <>
+                          <div className="flex px-2 py-1 justify-between items-center animate-pulse">
+                            <div className="flex">
+                              <div className="flex px-2 py-1 relative">
+                                <div className="w-16 h-16 rounded-full bg-gray-600"></div>
+                                <div className="absolute w-3 h-3 rounded-full bg-gray-300 right-1 top-11"></div>
+                              </div>
+                              <div className="mt-2">
+                                <p className="h-4 bg-gray-600 rounded w-32 mb-2"></p>
+                                <p className="h-3 bg-gray-600 rounded w-11"></p>
+                              </div>
+                            </div>
+                          </div>
+                        </>
                       ) : (
                         <>
                           <SeachResult
@@ -288,7 +303,7 @@ const Sidebar = () => {
                           </div>
                         </div>
                         <div>
-                          {params.userId !== conv?.userDetails?._id ? (
+                          {Recever.recever_id !== conv?.userDetails?._id ? (
                             <>
                               {conv?.unseenMessages != 0 ? (
                                 <>
@@ -297,11 +312,39 @@ const Sidebar = () => {
                                   </p>
                                 </>
                               ) : (
-                                <></>
+                                <>
+                                  {conv?.lastMessage?.seen ? (
+                                    <>
+                                      <p className="rounded-full w-7 h-7 flex items-center justify-center text-center text-sm  text-white">
+                                        <BiCheckDouble />
+                                      </p>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <p className="rounded-full w-7 h-7 flex items-center justify-center text-center text-sm  text-white">
+                                        <FaCheck />
+                                      </p>
+                                    </>
+                                  )}
+                                </>
                               )}
                             </>
                           ) : (
-                            <></>
+                            <>
+                              {conv?.lastMessage?.seen ? (
+                                <>
+                                  <p className="rounded-full w-7 h-7 flex items-center justify-center text-center text-sm  text-white">
+                                    <BiCheckDouble />
+                                  </p>
+                                </>
+                              ) : (
+                                <>
+                                  <p className="rounded-full w-7 h-7 flex items-center justify-center text-center text-sm  text-white">
+                                    <FaCheck />
+                                  </p>
+                                </>
+                              )}
+                            </>
                           )}
                         </div>
                       </div>

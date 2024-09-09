@@ -22,7 +22,6 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
           { withCredentials: true }
         );
-        console.log(response.data);
         if (response.data?.status === 1) {
           setIsAuthenticated(true);
           navigateTo("/chat");
@@ -33,7 +32,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
         // dispatch(SetUserInfo(user));
         setIsAuthenticated(response.data.status === 1);
       } catch (error) {
-        console.error("Auth check failed:", error);
+        // console.error("Auth check failed:", error);
         setIsAuthenticated(false);
       }
     };

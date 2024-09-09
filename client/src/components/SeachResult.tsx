@@ -55,11 +55,23 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
             />
           ) : (
             <>
-              <img
-                className="w-[25%] rounded-full"
-                src={`https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQOtu74pEiq7ofeQeTsco0migV16zZoBwSlGg&s`}
-                alt="buna chat"
-              />
+              {user.profile_pic ? (
+                <>
+                  <img
+                    className="w-[25%] rounded-full"
+                    src={`${user.profile_pic}`}
+                    alt="buna chat"
+                  />
+                </>
+              ) : (
+                <>
+                  <img
+                    className="w-[25%] rounded-full"
+                    src="/userpic.png"
+                    alt="buna chat"
+                  />
+                </>
+              )}
             </>
           )}
 
@@ -78,13 +90,13 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
                 <>
                   {isOnline ? (
                     <>
-                      <div className="bg-green-600 w-fit px-2  mt-0">
+                      <div className="bg-green-600 w-fit px-2  mt-0 rounded">
                         <p className="text-[12px] text-white">online</p>
                       </div>
                     </>
                   ) : (
                     <>
-                      <div className="bg-red-600 w-fit">
+                      <div className="bg-red-600 w-fit rounded">
                         <p className="text-[12px] text-white">offline</p>
                       </div>
                     </>
