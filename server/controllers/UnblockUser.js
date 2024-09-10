@@ -1,4 +1,5 @@
-import UserModel from "../models/UserModels.js";
+const UserModel = require("../models/UserModels.js");
+
 const UnblockUser = async (req, res) => {
   const { blocker_id, blocked_id } = req.body;
   try {
@@ -18,4 +19,5 @@ const UnblockUser = async (req, res) => {
     return res.json({ message: error.message || error });
   }
 };
-export default UnblockUser;
+
+module.exports = UnblockUser;

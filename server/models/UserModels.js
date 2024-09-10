@@ -1,10 +1,11 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
+
 const userSchema = new mongoose.Schema(
   {
-    name: { type: String, required: [true, "provied name"] },
+    name: { type: String, required: [true, "provide name"] },
     email: {
       type: String,
-      required: [true, "provied email"],
+      required: [true, "provide email"],
       unique: true,
     },
     user_name: {
@@ -30,11 +31,7 @@ const userSchema = new mongoose.Schema(
     public_id: { type: String, default: "" },
     lastLogin: {
       type: Date,
-      defualt: Date.now,
-    },
-    isVerified: {
-      type: Boolean,
-      default: false,
+      default: Date.now, // Fixed typo from 'defualt' to 'default'
     },
     isVerified: {
       type: Boolean,
@@ -50,6 +47,7 @@ const userSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
 const UserModel = mongoose.model("User", userSchema);
 
-export default UserModel;
+module.exports = UserModel;

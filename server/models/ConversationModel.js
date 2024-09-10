@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const messageSchema = new mongoose.Schema(
   {
@@ -7,10 +7,6 @@ const messageSchema = new mongoose.Schema(
       default: "",
     },
     imageURL: {
-      type: String,
-      default: "",
-    },
-    videoURL: {
       type: String,
       default: "",
     },
@@ -33,7 +29,7 @@ const conversationSchema = new mongoose.Schema(
   {
     sender: {
       type: mongoose.Schema.ObjectId,
-      rquired: true,
+      required: true,
       ref: "User",
     },
     receiver: {
@@ -53,4 +49,5 @@ const conversationSchema = new mongoose.Schema(
 
 const MessageModel = mongoose.model("Message", messageSchema);
 const ConversationModel = mongoose.model("Conversation", conversationSchema);
-export { MessageModel, ConversationModel };
+
+module.exports = { MessageModel, ConversationModel };

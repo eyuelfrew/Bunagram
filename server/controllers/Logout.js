@@ -1,11 +1,11 @@
 const logout = async (req, res) => {
   try {
     const cookieOption = {
-      http: true,
+      httpOnly: true,
       secure: true,
     };
     return res.cookie("token", "", cookieOption).status(200).json({
-      message: "session out",
+      message: "Session out",
       logout: true,
     });
   } catch (error) {
@@ -14,4 +14,5 @@ const logout = async (req, res) => {
       .json({ message: error.message || error, error: true });
   }
 };
-export default logout;
+
+module.exports = logout;

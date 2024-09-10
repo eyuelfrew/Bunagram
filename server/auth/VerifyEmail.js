@@ -1,6 +1,7 @@
-import UserModel from "../models/UserModels.js";
-import jwt from "jsonwebtoken";
-import SendWelcomeEmail from "../mail/WelcomeEmail.js";
+const UserModel = require("../models/UserModels.js");
+const jwt = require("jsonwebtoken");
+const SendWelcomeEmail = require("../mail/WelcomeEmail.js");
+
 const VerifyAccount = async (req, res) => {
   const { verification_code } = req.body;
   const user = await UserModel.findOne({
@@ -8,21 +9,21 @@ const VerifyAccount = async (req, res) => {
     verificationTokenExpiresAt: { $gt: Date.now() },
   });
 
-  //check if the unverfied user exists
+  // Check if the unverified user exists
   if (!user) {
     return res.json({
-      message: "Not registerd",
+      message: "Not registered",
       notRegistered: true,
       status: 0,
     });
   }
 
-  //if user found , update and save new status of user
+  // If user found, update and save new status of user
   user.isVerified = true;
   user.verificationToken = undefined;
   user.verificationTokenExpiresAt = undefined;
 
-  //update and save user status
+  // Update and save user status
   await user.save();
   const tokenData = {
     id: user._id,
@@ -33,22 +34,20 @@ const VerifyAccount = async (req, res) => {
     expiresIn: "5d",
   });
 
-  // configure cookie and send response to client
+  // Configure cookie and send response to client
   await SendWelcomeEmail(user.email, user.name);
   return res
     .cookie("token", token, {
       httpOnly: true,
-      sameSite: "strict",
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-      domain: "http://localhost:5173/",
-      path: "/",
+      sameSite: "none",
+      secure: true,
     })
     .json({
-      message: "Account Verifiyed Successfuli!",
+      message: "Account Verified Successfully!",
       status: 200,
       user: { ...user._doc, password: undefined },
       token: token,
     });
 };
 
-export default VerifyAccount;
+module.exports = VerifyAccount;

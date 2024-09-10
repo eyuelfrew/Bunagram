@@ -1,18 +1,19 @@
-import Password_Reset_Success_Email from "../mail/Password_Reset_Success_Email.js";
-import UserModel from "../models/UserModels.js";
-import bcryptjs from "bcryptjs";
+const Password_Reset_Success_Email = require("../mail/Password_Reset_Success_Email.js");
+const UserModel = require("../models/UserModels.js");
+const bcryptjs = require("bcryptjs");
+
 const ResetPassword = async (req, res) => {
   const { token } = req.params;
   const { password } = req.body;
 
   try {
-    // find user by the generated token
+    // Find user by the generated token
     const user = await UserModel.findOne({
       resetPasswordToken: token,
       resetPasswordExpiresAt: { $gt: Date.now() },
     });
 
-    //check if the usre exists or the token not expired
+    // Check if the user exists or the token is not expired
     if (!user) {
       return res.json({
         status: 0,
@@ -20,22 +21,23 @@ const ResetPassword = async (req, res) => {
       });
     }
 
-    // update password
+    // Update password
     const hashedPassword = await bcryptjs.hash(password, 10);
     user.password = hashedPassword;
     user.resetPasswordToken = undefined;
     user.resetPasswordExpiresAt = undefined;
 
-    // save new user info in to database
+    // Save new user info in the database
     await user.save();
 
-    //send rest password successfull email
+    // Send reset password successful email
     await Password_Reset_Success_Email(user.email);
 
-    return res.json({ message: "Password Rest SuccessFully!", status: 1 });
+    return res.json({ message: "Password Reset Successfully!", status: 1 });
   } catch (error) {
     console.log(error);
     return res.json({ message: error.message || error });
   }
 };
-export default ResetPassword;
+
+module.exports = ResetPassword;

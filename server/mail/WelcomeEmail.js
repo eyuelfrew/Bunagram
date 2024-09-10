@@ -1,17 +1,19 @@
-import nodejsmailer from "nodemailer";
+const nodejsmailer = require("nodemailer");
+
 const SendWelcomeEmail = async (email, name) => {
   console.log("Email sending ... ...");
 
-  var mailOptions = {
+  const mailOptions = {
     from: '"Bunagram" <eyumanfrew@gmail.com>',
-    to: `${email}`,
-    subject: "Email Verification!",
+    to: email,
+    subject: "Welcome to Bunagram!",
     html: `<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-  <div style="background: #1e1e1e; padding: 20px; text-align: center;">
-    <h1 style="color: white; margin: 0;">Welcome To Bunagram</h1>
-  </div>
-</body>`,
+      <div style="background: #1e1e1e; padding: 20px; text-align: center;">
+        <h1 style="color: white; margin: 0;">Welcome to Bunagram, ${name}!</h1>
+      </div>
+    </body>`,
   };
+
   const transporter = nodejsmailer.createTransport({
     service: "gmail",
     auth: {
@@ -19,15 +21,16 @@ const SendWelcomeEmail = async (email, name) => {
       pass: "xykssntmmdwpicao",
     },
   });
-  transporter.sendMail(mailOptions, function (error, info) {
+
+  transporter.sendMail(mailOptions, (error, info) => {
     if (error) {
       console.log(error);
       return error;
     } else {
-      console.log("Email Send " + info.response);
+      console.log("Email sent: " + info.response);
       return info;
     }
   });
 };
 
-export default SendWelcomeEmail;
+module.exports = SendWelcomeEmail;

@@ -1,11 +1,12 @@
-import UserModel from "../models/UserModels.js";
-import bcryptjs from "bcryptjs";
-import jwt from "jsonwebtoken";
+const UserModel = require("../models/UserModels.js");
+const bcryptjs = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
 const Login = async (req, res) => {
   const { email, password, rememberMe } = req.body;
   try {
     /*
-    -- Check if user exist in the data base
+    -- Check if user exists in the database
     */
     const user = await UserModel.findOne({ email });
     if (!user) {
@@ -17,8 +18,8 @@ const Login = async (req, res) => {
     }
 
     /*
-      -- if user exists in the data base then check if the password matchs
-      */
+      -- If user exists in the database then check if the password matches
+    */
     const checkPassword = await bcryptjs.compare(password, user.password);
     if (!checkPassword) {
       return res.json({
@@ -31,23 +32,23 @@ const Login = async (req, res) => {
     await user.save();
 
     /*
-      --- response success with cookie
-      */
+      --- Response success with cookie
+    */
     const tokenData = {
       id: user._id,
       email: user.email,
     };
     const tokenOption = rememberMe ? { expiresIn: "30d" } : { expiresIn: "5d" };
     const token = jwt.sign(tokenData, process.env.JWT_SECRET_KEY, tokenOption);
-    console.log(token);
+
     return res
       .cookie("token", token, {
         httpOnly: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
+        sameSite: "none",
         secure: true,
       })
       .json({
-        message: "Login Successfull",
+        message: "Login Successful",
         status: 1,
         user: { ...user._doc, password: undefined },
         token: token,
@@ -57,4 +58,5 @@ const Login = async (req, res) => {
     return res.json({ message: err.message || err });
   }
 };
-export default Login;
+
+module.exports = Login;

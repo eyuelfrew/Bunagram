@@ -1,13 +1,14 @@
-import ForgotPasswordEmail from "../mail/ForgotPasswordEmail.js";
-import UserModel from "../models/UserModels.js";
-import crypto from "crypto";
+const ForgotPasswordEmail = require("../mail/ForgotPasswordEmail.js");
+const UserModel = require("../models/UserModels.js");
+const crypto = require("crypto");
+
 const ForgotPassword = async (req, res) => {
   const { email } = req.body;
   try {
-    //fid a user by email
+    // Find a user by email
     const user = await UserModel.findOne({ email });
 
-    //check if user exists
+    // Check if user exists
     if (!user) {
       return res.json({
         message: "User not found!",
@@ -16,14 +17,14 @@ const ForgotPassword = async (req, res) => {
       });
     }
 
-    //generate passoword reset token
+    // Generate password reset token
     const resetToken = crypto.randomBytes(20).toString("hex");
-    const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; //expires after 1 hour
+    const resetTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; // Expires after 1 hour
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpiresAt = resetTokenExpiresAt;
     await user.save();
 
-    //send password reset email
+    // Send password reset email
     const response = await ForgotPasswordEmail(
       user.email,
       `${process.env.CLIENT_URL}/reset-password/${resetToken}`
@@ -39,4 +40,5 @@ const ForgotPassword = async (req, res) => {
     return res.json({ message: error.message || error });
   }
 };
-export default ForgotPassword;
+
+module.exports = ForgotPassword;

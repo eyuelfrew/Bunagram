@@ -2,8 +2,8 @@ const Logout = async (req, res) => {
   try {
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "none",
+      secure: true,
     };
 
     // Clear the token cookie
@@ -17,4 +17,5 @@ const Logout = async (req, res) => {
     return res.json({ message: error.message || error });
   }
 };
-export default Logout;
+
+module.exports = Logout;

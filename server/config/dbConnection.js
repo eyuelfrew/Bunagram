@@ -1,14 +1,14 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const connectDB = async () => {
   const mongoURL = process.env.MONGO_URL;
 
-  //check if mongo DB connection string is missing
+  // Check if MongoDB connection string is missing
   if (!mongoURL) {
     return console.log("MongoDB connection string missing !!");
   }
 
-  //connect to mongoDB
+  // Connect to MongoDB
   try {
     await mongoose.connect(mongoURL, {});
     console.log("MongoDB Connected!");
@@ -16,4 +16,5 @@ const connectDB = async () => {
     console.log(err);
   }
 };
-export default connectDB;
+
+module.exports = connectDB;

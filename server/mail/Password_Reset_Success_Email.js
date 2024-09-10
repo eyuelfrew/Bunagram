@@ -1,8 +1,9 @@
-import nodejsmailer from "nodemailer";
+const nodejsmailer = require("nodemailer");
+
 const Password_Reset_Success_Email = async (email) => {
   console.log("Email sending ... ...");
 
-  var mailOptions = {
+  const mailOptions = {
     from: '"Bunagram" <eyumanfrew@gmail.com>',
     to: `${email}`,
     subject: "Password Reset Successful!",
@@ -12,6 +13,7 @@ const Password_Reset_Success_Email = async (email) => {
   </div>
 </body>`,
   };
+
   const transporter = nodejsmailer.createTransport({
     service: "gmail",
     auth: {
@@ -19,14 +21,16 @@ const Password_Reset_Success_Email = async (email) => {
       pass: "xykssntmmdwpicao",
     },
   });
+
   transporter.sendMail(mailOptions, function (error, info) {
     if (error) {
       console.log(error);
       return error;
     } else {
-      console.log("Email Send " + info.response);
+      console.log("Email sent: " + info.response);
       return info;
     }
   });
 };
-export default Password_Reset_Success_Email;
+
+module.exports = Password_Reset_Success_Email;

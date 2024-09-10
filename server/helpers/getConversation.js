@@ -1,4 +1,5 @@
-import { ConversationModel } from "../models/ConversationModel.js";
+const { ConversationModel } = require("../models/ConversationModel.js");
+
 const getConversations = async (currentUserId) => {
   if (currentUserId) {
     const currentUserConversation = await ConversationModel.find({
@@ -8,14 +9,15 @@ const getConversations = async (currentUserId) => {
       .populate("sender", "_id name email profile_pic blockedUsers")
       .populate("receiver", "_id name email profile_pic blockedUsers")
       .sort({ updatedAt: -1 });
+
     const conversation = currentUserConversation.map((conv) => {
-      const countUnseenMsg = conv?.messages?.reduce((preve, curr) => {
+      const countUnseenMsg = conv?.messages?.reduce((prev, curr) => {
         const msgByUserId = curr?.msgByUserId?.toString();
 
         if (msgByUserId !== currentUserId) {
-          return preve + (curr?.seen ? 0 : 1);
+          return prev + (curr?.seen ? 0 : 1);
         } else {
-          return preve;
+          return prev;
         }
       }, 0);
       return {
@@ -32,4 +34,5 @@ const getConversations = async (currentUserId) => {
     // socket.emit("conversation", []);
   }
 };
-export default getConversations;
+
+module.exports = getConversations;

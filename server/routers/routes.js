@@ -1,66 +1,68 @@
-import express from "express";
+const express = require("express");
 
-import searchUser from "../controllers/SearchUsers.js";
-import Logout from "../auth/Logout.js";
-import Login from "../auth/Login.js";
-import VerifiyToken from "../middleware/VerifyToken.js";
-import CheckAuth from "../auth/CheckAuth.js";
-import RegisterUser from "../controllers/RegisterUsers.js";
-import VerifyAccount from "../auth/VerifyEmail.js";
-import DeleteAccount from "../controllers/DeleteAccount.js";
-import {
+const searchUser = require("../controllers/SearchUsers.js");
+const Logout = require("../auth/Logout.js");
+const Login = require("../auth/Login.js");
+const VerifyToken = require("../middleware/VerifyToken.js");
+const CheckAuth = require("../auth/CheckAuth.js");
+const RegisterUser = require("../controllers/RegisterUsers.js");
+const VerifyAccount = require("../auth/VerifyEmail.js");
+const DeleteAccount = require("../controllers/DeleteAccount.js");
+const {
   CheckUserName,
   EditBio,
   EditUserName,
   UpdateName,
-} from "../controllers/UpdateUser.js";
-import ForgotPassword from "../auth/ForgotPassword.js";
-import ResetPassword from "../auth/ResetPassword.js";
-import BlockUser from "../controllers/BlockUser.js";
-import UnblockUser from "../controllers/UnblockUser.js";
-import UpdateProfilePicture from "../controllers/UpdateProfilePic.js";
-import DeletProfilePic from "../controllers/Profile Picture/DeleteProfilePicture.js";
+} = require("../controllers/UpdateUser.js");
+const ForgotPassword = require("../auth/ForgotPassword.js");
+const ResetPassword = require("../auth/ResetPassword.js");
+const BlockUser = require("../controllers/BlockUser.js");
+const UnblockUser = require("../controllers/UnblockUser.js");
+const UpdateProfilePicture = require("../controllers/UpdateProfilePic.js");
+const DeleteProfilePic = require("../controllers/Profile Picture/DeleteProfilePicture.js");
+
 const router = express.Router();
 
-// checking if user is verifyed
-router.get("/check-auth", VerifiyToken, CheckAuth);
+// Checking if user is verified
+router.get("/check-auth", VerifyToken, CheckAuth);
 
-//create users api
+// Create users API
 router.post("/register", RegisterUser);
 
-//login
+// Login
 router.post("/login", Login);
 
-//logout
+// Logout
 router.get("/logout", Logout);
 
-//verify email
-router.post("/verifiy-email", VerifyAccount);
+// Verify email
+router.post("/verify-email", VerifyAccount);
 
-// forgot password
+// Forgot password
 router.post("/forgot-pass", ForgotPassword);
 
-// reset password
+// Reset password
 router.post("/reset-password/:token", ResetPassword);
 
-// block user
-router.post("/block-user", VerifiyToken, BlockUser);
+// Block user
+router.post("/block-user", VerifyToken, BlockUser);
 
-//unblock users
-router.post("/unblock-user", VerifiyToken, UnblockUser);
+// Unblock user
+router.post("/unblock-user", VerifyToken, UnblockUser);
 
 /*
---- Update User Inforation End-Points
+--- Update User Information End-Points
 */
 
-router.put("/update-name", VerifiyToken, UpdateName);
-router.post("/update-bio", VerifiyToken, EditBio);
-router.post("/update-user-name", VerifiyToken, EditUserName);
+router.put("/update-name", VerifyToken, UpdateName);
+router.post("/update-bio", VerifyToken, EditBio);
+router.post("/update-user-name", VerifyToken, EditUserName);
 router.post("/check-user-name", CheckUserName);
-router.delete("/del-acc/:id", VerifiyToken, DeleteAccount);
-router.post("/update-pp", VerifiyToken, UpdateProfilePicture);
-router.delete("/delete-profile/:user_id", VerifiyToken, DeletProfilePic);
+router.delete("/del-acc/:id", VerifyToken, DeleteAccount);
+router.post("/update-pp", VerifyToken, UpdateProfilePicture);
+router.delete("/delete-profile/:user_id", VerifyToken, DeleteProfilePic);
 
-//searh users
+// Search users
 router.post("/search", searchUser);
-export default router;
+
+module.exports = router;

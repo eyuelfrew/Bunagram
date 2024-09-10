@@ -1,37 +1,38 @@
-import UserModel from "../models/UserModels.js";
-import bcryptjs from "bcryptjs";
-import jwt from "jsonwebtoken";
-import SendVerificationEmail from "../mail/SendVerificationEmail.js";
-import GenerateVerificationToken from "../utils/GenerateVerificationToken.js";
+const UserModel = require("../models/UserModels.js");
+const bcryptjs = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const SendVerificationEmail = require("../mail/SendVerificationEmail.js");
+const GenerateVerificationToken = require("../utils/GenerateVerificationToken.js");
+
 const RegisterUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    //check if use exists
+    // Check if user exists
     const checkEmail = await UserModel.findOne({ email });
     if (checkEmail) {
       return res.json({ message: "User Exists!", status: 0 });
     }
 
-    //hashing passoword
+    // Hashing password
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
 
-    //generate verification code
+    // Generate verification code
     const verificationToken = await GenerateVerificationToken();
 
-    //register the new user in mongoDB
+    // Register the new user in MongoDB
     const payload = {
       name,
       email,
       password: hashedPassword,
       verificationToken,
-      verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, //expires after 24 hours
+      verificationTokenExpiresAt: Date.now() + 24 * 60 * 60 * 1000, // Expires after 24 hours
     };
     const user = new UserModel(payload);
     const userSave = await user.save();
 
-    //generate jwt and send as cookei
+    // Generate JWT and send as cookie
     const token = jwt.sign(
       { id: userSave._id, email: userSave.email },
       process.env.JWT_SECRET_KEY,
@@ -39,13 +40,13 @@ const RegisterUser = async (req, res) => {
         expiresIn: "45m",
       }
     );
-    res;
 
-    //send verification code to user email
+    // Send verification code to user email
     const response = await SendVerificationEmail(
       email,
       payload.verificationToken
     );
+
     return res
       .cookie("token", token, {
         httpOnly: true,
@@ -64,4 +65,5 @@ const RegisterUser = async (req, res) => {
     return res.json({ message: error || error, status: 0 });
   }
 };
-export default RegisterUser;
+
+module.exports = RegisterUser;

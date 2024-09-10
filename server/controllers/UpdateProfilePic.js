@@ -1,4 +1,5 @@
-import UserModel from "../models/UserModels.js";
+const UserModel = require("../models/UserModels.js");
+
 const UpdateProfilePicture = async (req, res) => {
   const { public_id, pic_url, user_id } = req.body;
   try {
@@ -14,7 +15,7 @@ const UpdateProfilePicture = async (req, res) => {
     user.public_id = public_id;
     const newUserInfo = await user.save();
     return res.json({
-      message: "Profile pic update!",
+      message: "Profile pic updated!",
       status: 1,
       user: { ...newUserInfo._doc, password: undefined },
     });
@@ -27,4 +28,4 @@ const UpdateProfilePicture = async (req, res) => {
   }
 };
 
-export default UpdateProfilePicture;
+module.exports = UpdateProfilePicture;

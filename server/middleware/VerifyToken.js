@@ -1,5 +1,6 @@
-import jwt from "jsonwebtoken";
-const VerifiyToken = async (req, res, next) => {
+const jwt = require("jsonwebtoken");
+
+const VerifyToken = async (req, res, next) => {
   const token = req.cookies.token || "";
   if (!token) {
     return res.json({
@@ -12,12 +13,13 @@ const VerifiyToken = async (req, res, next) => {
   try {
     const decoded = await jwt.verify(token, process.env.JWT_SECRET_KEY);
 
-    if (!decoded)
+    if (!decoded) {
       return res.json({
         message: "Unauthorized - invalid token",
         status: 0,
         notAuth: true,
       });
+    }
     req.userId = decoded.id;
     next();
   } catch (error) {
@@ -30,4 +32,5 @@ const VerifiyToken = async (req, res, next) => {
     });
   }
 };
-export default VerifiyToken;
+
+module.exports = VerifyToken;
