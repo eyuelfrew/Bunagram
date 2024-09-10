@@ -22,8 +22,8 @@ const PreviewComponent: React.FC<PreviewComponentProps> = ({
   if (!preview) return null;
   return (
     <>
-      <div className="fixed  inset-0 bg-black bg-opacity-75 flex justify-center items-center z-50">
-        <div className="relative mt-4 p-4 bg-[var(--light-dark-color)] rounded-lg shadow-lg w-80">
+      <div className="fixed  inset-0  bg-opacity-75 flex justify-center items-center z-[5000]">
+        <div className="relative mt-24 p-4 bg-[var(--light-dark-color)] rounded-lg shadow-lg w-80 ">
           <div className="relative">
             <img
               src={preview}

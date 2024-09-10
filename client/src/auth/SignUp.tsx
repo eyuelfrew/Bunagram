@@ -136,7 +136,7 @@ const SignUp = () => {
             type="submit"
             className={`hover:bg-[var(--hard-dark)]  text-white w-28 p-2 text-lg rounded-xl `}
           >
-            Resiter
+            Register
           </button>
         </div>
         <p className="font-light text-gray-500 dark:text-gray-400">

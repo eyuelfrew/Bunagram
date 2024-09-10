@@ -131,15 +131,11 @@ const ChatBox = () => {
         convID: string;
         messages: React.SetStateAction<AllMessage[]>;
       }) => {
-        const test = data.convID === Recever.conversation_id;
-        if (test) {
-          setAllMessage(data.messages);
-          SocketConnection.emit("seen", Recever.recever_id);
-          return;
-        } else if (Recever.recever_id === data.reciver) {
-          setAllMessage(data.messages);
-          SocketConnection.emit("seen", Recever.recever_id);
+        const test = Recever.recever_id === data.reciver;
 
+        if (test) {
+          setAllMessage(data?.messages);
+          SocketConnection.emit("seen", Recever.recever_id);
           return;
         } else {
           return;
@@ -151,11 +147,11 @@ const ChatBox = () => {
       SocketConnection.on("message", messageHandler);
 
       SocketConnection.on("seen-message", (data) => {
-        const test = data.convID === Recever.conversation_id;
+        console.log(Recever.recever_id);
+        console.log(data.reciver);
+        const test = Recever.recever_id === data.reciver;
+        console.log(test);
         if (test) {
-          setAllMessage(data.messages);
-          return;
-        } else if (Recever.recever_id === data.reciver) {
           setAllMessage(data.messages);
           return;
         } else {
