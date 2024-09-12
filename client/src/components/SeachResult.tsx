@@ -61,7 +61,7 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
               {user.profile_pic ? (
                 <>
                   <img
-                    className="w-[25%] rounded-full"
+                    className="w-[68px] h-[68px] md:w-[57px] md:h-[57px] lg:w-[57px] lg:h-[57px] rounded-full object-cover"
                     src={`${user.profile_pic}`}
                     alt="buna chat"
                   />

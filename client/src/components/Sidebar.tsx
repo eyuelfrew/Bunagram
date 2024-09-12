@@ -156,7 +156,7 @@ const Sidebar = () => {
             {viewResult && (
               <div
                 onBlur={handleBlur}
-                className="z-[1000] overflow-scroll emoji-scroll-bar overflow-x-hidden rounded-t-2xl p-1 absolute h-[400px] w-full bg-[var(--light-dark-color)] flex flex-col"
+                className="z-[1000] overflow-scroll emoji-scroll-bar overflow-x-hidden rounded-t-2xl p-1 absolute h-[400px] w-full bg-[var(--light-dark-color)] flex flex-col gap-3"
               >
                 {users.length !== 0 &&
                   users.map((user, index) => (
