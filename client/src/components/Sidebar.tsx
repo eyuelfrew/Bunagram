@@ -20,7 +20,7 @@ interface ConversationWithUserDetails extends Conversation {
 const Sidebar = () => {
   const [isLoading, setIsLoading] = useState(false);
   const audio = new Audio(
-    "https://bunagram.onrender.com/discord_notification.mp3"
+    "https://bunagram.vercel.app/discord_notification.mp3"
   );
   const URL = import.meta.env.VITE_BACK_END_URL;
   const Recever = useSelector((state: Root_State) => state.receiverReducer);

@@ -116,7 +116,7 @@ const EditUserName = () => {
           isUserNameEdit ? "" : "hidden"
         } absolute flex w-full justify-center items-center h-screen`}
       >
-        <div className="p-3 -mt-40 h-[40%] w-[22%] bg-[var(--light-dark-color)] z-[6000] rounded-md">
+        <div className="p-3 -mt-40 w-[65%] md:w-[40%] lg:w-[22%] bg-[var(--light-dark-color)] z-[6000] rounded-md">
           <h1 className="text-slate-200 text-center text-xl font-light">
             Edit Username
           </h1>
@@ -152,10 +152,7 @@ const EditUserName = () => {
             </div>
             <div className="flex justify-end gap-4 mt-14 text-white text-xl">
               <button onClick={handleCloseModal}>Cancel</button>
-              <button
-                onClick={handleSave}
-                // disabled={!isAvailable || !username || error}
-              >
+              <button onClick={handleSave} disabled={!isAvailable}>
                 Save
               </button>
             </div>

@@ -58,7 +58,7 @@ const EditName = () => {
           isEditName ? "" : "hidden"
         } absolute flex w-full justify-center items-center h-screen`}
       >
-        <div className="p-3 -mt-40 h-[40%] w-[22%] bg-[var(--light-dark-color)] z-[6000] rounded-md">
+        <div className="p-3 -mt-40  w-[65%] md:w-[40%] lg:w-[22%] bg-[var(--light-dark-color)] z-[6000] rounded-md">
           <h1 className="text-slate-200 text-center text-xl font-light">
             Edit Your Name
           </h1>
