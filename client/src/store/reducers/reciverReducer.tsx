@@ -15,6 +15,7 @@ const initState: Recevier = {
   sender_id: "",
   user_name: "",
   phone_number: "",
+  bio: "",
   blockedUsers: [],
 };
 const receiverReducer = (
