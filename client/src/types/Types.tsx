@@ -38,8 +38,11 @@ export interface Recevier {
   conversation_id: string;
   messageByUser: string;
   profile_pic: string;
+  user_name: string;
   recever_id: string;
+  phone_number: string;
   sender_id: string;
+  bio: string;
   blockedUsers: string[];
 }
 

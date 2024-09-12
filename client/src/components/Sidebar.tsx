@@ -225,6 +225,9 @@ const Sidebar = () => {
                           conversation_id: conv._id,
                           recever_id: conv?.userDetails._id,
                           sender_id: "",
+                          bio: conv?.userDetails.bio || "",
+                          phone_number: conv?.userDetails.phone_number,
+                          user_name: conv?.userDetails.user_name,
                           blockedUsers: conv?.userDetails.blockedUsers,
                         })
                       }

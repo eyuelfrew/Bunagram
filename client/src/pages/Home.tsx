@@ -16,6 +16,7 @@ import axios, { AxiosResponse } from "axios";
 import { SetUserInfo } from "../store/actions/UserAction";
 import EditUserName from "../components/Modals/EditUserName";
 import DeleteAccount from "../components/Modals/DeleteAccount";
+import Profile from "../layout/Profile";
 const Home = () => {
   const { setSocket, setOnlineUsers, clearSocketState } = UseSocket();
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
@@ -119,6 +120,7 @@ const Home = () => {
         <EditYourNumber />
         <EditUserName />
         <DeleteAccount />
+        <Profile />
       </div>
     </>
   );

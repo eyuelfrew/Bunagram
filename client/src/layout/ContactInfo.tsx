@@ -281,7 +281,7 @@ const ContactInfo = () => {
             >
               <span className="flex gap-4 text-md text-gray-300 items-center font-thin">
                 {" "}
-                <CiAt size={25} className="" /> Name
+                <CiAt size={25} className="" /> username
               </span>
               <span className="text-md text-gray-300 font-thin">
                 {user_name}

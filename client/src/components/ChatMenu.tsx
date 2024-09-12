@@ -8,6 +8,8 @@ import axios, { AxiosResponse } from "axios";
 import { SetUserInfo } from "../store/actions/UserAction";
 import { UseSocket } from "../context/SocketContext";
 import { getReceiverInit } from "../store/actions/getRecever";
+import { CgProfile } from "react-icons/cg";
+import { ViewProfile } from "../store/actions/ViewProfile";
 
 const ChatMenu: React.FC = () => {
   const { socket } = UseSocket();
@@ -94,7 +96,10 @@ const ChatMenu: React.FC = () => {
             conversation_id: "",
             recever_id: data._id,
             sender_id: "",
+            user_name: data.user_name || "",
+            phone_number: data?.phone_number,
             blockedUsers: data.blockedUsers,
+            bio: data.bio || "",
           })
         );
       }
@@ -108,8 +113,11 @@ const ChatMenu: React.FC = () => {
             profile_pic: data.profile_pic,
             messageByUser: "",
             conversation_id: "",
+            bio: data.bio || "",
             recever_id: data._id,
             sender_id: "",
+            user_name: data?.user_name,
+            phone_number: data?.phone_number,
             blockedUsers: data.blockedUsers,
           })
         );
@@ -136,8 +144,15 @@ const ChatMenu: React.FC = () => {
         <div
           onClick={(e) => e.stopPropagation()}
           ref={menuRef}
-          className="absolute bg-gray-700 h-24 -ml-32  p-3 flex flex-col gap-3 w-36"
+          className="absolute bg-gray-700 h-fit -ml-32  p-3 flex flex-col gap-3 w-36"
         >
+          <button
+            onClick={() => dispatch(ViewProfile())}
+            className="flex items-center gap-2 "
+          >
+            <CgProfile />
+            Profile
+          </button>
           <button
             onClick={handleClearChat}
             className="flex items-center gap-2 "
