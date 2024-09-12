@@ -52,7 +52,7 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
         <div className="rounded-[100%]  flex items-center gap-2">
           {logedInUser === user._id ? (
             <img
-              className="w-[25%] rounded-full"
+              className="w-[58px] h-[58px] md:w-[77px] md:h-[77px] lg:w-[60px] lg:h-[60px] rounded-full"
               src={`/savedmessage.jpg`}
               alt="buna chat"
             />
@@ -61,7 +61,7 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
               {user.profile_pic ? (
                 <>
                   <img
-                    className="w-[68px] h-[68px] md:w-[57px] md:h-[57px] lg:w-[57px] lg:h-[57px] rounded-full object-cover"
+                    className="w-[58px] h-[58px] md:w-[77px] md:h-[77px] lg:w-[60px] lg:h-[60px] rounded-full object-cover"
                     src={`${user.profile_pic}`}
                     alt="buna chat"
                   />
@@ -69,7 +69,7 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
               ) : (
                 <>
                   <img
-                    className="w-[25%] rounded-full"
+                    className="w-[58px] h-[58px] md:w-[77px] md:h-[77px] lg:w-[60px] lg:h-[60px] rounded-full"
                     src="/userpic.png"
                     alt="buna chat"
                   />
