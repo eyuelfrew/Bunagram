@@ -6,8 +6,14 @@ const getConversations = async (currentUserId) => {
       $or: [{ sender: currentUserId }, { receiver: currentUserId }],
     })
       .populate("messages")
-      .populate("sender", "_id name email profile_pic blockedUsers")
-      .populate("receiver", "_id name email profile_pic blockedUsers")
+      .populate(
+        "sender",
+        "_id name email profile_pic blockedUsers phone_number bio user_name"
+      )
+      .populate(
+        "receiver",
+        "_id name email profile_pic blockedUsers phone_number bio user_name"
+      )
       .sort({ updatedAt: -1 });
 
     const conversation = currentUserConversation.map((conv) => {
