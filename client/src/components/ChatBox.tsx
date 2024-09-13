@@ -154,7 +154,6 @@ const ChatBox = () => {
 
       SocketConnection.on("seen-message", (data) => {
         const test = data?.convID === Recever.conversation_id;
-        // console.log(test);
         if (test) {
           setAllMessage(data.messages);
           return;
@@ -167,7 +166,7 @@ const ChatBox = () => {
         SocketConnection.off("message", messageHandler);
       };
     }
-  }, [Recever]);
+  }, [SocketConnection]);
 
   const isOnline = onlineUsers.includes(Recever.recever_id);
   const isBlocked = user.blockedUsers.includes(Recever.recever_id);
