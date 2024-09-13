@@ -131,6 +131,7 @@ const ChatBox = () => {
         convID: string;
         messages: React.SetStateAction<AllMessage[]>;
       }) => {
+        console.log("Message Event is triggered!!!!");
         const test = Recever.recever_id === data.reciver;
         console.log(Recever.recever_id);
         console.log(data.reciver);
@@ -166,7 +167,7 @@ const ChatBox = () => {
         SocketConnection.off("message", messageHandler);
       };
     }
-  }, [Recever, SocketConnection]);
+  }, [Recever]);
 
   const isOnline = onlineUsers.includes(Recever.recever_id);
   const isBlocked = user.blockedUsers.includes(Recever.recever_id);
