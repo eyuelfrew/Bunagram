@@ -20,26 +20,25 @@ import Profile from "../layout/Profile";
 const Home = () => {
   const { setSocket, setOnlineUsers, clearSocketState } = UseSocket();
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
+  const user = useSelector((state: Root_State) => state.UserReducers);
   const dispatch = useDispatch();
   const navigateTo = useNavigate();
   const token = localStorage.getItem("token");
   const loginStatus = useSelector(
     (state: Root_State) => state.LoginReducer.LoginStatus
   );
-  //redired the usre to login page if not loged in
+
   useEffect(() => {
     if (!loginStatus && !token) {
       navigateTo("/");
     }
-  }, []);
-  //start socket connetion if the user has loged in
-  useEffect(() => {
     if (token) {
       const socketConnection = io(`${import.meta.env.VITE_BACK_END_URL}`, {
         auth: { token },
       });
 
       socketConnection.on("connect", () => {
+        console.log("conneted");
         setSocket(socketConnection);
       });
 
@@ -52,7 +51,7 @@ const Home = () => {
         clearSocketState();
       };
     }
-  }, [token]);
+  }, [token, user]);
 
   useEffect(() => {
     dispatch(getUserDetail());

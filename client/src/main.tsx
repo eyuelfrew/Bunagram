@@ -5,7 +5,9 @@ import { Provider } from "react-redux";
 import { store } from "./store/store";
 import App from "./App.tsx";
 import { SocketProvider } from "./context/SocketContext.tsx";
+// import { StrictMode } from "react";
 ReactDOM.createRoot(document.getElementById("root")!).render(
+  // <StrictMode>
   <SocketProvider>
     <Provider store={store}>
       <BrowserRouter>
@@ -13,4 +15,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       </BrowserRouter>
     </Provider>
   </SocketProvider>
+  // </StrictMode>
 );

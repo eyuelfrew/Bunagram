@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { LogoutReq } from "../store/actions/login";
 import { clearReciver } from "../store/actions/getRecever";
 import { OpenConactInfo } from "../store/actions/AccountAction";
+import { ResetUserInfo } from "../store/actions/UserAction";
 const MenuLayout = () => {
   const user = useSelector((state: Root_State) => state.UserReducers);
   const navigateTo = useNavigate();
@@ -23,6 +24,8 @@ const MenuLayout = () => {
       withCredentials: true,
     });
     navigateTo("/");
+    dispatch(ResetUserInfo());
+
     dispatch(CloseMenu());
     dispatch(clearReciver());
   };

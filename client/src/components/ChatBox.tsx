@@ -122,7 +122,7 @@ const ChatBox = () => {
         SocketConnection.off("stop typing", handleStopTyping);
       };
     }
-  }, [Recever]);
+  }, [Recever, SocketConnection, user._id]);
 
   useEffect(() => {
     if (SocketConnection && Recever) {
@@ -131,7 +131,6 @@ const ChatBox = () => {
         convID: string;
         messages: React.SetStateAction<AllMessage[]>;
       }) => {
-        console.log("Message Event is triggered!!!!");
         const test = Recever.recever_id === data.reciver;
         console.log(Recever.recever_id);
         console.log(data.reciver);
@@ -166,7 +165,7 @@ const ChatBox = () => {
         SocketConnection.off("message", messageHandler);
       };
     }
-  }, [SocketConnection]);
+  }, [Recever, SocketConnection]);
 
   const isOnline = onlineUsers.includes(Recever.recever_id);
   const isBlocked = user.blockedUsers.includes(Recever.recever_id);

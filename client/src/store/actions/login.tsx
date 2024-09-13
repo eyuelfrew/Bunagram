@@ -27,6 +27,5 @@ export const NoAccountError = () => {
 };
 
 export const ResetLoginState = () => {
-  console.log("RESTED!");
   return { type: RESET_LOGIN_STATE };
 };

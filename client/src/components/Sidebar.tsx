@@ -58,14 +58,18 @@ const Sidebar = () => {
       console.log(error);
     }
   };
+  /*
+  --- Fetch Conversation
+  */
+
   useEffect(() => {
-    setIsLoading(true);
     if (SocketConnection && user?._id) {
       SocketConnection.emit("sidebar", user._id);
       SocketConnection.on("notif", () => {
         audio.play();
       });
       setIsLoading(true);
+
       SocketConnection.on("conversation", (data) => {
         const conversationUserData: ConversationWithUserDetails[] = data?.map(
           (conversationUser: Conversation) => {
