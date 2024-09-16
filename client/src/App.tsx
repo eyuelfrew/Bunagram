@@ -10,6 +10,7 @@ import { Toaster } from "react-hot-toast";
 import DeleteAccountSuccess from "./pages/DeleteAccountSuccess";
 import ForgotPassword from "./auth/ForgotPassword";
 import ResetPassword from "./auth/ResetPassword";
+import CloudPassword from "./pages/CloudPassword";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const navigateTo = useNavigate();
@@ -26,6 +27,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
           setIsAuthenticated(true);
           navigateTo("/chat");
         } else {
+          navigateTo("/");
           setIsAuthenticated(false);
         }
 
@@ -68,6 +70,7 @@ function App() {
         />
         <Route path="/verify-email" element={<VerifyAccount />}></Route>
         <Route path="/user-sorry" element={<DeleteAccountSuccess />}></Route>
+        <Route path="/cloudpass" element={<CloudPassword />}></Route>
         <Route path="/veri" element={<ForgotPassword />}></Route>
         <Route
           path="/reset-password/:token"

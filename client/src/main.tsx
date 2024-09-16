@@ -8,12 +8,14 @@ import { SocketProvider } from "./context/SocketContext.tsx";
 // import { StrictMode } from "react";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   // <StrictMode>
-  <SocketProvider>
-    <Provider store={store}>
+  <Provider store={store}>
+    <SocketProvider>
       <BrowserRouter>
         <App />
       </BrowserRouter>
-    </Provider>
-  </SocketProvider>
-  // </StrictMode>
+    </SocketProvider>
+  </Provider>
 );
+{
+  /* </StrictMode> */
+}

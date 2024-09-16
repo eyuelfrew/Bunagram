@@ -17,6 +17,8 @@ export interface User {
   phone_number: string;
   blockedUsers: string[];
   public_id: string;
+  lastSeen: string;
+  twoStepVerification: boolean;
 }
 export interface UserState {
   user: User;
@@ -43,6 +45,7 @@ export interface Recevier {
   phone_number: string;
   sender_id: string;
   bio: string;
+  lastSeen: string;
   blockedUsers: string[];
 }
 

@@ -17,7 +17,7 @@ import ChatMenu from "./ChatMenu";
 
 import LottieAnimation from "./LottieAnimation";
 import SendImage from "./SendImage";
-import { MdArrowDownward, MdCheck, MdDelete, MdEdit } from "react-icons/md";
+import { MdCheck, MdDelete, MdEdit } from "react-icons/md";
 import EmojiPicker from "./EmojiPicker";
 import { LiaCheckDoubleSolid } from "react-icons/lia";
 import { ImCross } from "react-icons/im";
@@ -47,7 +47,6 @@ const ChatBox = () => {
   const messageEndRef = useRef<HTMLDivElement>(null);
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const currentMessage = useRef<HTMLDivElement | null>(null);
-  const [showScrollButton, setShowScrollButton] = useState(false);
   const [allMessages, setAllMessage] = useState<AllMessage[]>([]);
   const [message, setMessage] = useState<Message>({
     text: "",
@@ -55,9 +54,9 @@ const ChatBox = () => {
     videoURL: "",
   });
 
-  // const [FileUpload, setFileUpload] = useState(false);
-
-  /* Edit Messag State  */
+  /* 
+  ---Edit Message State  
+  */
   const [isEdit, setIsEdit] = useState(false);
   const [editMessage, setEditMessage] = useState({ text: "", _id: "" });
 
@@ -72,34 +71,11 @@ const ChatBox = () => {
       });
     }
   }, [allMessages]);
-  const handleScroll = () => {
-    if (currentMessage.current) {
-      const { scrollTop, scrollHeight, clientHeight } = currentMessage.current;
-      const scrolledToBottom = scrollTop + clientHeight >= scrollHeight - 50; // Check if user is near the bottom
 
-      // Show the button if the user has scrolled up (not at the bottom)
-      setShowScrollButton(!scrolledToBottom);
-    }
-  };
-  useEffect(() => {
-    const container = currentMessage.current;
-    if (container) {
-      container.addEventListener("scroll", handleScroll);
-    }
-    return () => {
-      if (container) {
-        container.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, []);
-  const scrollDown = () => {
-    if (currentMessage.current) {
-      currentMessage.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      });
-    }
-  };
+  /*
+  --- Fectch message when reciver is clicked
+  */
+
   useEffect(() => {
     setMessage({ ...message, text: "" });
     if (SocketConnection && Recever.recever_id) {
@@ -124,24 +100,28 @@ const ChatBox = () => {
     }
   }, [Recever, SocketConnection, user._id]);
 
+  /*
+  --- Fetch Message And Emit Seen Messages
+  */
   useEffect(() => {
     if (SocketConnection && Recever) {
       const messageHandler = (data: {
         reciver: string;
         convID: string;
+        sender: string;
         messages: React.SetStateAction<AllMessage[]>;
       }) => {
         const test = Recever.recever_id === data.reciver;
-        console.log(Recever.recever_id);
-        console.log(data.reciver);
-        // console.log(data?.messages);
+
         if (test) {
+          console.log("Error");
           setAllMessage(data?.messages);
-          SocketConnection.emit("seen", Recever.recever_id);
+          SocketConnection.emit("seen", Recever?.messageByUser);
+
           return;
         } else if (data?.convID === Recever.conversation_id) {
           setAllMessage(data?.messages);
-          SocketConnection.emit("seen", Recever.recever_id);
+          SocketConnection.emit("seen", Recever?.messageByUser);
         } else {
           return;
         }
@@ -150,16 +130,6 @@ const ChatBox = () => {
         dispatch(updateReceiver(newConversationId.convID));
       };
       SocketConnection.on("message", messageHandler);
-
-      SocketConnection.on("seen-message", (data) => {
-        const test = data?.convID === Recever.conversation_id;
-        if (test) {
-          setAllMessage(data.messages);
-          return;
-        } else {
-          return;
-        }
-      });
       SocketConnection.on("newconversation", handleNewConveration);
       return () => {
         SocketConnection.off("message", messageHandler);
@@ -172,7 +142,7 @@ const ChatBox = () => {
   const handleSendMessage = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isEdit && SocketConnection && message.text.trim() !== "") {
-      SocketConnection.emit("newmessage", {
+      SocketConnection.emit("new-message", {
         sender: user?._id,
         receiver: Recever.recever_id,
         text: message.text,
@@ -194,7 +164,7 @@ const ChatBox = () => {
     }
   };
 
-  const handleOnMessageChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleOnMessageChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setMessage({ ...message, [name]: value });
     if (!SocketConnection) return;
@@ -238,7 +208,7 @@ const ChatBox = () => {
   /*
 -- Hundle emoji selection or picker
 */
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
   const handleEmojiPiker = (emoji: string) => {
     const inputElement = inputRef.current;
     if (inputElement) {
@@ -277,6 +247,28 @@ const ChatBox = () => {
     setIsEdit(false);
     setEditMessage({ ...editMessage, text: "", _id: "" });
     setMessage({ ...message, text: "" });
+  };
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && e.shiftKey) {
+      e.preventDefault();
+      const { name, value } = e.currentTarget;
+      setMessage({ ...message, [name]: value + "\n" });
+    }
+    if (e.key === "Enter") {
+      if (e.shiftKey) {
+        return;
+      } else {
+        e.preventDefault();
+        SocketConnection?.emit("new-message", {
+          sender: user?._id,
+          receiver: Recever.recever_id,
+          text: message.text,
+          msgByUserId: user?._id,
+          conversation_id: Recever.conversation_id || "",
+        });
+        setMessage({ ...message, text: "" });
+      }
+    }
   };
   return (
     <div className="">
@@ -329,6 +321,17 @@ const ChatBox = () => {
                 ) : (
                   <>
                     <div className="absolute w-4 h-4 rounded-full bg-red-500 right-0 top-10 lg:top-14"></div>
+                    <span className="absolute ml-10 w-[270%] top-8 left-6  lg:top-12 lg:left-10 flex">
+                      {Recever?.lastSeen ? (
+                        <>
+                          last seen at{" "}
+                          {moment(Recever?.lastSeen || "").format("hh:mm") ||
+                            ""}
+                        </>
+                      ) : (
+                        <></>
+                      )}
+                    </span>
                   </>
                 )}
               </>
@@ -337,7 +340,7 @@ const ChatBox = () => {
           <div className="">
             <p className="text-xl lg:text-2xl ml-4">
               {user._id === Recever.recever_id ? (
-                <>Saved Messages</>
+                <></>
               ) : (
                 <> {Recever.full_name}</>
               )}
@@ -393,22 +396,22 @@ const ChatBox = () => {
                 <p className="break-words">{msg.text}</p>
                 <p className="text-x flex justify-between mt-1 items-center gap-8">
                   {moment(msg.createdAt).format("hh:mm")}
-                  <span className="flex gap-1">
-                    <span>
-                      <MdDelete
-                        onClick={() => handleDeleteMessage(msg._id)}
-                        className=" hover:scale-[2] cursor-pointer"
-                      />
-                    </span>
-                    <span>
-                      {user._id === msg.msgByUserId && (
+                  {user._id === msg.msgByUserId && (
+                    <span className="flex gap-1">
+                      <span>
+                        <MdDelete
+                          onClick={() => handleDeleteMessage(msg._id)}
+                          className=" hover:scale-[2] cursor-pointer"
+                        />
+                      </span>
+                      <span>
                         <MdEdit
                           onClick={() => handleEditMessage(msg)}
                           className=" hover:scale-[2] cursor-pointer"
                         />
-                      )}
+                      </span>
                     </span>
-                  </span>
+                  )}
                 </p>
                 {user._id === msg.msgByUserId && msg.seen ? (
                   <>
@@ -426,14 +429,14 @@ const ChatBox = () => {
       </section>
 
       <section className="relative flex items-center h-16 bg-[var(--medium-dard)] ">
-        {showScrollButton && (
-          <button
-            onClick={scrollDown}
-            className={`!{} bg-green-400 z-[3000] absolute -mt-28 rounded-full text-3xl right-8 p-3`}
-          >
-            <MdArrowDownward />
-          </button>
-        )}
+        {/* {showScrollButton && ( */}
+        {/* <button
+          onClick={scrollDown}
+          className={`!{} bg-green-400 z-[3000] absolute -mt-28 rounded-full text-3xl right-8 p-3`}
+        >
+          <MdArrowDownward />
+        </button> */}
+        {/* )} */}
 
         {isEdit ? (
           <div className="flex justify-between px-4  z-[5000] absolute w-[99%]  top-0 -mt-16 h-16 bg-[var(--messge-input-dark)] items-center">
@@ -488,16 +491,17 @@ const ChatBox = () => {
                 </div>
                 <form className="h-full w-full  " onSubmit={handleSendMessage}>
                   <div className=" w-full flex items-center">
-                    <input
-                      autoComplete="off"
+                    <textarea
                       ref={inputRef}
+                      autoComplete="off"
                       id="message_input"
-                      type="text"
                       name="text"
                       className="mt-2 rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white"
                       placeholder="Write a message..."
                       value={message.text}
                       onChange={handleOnMessageChange}
+                      onKeyDown={handleKeyDown}
+                      rows={1}
                     />
                     {isEdit && (
                       <button

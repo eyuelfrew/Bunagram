@@ -7,6 +7,7 @@ import menuReducer from "./reducers/menuReducer";
 import UserReducers from "./reducers/userReducer";
 import ContactMenuReducer from "./reducers/ContactMenuReducer";
 import ProfileReducer from "./reducers/profileReducer";
+import SetingReducer from "./reducers/settingReducer";
 export const RootReducer = combineReducers({
   LoginReducer,
   UserReducers,
@@ -14,4 +15,5 @@ export const RootReducer = combineReducers({
   menuReducer,
   ContactMenuReducer,
   ProfileReducer,
+  SetingReducer,
 });

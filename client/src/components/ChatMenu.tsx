@@ -100,6 +100,7 @@ const ChatMenu: React.FC = () => {
             phone_number: data?.phone_number,
             blockedUsers: data.blockedUsers,
             bio: data.bio || "",
+            lastSeen: "",
           })
         );
       }
@@ -119,6 +120,7 @@ const ChatMenu: React.FC = () => {
             user_name: data?.user_name,
             phone_number: data?.phone_number,
             blockedUsers: data.blockedUsers,
+            lastSeen: "",
           })
         );
       }

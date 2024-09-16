@@ -4,10 +4,11 @@ import { Root_State } from "../store/store";
 import { CloseMenu } from "../store/actions/MenuControllers";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { LogoutReq } from "../store/actions/login";
+import { LogoutReq, ResetLoginState } from "../store/actions/login";
 import { clearReciver } from "../store/actions/getRecever";
 import { OpenConactInfo } from "../store/actions/AccountAction";
 import { ResetUserInfo } from "../store/actions/UserAction";
+import { OpenSetting } from "../store/actions/SettingActions";
 const MenuLayout = () => {
   const user = useSelector((state: Root_State) => state.UserReducers);
   const navigateTo = useNavigate();
@@ -18,7 +19,7 @@ const MenuLayout = () => {
   };
   const HandleLogout = async () => {
     dispatch(LogoutReq());
-
+    dispatch(ResetLoginState());
     localStorage.clear();
     await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
       withCredentials: true,
@@ -34,6 +35,11 @@ const MenuLayout = () => {
     dispatch(CloseMenu());
     dispatch(OpenConactInfo());
   };
+  const handleSetting = (): void => {
+    dispatch(CloseMenu());
+    dispatch(OpenSetting());
+  };
+
   return (
     <>
       {menuBar && (
@@ -82,7 +88,7 @@ const MenuLayout = () => {
         </div>
         <div className="mx-5 mt-11 flex flex-col gap-5">
           <button onClick={handleContactInfo}>Account</button>
-          <button>Setting</button>
+          <button onClick={handleSetting}>Setting</button>
           <button onClick={HandleLogout}>Logout</button>
         </div>
       </div>

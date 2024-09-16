@@ -7,7 +7,8 @@ export const LOGIN_FAILD = "LOGIN_FAILD";
 export const LOGOUT_REQUEST = "LOGOUT_REQUEST";
 export const ACCOUNT_NOT_FOUND = "ACCOUNT_NOT_FOUND";
 export const RESET_LOGIN_STATE = "RESET_LOGIN_STATE";
-
+export const ACCOUNT_LOCKED = "ACCOUNT_LOCKED";
+export const TWO_STEP_ENABLED = "TWO_STEP_ENABLED";
 /*
 -- Loged in user state ations
 */
@@ -62,3 +63,13 @@ export const CLOSE_DELETE_ACCOUNT = "CLOSE_DELETE_ACCOUNT";
 
 export const OPEN_VIEW_PROFILE = "OPEN_VIEW_PROFILE";
 export const CLOSE_VIEW_PROFILE = "CLOSE_VIEW_PROFILE";
+
+/*
+--- Open Setting and Close Setting 
+*/
+export const OPEN_SETTING = "OPEN_SETTING";
+export const CLOSE_SETTING = "OPNE_SETTING";
+
+/* Two step Verificaton setting*/
+export const OPEN_TWO_STEP_VERIFIATION = "OPEN_TWO_STEP_VERIFIATION";
+export const CLOSE_TWO_STEP_VERIFIATION = "CLOSE_TWO_STEP_VERIFIATION";

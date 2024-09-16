@@ -9,6 +9,8 @@ const LoginPage = () => {
   const isLoading = useSelector(
     (state: Root_State) => state.LoginReducer.isLoading
   );
+  const { isTwoStep } = useSelector((state: Root_State) => state.LoginReducer);
+  console.log(isTwoStep);
   const loginStatus = useSelector(
     (state: Root_State) => state.LoginReducer.LoginStatus
   );
@@ -27,12 +29,19 @@ const LoginPage = () => {
     dispatch(LoginRequest(Form));
   };
   useEffect(() => {
+    console.log("test test");
+  }, []);
+  useEffect(() => {
     const token = localStorage.getItem("token");
     if (loginStatus && token) {
       console.log("Testing Router");
       navigateTo("/chat");
     }
-  }, [loginStatus, navigateTo]);
+    console.log(isTwoStep);
+    if (isTwoStep) {
+      navigateTo("/cloudpass");
+    }
+  }, [isTwoStep, loginStatus, navigateTo]);
   return (
     <section className="bg-gray-50 dark:bg-gray-200">
       <div className="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">

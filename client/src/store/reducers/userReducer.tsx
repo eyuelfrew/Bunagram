@@ -12,6 +12,8 @@ const initState: User = {
   phone_number: "",
   blockedUsers: [],
   public_id: "",
+  lastSeen: "",
+  twoStepVerification: false,
 };
 const UserReducers = (
   state = initState,

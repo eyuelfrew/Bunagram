@@ -17,6 +17,8 @@ import { SetUserInfo } from "../store/actions/UserAction";
 import EditUserName from "../components/Modals/EditUserName";
 import DeleteAccount from "../components/Modals/DeleteAccount";
 import Profile from "../layout/Profile";
+import Setting from "../layout/Setting";
+import TwoStepVerification from "../auth/TwoStepVerification";
 const Home = () => {
   const { setSocket, setOnlineUsers, clearSocketState } = UseSocket();
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
@@ -38,7 +40,6 @@ const Home = () => {
       });
 
       socketConnection.on("connect", () => {
-        console.log("conneted");
         setSocket(socketConnection);
       });
 
@@ -59,6 +60,13 @@ const Home = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
+          withCredentials: true,
+        });
+        navigateTo("/");
+      }
       try {
         const response: AxiosResponse = await axios.get(
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
@@ -120,6 +128,8 @@ const Home = () => {
         <EditUserName />
         <DeleteAccount />
         <Profile />
+        <Setting />
+        <TwoStepVerification />
       </div>
     </>
   );

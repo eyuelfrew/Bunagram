@@ -1,10 +1,12 @@
 import {
+  ACCOUNT_LOCKED,
   ACCOUNT_NOT_FOUND,
   INIT_LOGIN_REQUEST,
   LOGIN_FAILD,
   LOGIN_SUCCESS,
   LOGOUT_REQUEST,
   RESET_LOGIN_STATE,
+  TWO_STEP_ENABLED,
 } from "../actionTypes/actionTypes";
 
 const init_State = {
@@ -14,6 +16,8 @@ const init_State = {
   LoginStatus: null,
   errorMsg: "",
   account_not_found: null,
+  isLocked: false,
+  isTwoStep: false,
 };
 const LoginReducer = (
   state = init_State,
@@ -21,7 +25,7 @@ const LoginReducer = (
 ) => {
   switch (action.type) {
     case INIT_LOGIN_REQUEST:
-      return { ...state, isLoading: true, error: null };
+      return { ...state, isLoading: true, error: null, isLocked: false };
     case LOGIN_FAILD:
       return {
         ...state,
@@ -46,12 +50,29 @@ const LoginReducer = (
         account_not_found: true,
       };
     case RESET_LOGIN_STATE:
-      console.log("Some thng is wrong");
       return {
         ...state,
         isLoading: false,
         LoginStatus: false,
         account_not_found: false,
+        isLocked: false,
+        isTwoStep: false,
+      };
+    case ACCOUNT_LOCKED:
+      return {
+        ...state,
+        isLoading: false,
+        LoginStatus: false,
+        account_not_found: false,
+        isLocked: true,
+      };
+    case TWO_STEP_ENABLED:
+      return {
+        ...state,
+        isLoading: false,
+        LoginStatus: false,
+        account_not_found: false,
+        isTwoStep: true,
       };
     default:
       return state;

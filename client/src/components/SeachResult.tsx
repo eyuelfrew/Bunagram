@@ -43,6 +43,7 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
           phone_number: user.phone_number,
           user_name: user.user_name,
           blockedUsers: user.blockedUsers,
+          lastSeen: "",
         })
       }
       to={"#"}
@@ -50,13 +51,7 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
     >
       <div className=" flex space-x-4 items-center justify-between px-2">
         <div className="rounded-[100%]  flex items-center gap-2">
-          {logedInUser === user._id ? (
-            <img
-              className="w-[58px] h-[58px] md:w-[77px] md:h-[77px] lg:w-[60px] lg:h-[60px] rounded-full"
-              src={`/savedmessage.jpg`}
-              alt="buna chat"
-            />
-          ) : (
+          {logedInUser !== user._id && (
             <>
               {user.profile_pic ? (
                 <>
@@ -79,15 +74,7 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
           )}
 
           <div className="block">
-            <p>
-              {logedInUser === user._id ? (
-                <>
-                  <span className="text-lg">Saved Message</span>
-                </>
-              ) : (
-                <>{user.name}</>
-              )}
-            </p>
+            <p>{logedInUser !== user._id && <>{user.name}</>}</p>
             <>
               {logedInUser !== user._id && (
                 <>

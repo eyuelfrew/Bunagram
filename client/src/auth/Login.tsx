@@ -8,9 +8,14 @@ import { LoginRequest, ResetLoginState } from "../store/actions/login";
 
 const Login = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const { LoginStatus, isLoading, error, account_not_found } = useSelector(
-    (state: Root_State) => state.LoginReducer
-  );
+  const {
+    LoginStatus,
+    isLoading,
+    error,
+    account_not_found,
+    isLocked,
+    isTwoStep,
+  } = useSelector((state: Root_State) => state.LoginReducer);
   const navigateTo = useNavigate();
   const dispatch = useDispatch();
   const [rememberMe, setRememberMe] = useState(false);
@@ -31,6 +36,7 @@ const Login = () => {
   };
   useEffect(() => {
     const token = localStorage.getItem("token");
+
     if (LoginStatus && token) {
       toast.success("Login Success");
       navigateTo("/chat");
@@ -45,7 +51,16 @@ const Login = () => {
       dispatch(ResetLoginState());
       return;
     }
-  }, [LoginStatus, account_not_found, dispatch, error]);
+    if (isLocked) {
+      toast.error("To many attemps, try again later");
+      dispatch(ResetLoginState());
+      return;
+    }
+    if (isTwoStep) {
+      console.log("test");
+      navigateTo("/cloudpass");
+    }
+  }, [LoginStatus, account_not_found, error, isLocked, isTwoStep]);
   useEffect(() => {
     const checkAuth = async () => {
       try {
