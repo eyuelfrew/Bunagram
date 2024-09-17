@@ -50,7 +50,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
     );
   }
 
-  return isAuthenticated ? children : <Navigate to="/chat" replace />;
+  return isAuthenticated ? children : <Navigate to="/" replace />;
 };
 
 function App() {
