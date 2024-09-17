@@ -9,7 +9,7 @@ import { LoginRequest, ResetLoginState } from "../store/actions/login";
 const Login = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const {
-    LoginStatus,
+    // LoginStatus,
     isLoading,
     error,
     account_not_found,
@@ -60,7 +60,7 @@ const Login = () => {
       console.log("test");
       navigateTo("/cloudpass");
     }
-  }, [LoginStatus, account_not_found, error, isLocked, isTwoStep]);
+  }, [isLoading]);
   useEffect(() => {
     const checkAuth = async () => {
       try {
