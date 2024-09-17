@@ -37,9 +37,9 @@ const Login = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    if (LoginStatus && token) {
+    if (token) {
       toast.success(token);
-      // navigateTo("/chat");
+      navigateTo("/chat");
     }
     if (error) {
       toast.error("Invalid credentials");
