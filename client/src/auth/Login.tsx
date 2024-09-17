@@ -72,7 +72,8 @@ const Login = () => {
         if (response.data?.status === 1) {
           setIsAuthenticated(true);
         } else {
-          // setIsAuthenticated(false);
+          navigateTo("/");
+          setIsAuthenticated(false);
         }
       } catch (error) {
         console.log(error);
