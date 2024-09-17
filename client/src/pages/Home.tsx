@@ -60,13 +60,13 @@ const Home = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
-          withCredentials: true,
-        });
-        navigateTo("/");
-      }
+      // const token = localStorage.getItem("token");
+      // if (!token) {
+      //   await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
+      //     withCredentials: true,
+      //   });
+      //   // navigateTo("/");
+      // }
       try {
         const response: AxiosResponse = await axios.get(
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
