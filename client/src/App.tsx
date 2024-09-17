@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import { Navigate, Route, Routes } from "react-router-dom";
 import "./App.css";
 import Login from "./auth/Login";
 import Home from "./pages/Home";
@@ -13,7 +13,7 @@ import ResetPassword from "./auth/ResetPassword";
 import CloudPassword from "./pages/CloudPassword";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  const navigateTo = useNavigate();
+  // const navigateTo = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -25,9 +25,9 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
         );
         if (response.data?.status === 1) {
           setIsAuthenticated(true);
-          navigateTo("/chat");
+          // navigateTo("/chat");
         } else {
-          navigateTo("/");
+          // navigateTo("/");
           setIsAuthenticated(false);
         }
 
