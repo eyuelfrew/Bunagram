@@ -4,7 +4,7 @@ import { Root_State } from "../store/store";
 import { CloseMenu } from "../store/actions/MenuControllers";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { LogoutReq, ResetLoginState } from "../store/actions/login";
+import { ResetLoginState } from "../store/actions/login";
 import { clearReciver } from "../store/actions/getRecever";
 import { OpenConactInfo } from "../store/actions/AccountAction";
 import { ResetUserInfo } from "../store/actions/UserAction";
@@ -18,13 +18,17 @@ const MenuLayout = () => {
     dispatch(CloseMenu());
   };
   const HandleLogout = async () => {
-    dispatch(LogoutReq());
     dispatch(ResetLoginState());
     localStorage.clear();
-    await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
-      withCredentials: true,
-    });
-    navigateTo("/");
+    const response = await axios.get(
+      `${import.meta.env.VITE_BACK_END_URL}/api/logout`,
+      {
+        withCredentials: true,
+      }
+    );
+    if (response.data?.status === 1) {
+      navigateTo("/");
+    }
     dispatch(ResetUserInfo());
 
     dispatch(CloseMenu());

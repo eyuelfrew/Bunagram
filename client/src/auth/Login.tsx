@@ -35,6 +35,7 @@ const Login = () => {
     dispatch(LoginRequest(loginForm));
   };
   useEffect(() => {
+    setIsAuthenticated(false);
     const token = localStorage.getItem("token");
 
     if (LoginStatus && token) {
@@ -61,6 +62,13 @@ const Login = () => {
       navigateTo("/cloudpass");
     }
   }, [LoginStatus, account_not_found, error, isLocked, isTwoStep]);
+
+  /*
+  
+  ---- Check if user is logged in successfuly!
+
+  */
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -68,8 +76,8 @@ const Login = () => {
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
           { withCredentials: true }
         );
-        console.log(response.data);
         if (response.data?.status === 1) {
+          navigateTo("/chat");
           setIsAuthenticated(true);
         } else {
           setIsAuthenticated(false);
@@ -93,9 +101,7 @@ const Login = () => {
       </div>
     );
   }
-  return isAuthenticated ? (
-    <Navigate to="/chat" replace />
-  ) : (
+  return (
     <section className="bg-[var(--medium-dard)] flex h-screen justify-center items-center">
       <div className="w-80 lg:w-full  rounded-lg shadow bg-[var(--light-dark-color)] dark:border md:mt-0 sm:max-w-md xl:p-0 dark:border-gray-700">
         <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
