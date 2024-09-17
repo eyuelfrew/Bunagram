@@ -19,6 +19,13 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        const token = getCookie("token");
+        if (!token) {
+          // If no token, consider the user unauthenticated
+          setIsAuthenticated(false);
+          return;
+        }
+        alert(token);
         const response: AxiosResponse = await axios.get(
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
           { withCredentials: true }
@@ -38,7 +45,20 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
         setIsAuthenticated(false);
       }
     };
+    const getCookie = (name: string): string | null => {
+      const cookieArr = document.cookie.split(";");
 
+      for (let i = 0; i < cookieArr.length; i++) {
+        const cookie = cookieArr[i].trim();
+
+        // If the cookie starts with the provided name
+        if (cookie.startsWith(`${name}=`)) {
+          return cookie.substring(name.length + 1);
+        }
+      }
+
+      return null;
+    };
     checkAuth();
   }, []);
 
