@@ -87,9 +87,9 @@ function App() {
         <Route
           path="chat"
           element={
-            // <ProtectedRoute>
-            <Home />
-            // </ProtectedRoute> */}
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
           }
         />
         <Route path="/verify-email" element={<VerifyAccount />}></Route>
