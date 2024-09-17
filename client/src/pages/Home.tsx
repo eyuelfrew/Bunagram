@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Sidebar from "../components/Sidebar";
@@ -12,8 +12,8 @@ import ChatBox from "../components/ChatBox";
 import ContactInfo from "../layout/ContactInfo";
 import EditName from "../components/Modals/EditName";
 import EditYourNumber from "../components/Modals/EditPhone";
-import axios, { AxiosResponse } from "axios";
-import { SetUserInfo } from "../store/actions/UserAction";
+// import axios, { AxiosResponse } from "axios";
+// import { SetUserInfo } from "../store/actions/UserAction";
 import EditUserName from "../components/Modals/EditUserName";
 import DeleteAccount from "../components/Modals/DeleteAccount";
 import Profile from "../layout/Profile";
@@ -24,7 +24,7 @@ const Home = () => {
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const user = useSelector((state: Root_State) => state.UserReducers);
   const dispatch = useDispatch();
-  const navigateTo = useNavigate();
+  // const navigateTo = useNavigate();
   const token = localStorage.getItem("token");
   const loginStatus = useSelector(
     (state: Root_State) => state.LoginReducer.LoginStatus
@@ -32,7 +32,7 @@ const Home = () => {
 
   useEffect(() => {
     if (!loginStatus && !token) {
-      navigateTo("/");
+      // navigateTo("/");
     }
     if (token) {
       const socketConnection = io(`${import.meta.env.VITE_BACK_END_URL}`, {
@@ -58,32 +58,32 @@ const Home = () => {
     dispatch(getUserDetail());
   }, []);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
-          withCredentials: true,
-        });
-        navigateTo("/");
-      }
-      try {
-        const response: AxiosResponse = await axios.get(
-          `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
-          { withCredentials: true }
-        );
-        if (response.data?.status === 1) {
-          dispatch(SetUserInfo(response?.data?.user));
-        } else {
-          navigateTo("/");
-        }
-      } catch (error) {
-        console.error("Auth check failed:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const checkAuth = async () => {
+  //     const token = localStorage.getItem("token");
+  //     if (!token) {
+  //       await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
+  //         withCredentials: true,
+  //       });
+  //       navigateTo("/");
+  //     }
+  //     try {
+  //       const response: AxiosResponse = await axios.get(
+  //         `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
+  //         { withCredentials: true }
+  //       );
+  //       if (response.data?.status === 1) {
+  //         dispatch(SetUserInfo(response?.data?.user));
+  //       } else {
+  //         navigateTo("/");
+  //       }
+  //     } catch (error) {
+  //       console.error("Auth check failed:", error);
+  //     }
+  //   };
 
-    checkAuth();
-  }, []);
+  //   checkAuth();
+  // }, []);
 
   return (
     <>
