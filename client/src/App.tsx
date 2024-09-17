@@ -11,30 +11,19 @@ import DeleteAccountSuccess from "./pages/DeleteAccountSuccess";
 import ForgotPassword from "./auth/ForgotPassword";
 import ResetPassword from "./auth/ResetPassword";
 import CloudPassword from "./pages/CloudPassword";
-import { useDispatch } from "react-redux";
-import { SetUserInfo } from "./store/actions/UserAction";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const navigateTo = useNavigate();
-  const dispatch = useDispatch();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const token = getCookie("token");
-        if (!token) {
-          // If no token, consider the user unauthenticated
-          setIsAuthenticated(false);
-          return;
-        }
-
         const response: AxiosResponse = await axios.get(
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
           { withCredentials: true }
         );
         if (response.data?.status === 1) {
-          alert(response.data?.user);
           setIsAuthenticated(true);
           navigateTo("/chat");
         } else {
@@ -42,27 +31,14 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
           setIsAuthenticated(false);
         }
 
-        dispatch(SetUserInfo(response.data?.user));
-        setIsAuthenticated(true);
+        // dispatch(SetUserInfo(user));
+        setIsAuthenticated(response.data.status === 1);
       } catch (error) {
         // console.error("Auth check failed:", error);
         setIsAuthenticated(false);
       }
     };
-    const getCookie = (name: string): string | null => {
-      const cookieArr = document.cookie.split(";");
 
-      for (let i = 0; i < cookieArr.length; i++) {
-        const cookie = cookieArr[i].trim();
-
-        // If the cookie starts with the provided name
-        if (cookie.startsWith(`${name}=`)) {
-          return cookie.substring(name.length + 1);
-        }
-      }
-
-      return null;
-    };
     checkAuth();
   }, []);
 
@@ -99,14 +75,6 @@ function App() {
         <Route
           path="/reset-password/:token"
           element={<ResetPassword />}
-        ></Route>
-        <Route
-          path="/reset-password/:token"
-          element={
-            <ProtectedRoute>
-              <ResetPassword />
-            </ProtectedRoute>
-          }
         ></Route>
       </Routes>
       <Toaster />

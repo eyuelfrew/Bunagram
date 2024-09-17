@@ -9,7 +9,7 @@ import { LoginRequest, ResetLoginState } from "../store/actions/login";
 const Login = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const {
-    // LoginStatus,
+    LoginStatus,
     isLoading,
     error,
     account_not_found,
@@ -37,8 +37,8 @@ const Login = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    if (token) {
-      toast.success("Login success!");
+    if (LoginStatus && token) {
+      toast.success("Login Success");
       navigateTo("/chat");
     }
     if (error) {
@@ -60,7 +60,7 @@ const Login = () => {
       console.log("test");
       navigateTo("/cloudpass");
     }
-  }, [isLoading]);
+  }, [LoginStatus, account_not_found, error, isLocked, isTwoStep]);
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -72,7 +72,6 @@ const Login = () => {
         if (response.data?.status === 1) {
           setIsAuthenticated(true);
         } else {
-          navigateTo("/");
           setIsAuthenticated(false);
         }
       } catch (error) {

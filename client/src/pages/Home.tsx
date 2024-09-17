@@ -26,9 +26,12 @@ const Home = () => {
   const dispatch = useDispatch();
   const navigateTo = useNavigate();
   const token = localStorage.getItem("token");
+  const loginStatus = useSelector(
+    (state: Root_State) => state.LoginReducer.LoginStatus
+  );
 
   useEffect(() => {
-    if (!token) {
+    if (!loginStatus && !token) {
       navigateTo("/");
     }
     if (token) {
