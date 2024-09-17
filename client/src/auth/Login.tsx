@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import { LoginRequest, ResetLoginState } from "../store/actions/login";
 
 const Login = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  // const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const {
     LoginStatus,
     isLoading,
@@ -35,7 +35,7 @@ const Login = () => {
     dispatch(LoginRequest(loginForm));
   };
   useEffect(() => {
-    setIsAuthenticated(false);
+    // setIsAuthenticated(false);
     const token = localStorage.getItem("token");
 
     if (LoginStatus && token) {
@@ -78,13 +78,13 @@ const Login = () => {
         );
         if (response.data?.status === 1) {
           navigateTo("/chat");
-          setIsAuthenticated(true);
+          // setIsAuthenticated(true);
         } else {
-          setIsAuthenticated(false);
+          // setIsAuthenticated(false);
         }
       } catch (error) {
         console.log(error);
-        setIsAuthenticated(false);
+        // setIsAuthenticated(false);
       }
     };
 
@@ -94,13 +94,13 @@ const Login = () => {
   /*
   -- Loading UI till the user is autenticated or state changed
   */
-  if (isAuthenticated === null) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-[var(--light-dark-color)]">
-        <div className="rounded-full h-20 w-20 bg-violet-800 animate-ping"></div>
-      </div>
-    );
-  }
+  // if (isAuthenticated === null) {
+  //   return (
+  //     <div className="flex justify-center items-center h-screen bg-[var(--light-dark-color)]">
+  //       <div className="rounded-full h-20 w-20 bg-violet-800 animate-ping"></div>
+  //     </div>
+  //   );
+  // }
   return (
     <section className="bg-[var(--medium-dard)] flex h-screen justify-center items-center">
       <div className="w-80 lg:w-full  rounded-lg shadow bg-[var(--light-dark-color)] dark:border md:mt-0 sm:max-w-md xl:p-0 dark:border-gray-700">
