@@ -28,12 +28,13 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
           setIsAuthenticated(false);
           return;
         }
-        alert(token);
+
         const response: AxiosResponse = await axios.get(
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
           { withCredentials: true }
         );
         if (response.data?.status === 1) {
+          alert(response.data?.user);
           setIsAuthenticated(true);
           navigateTo("/chat");
         } else {
