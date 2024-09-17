@@ -38,8 +38,8 @@ const Login = () => {
     const token = localStorage.getItem("token");
 
     if (LoginStatus && token) {
-      toast.success("Login Success");
-      navigateTo("/chat");
+      toast.success($token);
+      // navigateTo("/chat");
     }
     if (error) {
       toast.error("Invalid credentials");
