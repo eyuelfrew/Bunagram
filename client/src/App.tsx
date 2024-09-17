@@ -1,4 +1,4 @@
-import { Navigate, Route, Routes } from "react-router-dom";
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import "./App.css";
 import Login from "./auth/Login";
 import Home from "./pages/Home";
@@ -11,9 +11,12 @@ import DeleteAccountSuccess from "./pages/DeleteAccountSuccess";
 import ForgotPassword from "./auth/ForgotPassword";
 import ResetPassword from "./auth/ResetPassword";
 import CloudPassword from "./pages/CloudPassword";
+import { useDispatch } from "react-redux";
+import { SetUserInfo } from "./store/actions/UserAction";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
-  // const navigateTo = useNavigate();
+  const navigateTo = useNavigate();
+  const dispatch = useDispatch();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -32,14 +35,14 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
         );
         if (response.data?.status === 1) {
           setIsAuthenticated(true);
-          // navigateTo("/chat");
+          navigateTo("/chat");
         } else {
           // navigateTo("/");
           setIsAuthenticated(false);
         }
 
-        // dispatch(SetUserInfo(user));
-        setIsAuthenticated(response.data.status === 1);
+        dispatch(SetUserInfo(response.data?.user));
+        setIsAuthenticated(true);
       } catch (error) {
         // console.error("Auth check failed:", error);
         setIsAuthenticated(false);
