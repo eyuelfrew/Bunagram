@@ -26,9 +26,6 @@ const Home = () => {
   const dispatch = useDispatch();
   const navigateTo = useNavigate();
   const token = localStorage.getItem("token");
-  // const loginStatus = useSelector(
-  //   (state: Root_State) => state.LoginReducer.LoginStatus
-  // );
 
   useEffect(() => {
     if (!token) {
@@ -60,13 +57,13 @@ const Home = () => {
 
   useEffect(() => {
     const checkAuth = async () => {
-      // const token = localStorage.getItem("token");
-      // if (!token) {
-      //   await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
-      //     withCredentials: true,
-      //   });
-      //   // navigateTo("/");
-      // }
+      const token = localStorage.getItem("token");
+      if (!token) {
+        await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
+          withCredentials: true,
+        });
+        navigateTo("/");
+      }
       try {
         const response: AxiosResponse = await axios.get(
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
@@ -74,6 +71,8 @@ const Home = () => {
         );
         if (response.data?.status === 1) {
           dispatch(SetUserInfo(response?.data?.user));
+        } else {
+          navigateTo("/");
         }
       } catch (error) {
         console.error("Auth check failed:", error);
