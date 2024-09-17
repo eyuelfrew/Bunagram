@@ -74,8 +74,6 @@ const Home = () => {
         );
         if (response.data?.status === 1) {
           dispatch(SetUserInfo(response?.data?.user));
-        } else {
-          navigateTo("/");
         }
       } catch (error) {
         console.error("Auth check failed:", error);
