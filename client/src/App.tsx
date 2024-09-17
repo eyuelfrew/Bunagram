@@ -37,7 +37,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
           setIsAuthenticated(true);
           navigateTo("/chat");
         } else {
-          // navigateTo("/");
+          navigateTo("/");
           setIsAuthenticated(false);
         }
 
