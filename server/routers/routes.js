@@ -20,6 +20,10 @@ const BlockUser = require("../controllers/BlockUser.js");
 const UnblockUser = require("../controllers/UnblockUser.js");
 const UpdateProfilePicture = require("../controllers/UpdateProfilePic.js");
 const DeleteProfilePic = require("../controllers/Profile Picture/DeleteProfilePicture.js");
+const TwoStepVerification = require("../auth/TwoStepVerification.js");
+const SendToStepVerificationEmail = require("../controllers/TwoStepVerificationEmail.js");
+const VerifyCloud = require("../auth/VerifyCloud.js");
+const DisableTwo = require("../auth/DisableTwoStep.js");
 
 const router = express.Router();
 
@@ -49,6 +53,18 @@ router.post("/block-user", VerifyToken, BlockUser);
 
 // Unblock user
 router.post("/unblock-user", VerifyToken, UnblockUser);
+
+// Enable two-step veerification
+router.post("/two-step-verification", VerifyToken, TwoStepVerification);
+
+// send two-step email verificatin code
+router.post("/verify-backup-email", VerifyToken, SendToStepVerificationEmail);
+
+// verify cloud password
+router.post("/verify-cloud-password", VerifyToken, VerifyCloud);
+
+// disable two step-password
+router.post("/disable-two-step", VerifyToken, DisableTwo);
 
 /*
 --- Update User Information End-Points

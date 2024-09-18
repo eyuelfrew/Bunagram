@@ -24,6 +24,7 @@ const userSchema = new mongoose.Schema(
     phone_number: {
       type: String,
     },
+    lastSeen: Date,
     profile_pic: {
       type: String,
       default: "",
@@ -31,13 +32,33 @@ const userSchema = new mongoose.Schema(
     public_id: { type: String, default: "" },
     lastLogin: {
       type: Date,
-      default: Date.now, // Fixed typo from 'defualt' to 'default'
+      default: Date.now,
     },
     isVerified: {
       type: Boolean,
       default: false,
     },
+    failedLoginAttempts: {
+      type: Number,
+      default: 0,
+    },
+    lockUntil: { type: Date, default: null },
+    isLocked: {
+      type: Boolean,
+      default: false,
+    },
     blockedUsers: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
+    /*
+    --- Two Step Verification attributes
+    */
+
+    twoStepVerification: { type: Boolean, default: false },
+    cloudPassword: { type: String, default: "" },
+    backupEmail: { type: String, default: "" },
+    hint: { type: String, default: "" },
+    /*
+    -- account autentication attributes
+    */
     resetPasswordToken: String,
     resetPasswordExpiresAt: Date,
     verificationToken: String,
