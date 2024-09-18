@@ -60,7 +60,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<SignUp />}></Route>
 
-        <Route path="chat" element={<Home />} />
+        <Route path="/chat" element={<Home />} />
         <Route path="/verify-email" element={<VerifyAccount />}></Route>
         <Route path="/user-sorry" element={<DeleteAccountSuccess />}></Route>
         <Route path="/cloudpass" element={<CloudPassword />}></Route>

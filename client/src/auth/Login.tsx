@@ -38,7 +38,7 @@ const Login = () => {
     // setIsAuthenticated(false);
     const token = localStorage.getItem("token");
 
-    if (LoginStatus && token) {
+    if (token) {
       toast.success("Login Success");
       navigateTo("/chat");
     }
