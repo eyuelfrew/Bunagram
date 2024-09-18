@@ -1,5 +1,5 @@
 // import { useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Sidebar from "../components/Sidebar";
 import { getUserDetail } from "../store/actions/getUserDetail";
@@ -20,10 +20,11 @@ import Profile from "../layout/Profile";
 import Setting from "../layout/Setting";
 import TwoStepVerification from "../auth/TwoStepVerification";
 // import { useNavigate } from "react-router-dom";
-import axios, { AxiosResponse } from "axios";
-import { SetUserInfo } from "../store/actions/UserAction";
+import axios from "axios";
+// import { SetUserInfo } from "../store/actions/UserAction";
 const Home = () => {
-  const [isAutenticating, setIsAutenticaing] = useState(false);
+  const test = true;
+  // const [isAutenticating, setIsAutenticaing] = useState(false);
   // const navigateTo = useNavigate();
   const { setSocket, setOnlineUsers, clearSocketState } = UseSocket();
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
@@ -73,38 +74,37 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      setIsAutenticaing(true);
-      const token = localStorage.getItem("token");
-      if (!token) {
-        await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
-          withCredentials: true,
-        });
-        // navigateTo("/");
-      }
-      try {
-        const response: AxiosResponse = await axios.get(
-          `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
-          { withCredentials: true }
-        );
-        if (response.data?.status === 1) {
-          setIsAutenticaing(false);
-          dispatch(SetUserInfo(response?.data?.user));
-        } else {
-          alert(response.data);
-          // navigateTo("/");
-        }
-      } catch (error) {
-        console.error("Auth check failed:", error);
-      }
-    };
-
-    checkAuth();
+    // const checkAuth = async () => {
+    //   setIsAutenticaing(true);
+    //   const token = localStorage.getItem("token");
+    //   if (!token) {
+    //     await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
+    //       withCredentials: true,
+    //     });
+    //     // navigateTo("/");
+    //   }
+    //   try {
+    //     const response: AxiosResponse = await axios.get(
+    //       `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
+    //       { withCredentials: true }
+    //     );
+    //     if (response.data?.status === 1) {
+    //       setIsAutenticaing(false);
+    //       dispatch(SetUserInfo(response?.data?.user));
+    //     } else {
+    //       alert(response.data);
+    //       // navigateTo("/");
+    //     }
+    //   } catch (error) {
+    //     console.error("Auth check failed:", error);
+    //   }
+    // };
+    // checkAuth();
   }, []);
 
   return (
     <>
-      {isAutenticating ? (
+      {test ? (
         <>
           <div className="flex justify-center items-center h-screen bg-[var(--light-dark-color)]">
             <div className="rounded-full h-20 w-20 bg-violet-800 animate-ping"></div>
