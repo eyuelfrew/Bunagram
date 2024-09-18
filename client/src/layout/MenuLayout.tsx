@@ -19,7 +19,7 @@ const MenuLayout = () => {
   };
   const HandleLogout = async () => {
     const cookies = document.cookie;
-
+    console.log(cookies);
     // Alert the cookie value
     alert("Stored Cookies: " + cookies);
     return;
