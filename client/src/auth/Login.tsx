@@ -79,6 +79,7 @@ const Login = () => {
         setIsAutenticating(false);
         console.log(response.data);
         if (response.data?.status === 1) {
+          alert("autenticated!");
           navigateTo("/chat");
         } else {
           console.log("Unautorized-request");
