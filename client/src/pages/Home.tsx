@@ -19,12 +19,12 @@ import DeleteAccount from "../components/Modals/DeleteAccount";
 import Profile from "../layout/Profile";
 import Setting from "../layout/Setting";
 import TwoStepVerification from "../auth/TwoStepVerification";
-import { useNavigate } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
 import axios, { AxiosResponse } from "axios";
 import { SetUserInfo } from "../store/actions/UserAction";
 const Home = () => {
   const [isAutenticating, setIsAutenticaing] = useState(false);
-  const navigateTo = useNavigate();
+  // const navigateTo = useNavigate();
   const { setSocket, setOnlineUsers, clearSocketState } = UseSocket();
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const user = useSelector((state: Root_State) => state.UserReducers);
@@ -41,7 +41,8 @@ const Home = () => {
         }
       );
       if (response.data?.status === 1) {
-        navigateTo("/");
+        alert("loged out");
+        // navigateTo("/");
       }
     };
     if (!token) {
@@ -79,7 +80,7 @@ const Home = () => {
         await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
           withCredentials: true,
         });
-        navigateTo("/");
+        // navigateTo("/");
       }
       try {
         const response: AxiosResponse = await axios.get(
@@ -90,7 +91,8 @@ const Home = () => {
           setIsAutenticaing(false);
           dispatch(SetUserInfo(response?.data?.user));
         } else {
-          navigateTo("/");
+          alert("Auth Error!");
+          // navigateTo("/");
         }
       } catch (error) {
         console.error("Auth check failed:", error);
