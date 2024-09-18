@@ -58,14 +58,13 @@ const Login = () => {
       return;
     }
     if (isTwoStep) {
-      console.log("test");
       navigateTo("/cloudpass");
     }
   }, [LoginStatus, account_not_found, error, isLocked, isTwoStep]);
 
   /*
   
-  ---- Check if user is logged in successfuly!
+  ---- Check if user is logged in befor!
 
   */
 
@@ -92,16 +91,6 @@ const Login = () => {
     checkAuth();
   }, []);
 
-  /*
-  -- Loading UI till the user is autenticated or state changed
-  */
-  // if (isAuthenticated === null) {
-  //   return (
-  // <div className="flex justify-center items-center h-screen bg-[var(--light-dark-color)]">
-  //   <div className="rounded-full h-20 w-20 bg-violet-800 animate-ping"></div>
-  // </div>
-  //   );
-  // }
   return (
     <>
       {isAutenticating ? (
