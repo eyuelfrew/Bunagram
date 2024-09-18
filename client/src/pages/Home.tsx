@@ -91,7 +91,7 @@ const Home = () => {
           setIsAutenticaing(false);
           dispatch(SetUserInfo(response?.data?.user));
         } else {
-          alert("Auth Error!");
+          alert(response.data);
           // navigateTo("/");
         }
       } catch (error) {
