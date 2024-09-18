@@ -28,6 +28,7 @@ const MenuLayout = () => {
         withCredentials: true,
       }
     );
+    navigateTo("/");
     if (response.data?.status === 1) {
       navigateTo("/");
     }
