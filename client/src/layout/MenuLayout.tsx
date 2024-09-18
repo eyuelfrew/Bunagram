@@ -20,9 +20,6 @@ const MenuLayout = () => {
   const HandleLogout = async () => {
     const cookies = document.cookie;
     console.log(cookies);
-    // Alert the cookie value
-    alert("Stored Cookies: " + cookies);
-    return;
     dispatch(ResetLoginState());
     localStorage.clear();
     const response = await axios.get(
