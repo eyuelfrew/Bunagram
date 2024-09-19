@@ -13,7 +13,7 @@ import { TiCancelOutline } from "react-icons/ti";
 import { CiLock } from "react-icons/ci";
 import axios from "axios";
 import { SetUserInfo } from "../store/actions/UserAction";
-import { VerificationMenuSVG } from "../components/svgs/Svgs";
+import { GearIcon, VerificationMenuSVG } from "../components/svgs/Svgs";
 
 const Setting = () => {
   const [error, setError] = useState("");
@@ -121,8 +121,11 @@ const Setting = () => {
               </button>
             </div>
           </div>
-          <div className="flex px-2 py-1  justify-center mb-4 ">
-            <h2 className="text-slate-200 text-xl">Settings</h2>
+          <div className="flex px-2 py-1  justify-center mb-4 flex-col">
+            <div className="flex justify-center">
+              <GearIcon />
+            </div>
+            <h2 className="text-slate-200 text-xl text-center">Settings</h2>
           </div>
           <div>
             <div

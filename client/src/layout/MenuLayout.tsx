@@ -18,8 +18,6 @@ const MenuLayout = () => {
     dispatch(CloseMenu());
   };
   const HandleLogout = async () => {
-    const cookies = document.cookie;
-    console.log(cookies);
     dispatch(ResetLoginState());
     localStorage.clear();
     const response = await axios.get(
@@ -28,7 +26,6 @@ const MenuLayout = () => {
         withCredentials: true,
       }
     );
-    navigateTo("/");
     if (response.data?.status === 1) {
       navigateTo("/");
     }

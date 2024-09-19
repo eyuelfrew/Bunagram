@@ -496,7 +496,7 @@ const ChatBox = () => {
                       autoComplete="off"
                       id="message_input"
                       name="text"
-                      className="mt-2 rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white"
+                      className="overflow-x-hidden overflow-y-scroll scrollbar mt-2 rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white"
                       placeholder="Write a message..."
                       value={message.text}
                       onChange={handleOnMessageChange}

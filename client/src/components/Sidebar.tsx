@@ -131,6 +131,8 @@ const Sidebar = () => {
 
           <div className="relative w-[80%]  mx-auto rounded-full">
             <input
+              readOnly
+              aria-label="Search users"
               autoComplete="off"
               type="text"
               name="usre_search_key_word"
@@ -138,6 +140,7 @@ const Sidebar = () => {
               onChange={handleSearchUser}
               className="w-[100%] bg-[var(--light-dark-color)] rounded-full border border-[var(--medium-dard)]  p-2 pr-10 focus:outline-none focus:ring-0 "
               placeholder="Search users..."
+              onFocus={(e) => e.target.removeAttribute("readonly")}
             />
             {viewResult && (
               <button

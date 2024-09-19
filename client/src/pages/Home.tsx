@@ -12,24 +12,20 @@ import ChatBox from "../components/ChatBox";
 import ContactInfo from "../layout/ContactInfo";
 import EditName from "../components/Modals/EditName";
 import EditYourNumber from "../components/Modals/EditPhone";
-// import axios, { AxiosResponse } from "axios";
-// import { SetUserInfo } from "../store/actions/UserAction";
+import axios, { AxiosResponse } from "axios";
+import { SetUserInfo } from "../store/actions/UserAction";
 import EditUserName from "../components/Modals/EditUserName";
 import DeleteAccount from "../components/Modals/DeleteAccount";
 import Profile from "../layout/Profile";
 import Setting from "../layout/Setting";
 import TwoStepVerification from "../auth/TwoStepVerification";
-// import { useNavigate } from "react-router-dom";
-import axios from "axios";
-// import { SetUserInfo } from "../store/actions/UserAction";
+import { useNavigate } from "react-router-dom";
 const Home = () => {
-  // const [isAutenticating, setIsAutenticaing] = useState(false);
-  // const navigateTo = useNavigate();
+  const navigateTo = useNavigate();
   const { setSocket, setOnlineUsers, clearSocketState } = UseSocket();
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const user = useSelector((state: Root_State) => state.UserReducers);
   const dispatch = useDispatch();
-  // const navigateTo = useNavigate();
   const token = localStorage.getItem("token");
 
   useEffect(() => {
@@ -41,8 +37,7 @@ const Home = () => {
         }
       );
       if (response.data?.status === 1) {
-        alert("loged out");
-        // navigateTo("/");
+        navigateTo("/");
       }
     };
     if (!token) {
@@ -73,43 +68,33 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    // const checkAuth = async () => {
-    //   setIsAutenticaing(true);
-    //   const token = localStorage.getItem("token");
-    //   if (!token) {
-    //     await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
-    //       withCredentials: true,
-    //     });
-    //     // navigateTo("/");
-    //   }
-    //   try {
-    //     const response: AxiosResponse = await axios.get(
-    //       `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
-    //       { withCredentials: true }
-    //     );
-    //     if (response.data?.status === 1) {
-    // setIsAutenticaing(false);
-    //       dispatch(SetUserInfo(response?.data?.user));
-    //     } else {
-    //       alert(response.data);
-    //       // navigateTo("/");
-    //     }
-    //   } catch (error) {
-    //     console.error("Auth check failed:", error);
-    //   }
-    // };
-    // checkAuth();
+    const checkAuth = async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
+          withCredentials: true,
+        });
+        navigateTo("/");
+      }
+      try {
+        const response: AxiosResponse = await axios.get(
+          `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
+          { withCredentials: true }
+        );
+        if (response.data?.status === 1) {
+          dispatch(SetUserInfo(response?.data?.user));
+        } else {
+          navigateTo("/");
+        }
+      } catch (error) {
+        console.error("Auth check failed:", error);
+      }
+    };
+    checkAuth();
   }, []);
 
   return (
     <>
-      {/* {test ? (
-        <>
-          <div className="flex justify-center items-center h-screen bg-[var(--light-dark-color)]">
-            <div className="rounded-full h-20 w-20 bg-violet-800 animate-ping"></div>
-          </div>
-        </>
-      ) : ( */}
       <>
         <div className=" h-96   flex w-full">
           <MenuLayout />
@@ -156,7 +141,6 @@ const Home = () => {
           <TwoStepVerification />
         </div>
       </>
-      {/* )} */}
     </>
   );
 };

@@ -3,7 +3,6 @@ import { ChangeEvent, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { SetUserInfo } from "../store/actions/UserAction";
-import { FaLongArrowAltRight } from "react-icons/fa";
 import { ResetLoginState } from "../store/actions/login";
 
 const CloudPassword = () => {
@@ -13,7 +12,7 @@ const CloudPassword = () => {
   const [passwordError, setPasswordError] = useState("");
   const handleVerifyPassword = async () => {
     if (password.trim() === "") {
-      setPasswordError("insert your cloud password");
+      setPasswordError("insert your cloud password!");
       return;
     }
     const response = await axios.post(
@@ -50,9 +49,9 @@ const CloudPassword = () => {
   };
   return (
     <div className="flex justify-center items-center h-screen bg-[var(--hard-dark)]">
-      <div className="max-w-md w-full bg-gray-800 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden">
-        <p className="text-center text-gray-300 mb-6 text-3xl font-light">
-          Cloud Password
+      <div className="max-w-md w-full bg-[var(--dark-bg-color)] bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden">
+        <p className="text-center text-gray-300 mb-6 text-xl font-light">
+          Two-Step Veriication
         </p>
         <div className="space-y-6 px-4 py-5">
           <div className="flex  flex-col">
@@ -60,23 +59,22 @@ const CloudPassword = () => {
               type="password"
               value={password}
               onChange={handlePasswordChange}
-              className="w-full h-12 text-center text-2xl font-bold bg-gray-700 text-white border-2 border-gray-600 rounded-lg focus:border-green-500 focus:outline-none"
+              className="w-full h-12 text-center text-2xl font-bold bg-gray-700 text-white border-2 border-gray-600 rounded-lg focus:border-gray-400 focus:outline-none"
             />
             <span className="text-red-500">{passwordError}</span>
           </div>
           <div className="flex justify-between">
             <button
               onClick={handleBackToLogIn}
-              className=" text-white rounded-lg py-3 text-xl font-light"
+              className="  rounded-lg  text-lg font-light text-blue-500"
             >
-              Got to login
+              Forgot?
             </button>
             <button
               onClick={handleVerifyPassword}
-              className=" flex text-white items-center justify-center  rounded-lg  text-xl font-light"
+              className="h-5 flex text-white items-center justify-center  rounded-lg  text-lg font-light"
             >
               Continue
-              <FaLongArrowAltRight />
             </button>
           </div>
         </div>
