@@ -3,6 +3,7 @@ import { IoClose } from "react-icons/io5";
 import { Link, useNavigate } from "react-router-dom";
 import uploadFile from "../helpers/UploadImage";
 import axios, { AxiosResponse } from "axios";
+import DOMPurify from "dompurify";
 function RegisterPage() {
   const url = import.meta.env.VITE_BACK_END_URL;
   const navigateTo = useNavigate();
@@ -14,7 +15,8 @@ function RegisterPage() {
   });
   const handleOnChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setData({ ...data, [name]: value });
+    const sanitizedValue = DOMPurify.sanitize(value);
+    setData({ ...data, [name]: sanitizedValue });
     console.log(data);
   };
 

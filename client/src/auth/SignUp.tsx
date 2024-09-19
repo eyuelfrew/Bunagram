@@ -4,6 +4,7 @@ import axios, { AxiosResponse } from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { FormErrors } from "../model/SignupModel";
+import DOMPurify from "dompurify";
 
 interface SignUpForm {
   name: string;
@@ -69,7 +70,8 @@ const SignUp = () => {
 
   //handle form change event
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSignUpForm({ ...form, [e.target.name]: e.target.value });
+    const sanitizedValue = DOMPurify.sanitize(e.target.value);
+    setSignUpForm({ ...form, [e.target.name]: sanitizedValue });
   };
   return (
     <div className="flex h-screen items-center justify-center bg-[var(--dark-bg-color)]">
