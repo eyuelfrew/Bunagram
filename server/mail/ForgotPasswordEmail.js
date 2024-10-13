@@ -12,15 +12,13 @@ const ForgotPasswordEmail = async (email, resetToken) => {
     <h1 style="color: white; margin: 0;">Password Reset</h1>
   </div>
   <div style="background-color: #f9f9f9; padding: 20px; border-radius: 0 0 5px 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
-    <p>Click the link below to reset your password,</p>
-    <p style="color:red">Ignore this message if you are not the one who requested this!</p>
-    <div style="text-align: center; margin: 30px 0;">
-      <a style="font-size: 14px;" href="${resetToken}">${resetToken}</a>
+    <p style="color:black; font-size:25px;">Click the link below to reset your password,</p>
+    <p style="color:red; font-size:25px;" >Ignore this message if you are not the one who requested this!</p>
+    <div style="text-align: center; margin: 30px 0; ">
+      <a style="font-size: 18px;" href="${resetToken}">${resetToken}</a>
     </div>
-    <p>Enter this code on the verification page to complete your registration.</p>
+    <p>Enter this code on the verification page to complete your au.</p>
     <p>This code will expire in 15 minutes for security reasons.</p>
-    <p>If you didn't create an account with us, please ignore this email.</p>
-    <p>Best regards,<br><span style="font-weight: bold;">Bunagram</span></p>
   </div>
   <div style="text-align: center; margin-top: 20px; color: #888; font-size: 0.8em;">
     <p>This is an automated message, please do not reply to this email.</p>

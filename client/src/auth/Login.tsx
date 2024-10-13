@@ -80,6 +80,7 @@ const Login = () => {
           setIsAuthenticated(true);
           navigateTo("/chat");
         } else {
+          navigateTo("/");
           setIsAuthenticated(false);
         }
       } catch (error) {
@@ -89,7 +90,6 @@ const Login = () => {
     };
 
     checkAuth();
-    console.log(isAuthenticated);
   }, []);
   if (isAuthenticated === null) {
     return (

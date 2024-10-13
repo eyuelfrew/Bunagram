@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 
 const Login = async (req, res) => {
   const { email, password, rememberMe } = req.body;
+  console.log("Email : ", email);
+  console.log("Password: ", password);
   try {
     /*
     -- Check if user exists in the database
@@ -28,7 +30,7 @@ const Login = async (req, res) => {
         user.lockUntil = null;
       } else {
         const remainingTime = Math.ceil(
-          (unlockTime - currentTime) / (1000 * 60)
+          (unlockTime - currentTime) / (1000 * 60),
         );
         return res.send({
           minLeft: remainingTime,

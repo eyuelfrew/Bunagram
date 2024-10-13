@@ -7,7 +7,6 @@ import App from "./App.tsx";
 import { SocketProvider } from "./context/SocketContext.tsx";
 // import { StrictMode } from "react";
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  // <StrictMode>
   <Provider store={store}>
     <SocketProvider>
       <BrowserRouter>
@@ -16,6 +15,3 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
     </SocketProvider>
   </Provider>
 );
-{
-  /* </StrictMode> */
-}

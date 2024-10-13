@@ -19,7 +19,7 @@ const RegisterUser = async (req, res) => {
     const hashedPassword = await bcryptjs.hash(password, salt);
 
     // Generate verification code
-    const verificationToken = await GenerateVerificationToken();
+    const verificationToken = GenerateVerificationToken();
 
     // Register the new user in MongoDB
     const payload = {
@@ -32,15 +32,6 @@ const RegisterUser = async (req, res) => {
     const user = new UserModel(payload);
     const userSave = await user.save();
 
-    // Generate JWT and send as cookie
-    const token = jwt.sign(
-      { id: userSave._id, email: userSave.email },
-      process.env.JWT_SECRET_KEY,
-      {
-        expiresIn: "45m",
-      }
-    );
-
     // Send verification code to user email
     const response = await SendVerificationEmail(
       email,
@@ -48,20 +39,14 @@ const RegisterUser = async (req, res) => {
     );
 
     return res
-      .cookie("token", token, {
-        httpOnly: true,
-        sameSite: "strict",
-        maxAge: 60 * 60 * 1000,
-      })
       .json({
         message: "User Created!",
         emailing_response: response,
         status: 1,
-        token: token,
-        user: { ...user._doc, password: undefined },
+        user: { ...user._doc, password: undefined }
       });
   } catch (error) {
-    console.log("what is this: ", error);
+    console.log(error);
     return res.json({ message: error || error, status: 0 });
   }
 };

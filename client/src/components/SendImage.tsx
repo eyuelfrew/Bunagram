@@ -1,25 +1,29 @@
 import { MdOutlineAttachFile } from "react-icons/md";
 import PreviewComponent from "./Modals/PreviewComponent";
 import { useState } from "react";
-import uploadFile from "../helpers/UploadImage";
-import { UseSocket } from "../context/SocketContext";
 import { useSelector } from "react-redux";
 import { Root_State } from "../store/store";
+import EncryptinService from "../utils/EncryptionService";
+import { SendCaption } from "../services/API";
 
 const SendImage = () => {
-  const { socket } = UseSocket();
   const [isLoading, setIsLoading] = useState(false);
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
-  const user = useSelector((state: Root_State) => state.UserReducers);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [image, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
   const [caption, setCaption] = useState<string>("");
-
+  const EncService = new EncryptinService(
+    import.meta.env.VITE_TRANSIT_KEY,
+    import.meta.env.VITE_STORAGE_KEY,
+    import.meta.env.VITE_INCOMING_MESSAGE_KEY
+  );
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    setIsLoading(false);
     if (file) {
       setSelectedFile(file);
       setPreview(URL.createObjectURL(file));
+      e.target.value = "";
     }
   };
   const handleClosePreview = () => {
@@ -28,23 +32,24 @@ const SendImage = () => {
     setCaption("");
   };
   const handleSend = async () => {
-    if (selectedFile) {
+    if (image) {
       setIsLoading(true);
-      const uploadResponse = await uploadFile(selectedFile);
-      console.log(uploadResponse);
-      if (socket) {
-        socket.emit("newmessage", {
-          sender: user?._id,
-          receiver: Recever.recever_id,
-          text: caption,
-          msgByUserId: user?._id,
-          imageURL: uploadResponse.secure_url,
-          conversation_id: Recever.conversation_id || "",
-        });
+      const formData = new FormData();
+      if (caption.trim() != "") {
+        formData.append("text", EncService.EncryptMessage(caption));
+      } else {
+        formData.append("text", "");
       }
-      setSelectedFile(null);
-      setPreview("");
-      setCaption("");
+      formData.append("reciver_id", Recever.recever_id);
+
+      formData.append("image", image);
+      const response = await SendCaption(formData);
+      if (response.success) {
+        setIsLoading(false);
+        setSelectedFile(null);
+        setPreview("");
+        setCaption("");
+      }
     }
   };
   return (
@@ -62,10 +67,10 @@ const SendImage = () => {
           accept="image/*"
         />
       </label>
-      {selectedFile && (
+      {image && (
         <PreviewComponent
           preview={preview}
-          file={selectedFile}
+          file={image}
           caption={caption}
           onCaptionChange={setCaption}
           onClose={handleClosePreview}

@@ -4,10 +4,10 @@ const connectDB = require("./config/dbConnection.js");
 const router = require("./routers/routes.js");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
-const colors = require("colors");
+const path = require("path");
+const multer = require("multer");
 const { Server } = require("socket.io");
 const getUserDetailFromToken = require("./helpers/getUserDetailsFromToken.js");
-// import UserModel = require "./models/UserModels.js";
 const {
   ConversationModel,
   MessageModel,
@@ -17,21 +17,17 @@ const bodyParser = require("body-parser");
 const UserModel = require("./models/UserModels.js");
 dotenv.config();
 const app = express();
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://bunagram.vercel.app", // Local development
-];
+const allowedOrigins = ["http://localhost:5173", "https://bunagram.vercel.app"];
 const corsOptions = {
-  origin: [
-    "http://localhost:5173",
-    "https://bunagram.vercel.app", // Local development
-  ],
+  origin: allowedOrigins,
   credentials: true,
 };
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cors(corsOptions));
 app.use(cookieParser());
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 //Configure PORT
 const port = process.env.PORT || 3000;
 
@@ -41,8 +37,14 @@ app.get("/", (req, res) => {
 });
 
 //api end points
-app.use("/api", router);
-
+app.use(
+  "/api",
+  (req, _, next) => {
+    req.io = io; // Attach io to req
+    next();
+  },
+  router
+);
 //connect to data base
 connectDB();
 
@@ -64,13 +66,10 @@ const io = new Server(server, {
 const onLineUser = new Set();
 io.on("connection", async (socket) => {
   const token = socket.handshake.auth.token;
-
-  //curent user detail
+  console.log("Socket Request token: ", token);
   const user = await getUserDetailFromToken(token);
-  //creating a room
   socket.join(user?._id?.toString());
   onLineUser.add(user?._id?.toString());
-  //online users
   io.emit("onlineuser", Array.from(onLineUser));
   //sidenar event
   socket.on("side-bar", async (currentUserId) => {
@@ -78,100 +77,26 @@ io.on("connection", async (socket) => {
     const conversation = await getConversations(currentUserId.toString());
     socket.emit("conversation", conversation || []);
   });
-  socket.on("message-page", async (data) => {
-    if (!data.sender) return console.log("no id found", data.sender);
-
-    try {
-      const getConversationMessage = await ConversationModel.findOne({
-        $or: [
-          {
-            sender: data?.sender?.toString(),
-            receiver: data?.receiver?.toString(),
-          },
-          {
-            sender: data?.receiver.toString(),
-            receiver: data?.sender.toString(),
-          },
-        ],
-      })
-        .populate("messages")
-        .sort({ updatedAt: -1 });
-      io.to(data?.sender?.toString()).emit("message", {
-        reciver: data?.receiver?.toString(),
-        convID: getConversationMessage?._id || "",
-        messages: getConversationMessage?.messages || [],
-      });
-    } catch (error) {
-      return console.log(error.message);
-    }
-  });
 
   //new message
-  socket.on("new-message", async (data) => {
-    try {
-      let conversation = await ConversationModel.findOne({
-        $or: [
-          { sender: data?.sender, receiver: data?.receiver },
-          { sender: data?.receiver, receiver: data?.sender },
-        ],
-      });
-      if (!conversation) {
-        const createConversation = new ConversationModel({
-          sender: data?.sender,
-          receiver: data?.receiver,
-        });
-        conversation = await createConversation.save();
-        io.to(user?._id.toString()).emit("newconversation", {
-          convID: conversation?._id,
-        });
-      }
-      const message = new MessageModel({
-        text: data?.text,
-        imageURL: data?.imageURL,
-        sender: data?.sender,
-        msgByUserId: data?.msgByUserId,
-      });
-      const savedMessage = await message.save();
-      await ConversationModel.updateOne(
-        { _id: conversation?._id },
-        { $push: { messages: savedMessage?._id } }
-      );
-      const getConversationMessage = await ConversationModel.findOne({
-        $or: [
-          { sender: data?.sender, receiver: data?.receiver },
-          { sender: data?.receiver, receiver: data?.sender },
-        ],
-      })
-        .populate("messages")
-        .sort({ updatedAt: -1 });
-      // Emit the updated messages to both sender and receiver
-      io.to(data?.sender.toString()).emit("message", {
-        reciver: data?.receiver?.toString(),
-        messages: getConversationMessage?.messages || [],
-        convID: getConversationMessage?._id,
-      });
-
-      io.to(data?.receiver.toString()).emit("message", {
-        reciver: data?.receiver?.toString(),
-        messages: getConversationMessage?.messages || [],
-        convID: getConversationMessage?._id,
-      });
-      io.to(data?.receiver.toString()).emit("notif");
-      const conversationSiender = await getConversations(data?.sender);
-      const conversationRecevier = await getConversations(data?.receiver);
-      // send the conversation t each users
-      io.to(data?.sender.toString()).emit(
-        "conversation",
-        conversationSiender || []
-      );
-      io.to(data?.receiver.toString()).emit(
-        "conversation",
-        conversationRecevier || []
-      );
-    } catch (error) {
-      console.error("Error handling new message:", error);
-    }
-  });
+  // socket.on("", async (data) => {
+  //   try {
+  //
+  //     const conversationSiender = await getConversations(data?.sender);
+  //     const conversationRecevier = await getConversations(data?.receiver);
+  //     // send the conversation t each users
+  //     io.to(data?.sender.toString()).emit(
+  //       "conversation",
+  //       conversationSiender || [],
+  //     );
+  //     io.to(data?.receiver.toString()).emit(
+  //       "conversation",
+  //       conversationRecevier || [],
+  //     );
+  //   } catch (error) {
+  //     console.error("Error handling new message:", error);
+  //   }
+  // });
 
   /*
   -- message seen socket request

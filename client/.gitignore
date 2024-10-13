@@ -12,6 +12,8 @@ dist
 dist-ssr
 *.local
 .env
+buna-pictures
+bunaram_ap
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

@@ -2,6 +2,7 @@ const logout = async (req, res) => {
   try {
     const cookieOption = {
       httpOnly: true,
+      sameSite: "none",
       secure: true,
     };
     return res.cookie("token", "", cookieOption).status(200).json({

@@ -21,11 +21,18 @@ import { MdCheck, MdDelete, MdEdit } from "react-icons/md";
 import EmojiPicker from "./EmojiPicker";
 import { LiaCheckDoubleSolid } from "react-icons/lia";
 import { ImCross } from "react-icons/im";
+import axios from "axios";
+import { SendMessage } from "../services/API";
+import EncryptinService from "../utils/EncryptionService";
+import { Recevier } from "../types/Types";
 
 interface Message {
   text: string;
   imageURL: string;
-  videoURL: string;
+  _id: string;
+  msgByUserId: string;
+  createdAt: string;
+  updatedAt: string;
 }
 interface AllMessage {
   _id: string;
@@ -37,7 +44,7 @@ interface AllMessage {
 }
 const ChatBox = () => {
   const dispatch = useDispatch();
-
+  const URI = import.meta.env.VITE_BACK_END_URL;
   const [typing, setTyping] = useState(false);
   const [istyping, setIsTyping] = useState(false);
   const [typerId, setTyperID] = useState<string>();
@@ -48,11 +55,46 @@ const ChatBox = () => {
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const currentMessage = useRef<HTMLDivElement | null>(null);
   const [allMessages, setAllMessage] = useState<AllMessage[]>([]);
-  const [message, setMessage] = useState<Message>({
+  const [message, setMessage] = useState({
     text: "",
     imageURL: "",
-    videoURL: "",
   });
+  /*
+  -- instantiate the encrition service
+  */
+  const EncService = new EncryptinService(
+    import.meta.env.VITE_TRANSIT_KEY,
+    import.meta.env.VITE_STORAGE_KEY,
+    import.meta.env.VITE_INCOMING_MESSAGE_KEY
+  );
+  /*
+  -- Fetch Messages One Time When Reciver State Changes
+  -- 
+  */
+  useEffect(() => {
+    if (Recever.recever_id.trim() != "") {
+      const fetchAllMessages = async () => {
+        const response = await axios.post(
+          `${import.meta.env.VITE_BACK_END_URL}/api/all-messages`,
+          {
+            reciver_id: Recever.recever_id,
+          },
+          {
+            withCredentials: true,
+          }
+        );
+        let AllMessages = response?.data;
+        AllMessages = AllMessages.map((message: Message) => {
+          return {
+            ...message,
+            text: EncService.DecryptMessage(message.text),
+          };
+        });
+        setAllMessage(AllMessages);
+      };
+      fetchAllMessages();
+    }
+  }, [Recever]);
 
   /* 
   ---Edit Message State  
@@ -73,17 +115,12 @@ const ChatBox = () => {
   }, [allMessages]);
 
   /*
-  --- Fectch message when reciver is clicked
+  --- Emmit typing event when a user is typing and stop typing!!
   */
 
   useEffect(() => {
     setMessage({ ...message, text: "" });
     if (SocketConnection && Recever.recever_id) {
-      SocketConnection.emit("message-page", {
-        sender: user._id,
-        receiver: Recever.recever_id,
-      });
-
       const handleTyping = (typerId: string) => {
         setTyperID(typerId);
         setIsTyping(true);
@@ -93,10 +130,6 @@ const ChatBox = () => {
       };
       SocketConnection.on("typing", handleTyping);
       SocketConnection.on("stop typing", handleStopTyping);
-      return () => {
-        SocketConnection.off("typing", handleTyping);
-        SocketConnection.off("stop typing", handleStopTyping);
-      };
     }
   }, [Recever, SocketConnection, user._id]);
 
@@ -105,60 +138,71 @@ const ChatBox = () => {
   */
   useEffect(() => {
     if (SocketConnection && Recever) {
-      const messageHandler = (data: {
+      const NewMessageHandler = async (data: {
         reciver: string;
-        convID: string;
-        sender: string;
-        messages: React.SetStateAction<AllMessage[]>;
+        message: AllMessage;
+        convID: string | Recevier;
       }) => {
+        console.log(data);
+        setMessage({ ...message, text: "" });
         const test = Recever.recever_id === data.reciver;
-
+        console.log(data?.message);
+        data.message.text = await EncService.DecryptIncomingMessage(
+          data?.message?.text
+        );
         if (test) {
-          console.log("Error");
-          setAllMessage(data?.messages);
-          SocketConnection.emit("seen", Recever?.messageByUser);
+          // data?.message = EncService.DecryptIncomingMessage(data?.message)
+          setAllMessage((allMessages) => [...allMessages, data?.message]);
+          // SocketConnection.emit("seen", Recever?.messageByUser);
 
           return;
         } else if (data?.convID === Recever.conversation_id) {
-          setAllMessage(data?.messages);
-          SocketConnection.emit("seen", Recever?.messageByUser);
+          setAllMessage((allMessages) => [...allMessages, data?.message]);
+          // SocketConnection.emit("seen", Recever?.messageByUser);
         } else {
           return;
         }
       };
+
       const handleNewConveration = (newConversationId: { convID: string }) => {
         dispatch(updateReceiver(newConversationId.convID));
       };
-      SocketConnection.on("message", messageHandler);
+      // SocketConnection.on("message", messageHandler);
       SocketConnection.on("newconversation", handleNewConveration);
-      return () => {
-        SocketConnection.off("message", messageHandler);
-      };
+      SocketConnection.on("new-message", NewMessageHandler);
+      // (data) => {
+      //   setMessage({ ...message, text: "" });
+      //   setAllMessage((allMessages) => [...allMessages, data]);
+      //   console.log(data);
+      // }
+      // return () => {
+      //   SocketConnection.off("message", NewMessageHandler);
+      // };
     }
   }, [Recever, SocketConnection]);
 
   const isOnline = onlineUsers.includes(Recever.recever_id);
   const isBlocked = user.blockedUsers.includes(Recever.recever_id);
-  const handleSendMessage = (e: FormEvent<HTMLFormElement>) => {
+  const handleSendMessage = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!isEdit && SocketConnection && message.text.trim() !== "") {
-      SocketConnection.emit("new-message", {
-        sender: user?._id,
-        receiver: Recever.recever_id,
+      const payload = {
+        reciver_id: Recever.recever_id,
         text: message.text,
-        msgByUserId: user?._id,
-        conversation_id: Recever.conversation_id || "",
-      });
+        conversation: Recever.conversation_id || "",
+      };
+      await SendMessage(payload);
+
       setMessage({ ...message, text: "" });
     }
     if (isEdit && SocketConnection && message.text.trim() !== "") {
-      const payload = {
-        message_id: editMessage._id,
-        text: message.text,
-        sender: user._id,
-        reciver: Recever.recever_id,
-      };
-      SocketConnection.emit("edit-message", payload);
+      // const payload = {
+      //   message_id: editMessage._id,
+      //   text: message.text,
+      //   sender: user._id,
+      //   reciver: Recever.recever_id,
+      // };
+      // SocketConnection.emit("edit-message", payload);
       setIsEdit(false);
       setMessage({ ...message, text: "" });
     }
@@ -248,7 +292,11 @@ const ChatBox = () => {
     setEditMessage({ ...editMessage, text: "", _id: "" });
     setMessage({ ...message, text: "" });
   };
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+
+  /*
+  -- Send Message By Hitting The Enter Key
+  */
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && e.shiftKey) {
       e.preventDefault();
       const { name, value } = e.currentTarget;
@@ -259,14 +307,19 @@ const ChatBox = () => {
         return;
       } else {
         e.preventDefault();
-        SocketConnection?.emit("new-message", {
-          sender: user?._id,
-          receiver: Recever.recever_id,
-          text: message.text,
-          msgByUserId: user?._id,
-          conversation_id: Recever.conversation_id || "",
-        });
-        setMessage({ ...message, text: "" });
+        const payload = {
+          reciver_id: Recever.recever_id,
+          text: EncService.EncryptMessage(message.text),
+          conversation: Recever.conversation_id || "",
+        };
+        const response = await axios.post(
+          `${import.meta.env.VITE_BACK_END_URL}/api/create-message`,
+          payload,
+          {
+            withCredentials: true,
+          }
+        );
+        console.log(response);
       }
     }
   };
@@ -392,7 +445,15 @@ const ChatBox = () => {
                        : ""
                    }`}
               >
-                {msg.imageURL ? <img src={`${msg.imageURL}`} alt="" /> : <></>}
+                {msg.imageURL != "" ? (
+                  <img
+                    src={`${URI}${msg.imageURL}`}
+                    alt=""
+                    className="w-full"
+                  />
+                ) : (
+                  <></>
+                )}
                 <p className="break-words">{msg.text}</p>
                 <p className="text-x flex justify-between mt-1 items-center gap-8">
                   {moment(msg.createdAt).format("hh:mm")}
@@ -492,7 +553,7 @@ const ChatBox = () => {
                 <form className="h-full w-full  " onSubmit={handleSendMessage}>
                   <div className=" w-full flex items-center">
                     <textarea
-                      ref={inputRef}
+                      // ref={inputRef}
                       autoComplete="off"
                       id="message_input"
                       name="text"

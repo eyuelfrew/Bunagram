@@ -83,6 +83,7 @@ const Home = () => {
         );
         if (response.data?.status === 1) {
           dispatch(SetUserInfo(response?.data?.user));
+          navigateTo("/chat");
         } else {
           navigateTo("/");
         }

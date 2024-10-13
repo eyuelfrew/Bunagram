@@ -24,8 +24,25 @@ const TwoStepVerification = require("../auth/TwoStepVerification.js");
 const SendToStepVerificationEmail = require("../controllers/TwoStepVerificationEmail.js");
 const VerifyCloud = require("../auth/VerifyCloud.js");
 const DisableTwo = require("../auth/DisableTwoStep.js");
-
+const GetAllMessages = require("../controllers/message-controllers/GetAllMessages.js");
+const SendMessage = require("../controllers/message-controllers/SendMessage.js");
+const SendImage = require("../controllers/message-controllers/SendImage.js");
+const multer = require("multer");
+const path = require("path");
 const router = express.Router();
+/*
+-- configure route for upoading images if there is image sent form the clinet side
+*/
+const storage = multer.diskStorage({
+  destination: "./uploads/",
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, uniqueSuffix + path.extname(file.originalname));
+  },
+});
+const upload = multer({
+  storage: storage,
+}).single("image");
 
 // Checking if user is verified
 router.get("/check-auth", VerifyToken, CheckAuth);
@@ -81,4 +98,10 @@ router.delete("/delete-profile/:user_id", VerifyToken, DeleteProfilePic);
 // Search users
 router.post("/search", searchUser);
 
+/*
+--- Messaging routes
+*/
+router.post("/all-messages", VerifyToken, GetAllMessages); //fetch all messages
+router.post("/create-message", VerifyToken, SendMessage);
+router.post("/create-caption", VerifyToken, upload, SendImage);
 module.exports = router;
