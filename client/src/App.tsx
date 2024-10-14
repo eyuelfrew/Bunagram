@@ -27,18 +27,15 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
           { withCredentials: true }
         );
         if (response.data?.status === 1) {
-          console.log("Works Perfect");
           dispatch(SetUserInfo(response.data?.user));
           setIsAuthenticated(true);
           navigateTo("/chat");
         } else {
-          console.log("Works Perfect");
           localStorage.clear();
           navigateTo("/");
           setIsAuthenticated(false);
         }
       } catch (error) {
-        console.log(error);
         setIsAuthenticated(false);
       }
     };

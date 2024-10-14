@@ -1,6 +1,7 @@
 import React, {
   ChangeEvent,
   FormEvent,
+  MouseEvent,
   useEffect,
   useRef,
   useState,
@@ -17,12 +18,16 @@ import ChatMenu from "./ChatMenu";
 
 import LottieAnimation from "./LottieAnimation";
 import SendImage from "./SendImage";
-import { MdCheck, MdDelete, MdEdit } from "react-icons/md";
+import { MdCheck, MdDelete, MdModeEdit } from "react-icons/md";
 import EmojiPicker from "./EmojiPicker";
 import { LiaCheckDoubleSolid } from "react-icons/lia";
 import { ImCross } from "react-icons/im";
 import axios from "axios";
-import { SendMessage } from "../services/API";
+import {
+  DeleteSingleMessage,
+  SendMessage,
+  UpdateSingleMessage,
+} from "../services/API";
 import EncryptinService from "../utils/EncryptionService";
 import { Recevier } from "../types/Types";
 
@@ -42,7 +47,15 @@ interface AllMessage {
   seen: boolean;
   imageURL: string;
 }
+interface ContextMenuProps {
+  visible: boolean;
+  messageId: string | null;
+  x: number;
+  y: number;
+}
 const ChatBox = () => {
+  const [contextMenu, setContextMenu] = useState<ContextMenuProps | null>(null);
+  const currentMessage = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
   const URI = import.meta.env.VITE_BACK_END_URL;
   const [typing, setTyping] = useState(false);
@@ -53,12 +66,48 @@ const ChatBox = () => {
   const SocketConnection = socket;
   const messageEndRef = useRef<HTMLDivElement>(null);
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
-  const currentMessage = useRef<HTMLDivElement | null>(null);
   const [allMessages, setAllMessage] = useState<AllMessage[]>([]);
   const [message, setMessage] = useState({
     text: "",
     imageURL: "",
   });
+  const [editMessageID, setEditMessageId] = useState<AllMessage>();
+  /* 
+  ---Edit Message State  
+  */
+  const [isEdit, setIsEdit] = useState(false);
+  const [editMessage, setEditMessage] = useState({ text: "", _id: "" });
+  const blockedByReciver = Recever.blockedUsers.includes(user._id);
+  /*
+  -- handle right clikc context menu
+  */
+  const handleRightClick = (
+    event: MouseEvent<HTMLDivElement>,
+    messageId: string
+  ) => {
+    event.preventDefault();
+    // Get the window dimensions
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    // Calculate the position of the context menu and ensure it stays within the viewport
+    const xPos =
+      event.pageX + 150 > windowWidth ? windowWidth - 160 : event.pageX; // Adjust for width
+    const yPos =
+      event.pageY + 100 > windowHeight ? windowHeight - 110 : event.pageY; // Adjust for height
+
+    setContextMenu({
+      visible: true,
+      messageId,
+      x: xPos,
+      y: yPos,
+    });
+  };
+
+  // close right clicked menu when clicked some where else
+  const handleClickOutside = () => {
+    setContextMenu(null);
+  };
   /*
   -- instantiate the encrition service
   */
@@ -96,12 +145,6 @@ const ChatBox = () => {
     }
   }, [Recever]);
 
-  /* 
-  ---Edit Message State  
-  */
-  const [isEdit, setIsEdit] = useState(false);
-  const [editMessage, setEditMessage] = useState({ text: "", _id: "" });
-
   /*
   --- message scroll down effect
   */
@@ -113,7 +156,6 @@ const ChatBox = () => {
       });
     }
   }, [allMessages]);
-
   /*
   --- Emmit typing event when a user is typing and stop typing!!
   */
@@ -128,7 +170,17 @@ const ChatBox = () => {
       const handleStopTyping = () => {
         setIsTyping(false);
       };
+      const handleMessageDeleted = (messageId: string) => {
+        setAllMessage((prevMessages) => {
+          // Filter the previous messages, removing the one with the deleted ID
+          const updatedMessages = prevMessages.filter(
+            (msg) => msg._id !== messageId
+          );
+          return updatedMessages;
+        });
+      };
       SocketConnection.on("typing", handleTyping);
+      SocketConnection.on("message-deleted", handleMessageDeleted);
       SocketConnection.on("stop typing", handleStopTyping);
     }
   }, [Recever, SocketConnection, user._id]);
@@ -143,21 +195,33 @@ const ChatBox = () => {
         message: AllMessage;
         convID: string | Recevier;
       }) => {
-        console.log(data);
         setMessage({ ...message, text: "" });
         const test = Recever.recever_id === data.reciver;
-        console.log(data?.message);
         data.message.text = await EncService.DecryptIncomingMessage(
           data?.message?.text
         );
         if (test) {
-          // data?.message = EncService.DecryptIncomingMessage(data?.message)
-          setAllMessage((allMessages) => [...allMessages, data?.message]);
-          // SocketConnection.emit("seen", Recever?.messageByUser);
+          setAllMessage((allMessages) => {
+            const messageExists = allMessages.some(
+              (msg) => msg._id === data?.message._id
+            );
+            if (!messageExists) {
+              return [...allMessages, data?.message];
+            }
+            return allMessages;
+          });
 
           return;
         } else if (data?.convID === Recever.conversation_id) {
-          setAllMessage((allMessages) => [...allMessages, data?.message]);
+          setAllMessage((allMessages) => {
+            const messageExists = allMessages.some(
+              (msg) => msg._id === data?.message._id
+            );
+            if (!messageExists) {
+              return [...allMessages, data?.message];
+            }
+            return allMessages;
+          });
           // SocketConnection.emit("seen", Recever?.messageByUser);
         } else {
           return;
@@ -167,19 +231,21 @@ const ChatBox = () => {
       const handleNewConveration = (newConversationId: { convID: string }) => {
         dispatch(updateReceiver(newConversationId.convID));
       };
-      // SocketConnection.on("message", messageHandler);
+      const handleUpdatedMessage = (updatedMessage: AllMessage) => {
+        const decryptedMessage = EncService.DecryptMessage(updatedMessage.text);
+        setAllMessage((prevMessages) =>
+          prevMessages.map((msg) =>
+            msg._id === updatedMessage._id
+              ? { ...msg, text: decryptedMessage }
+              : msg
+          )
+        );
+      };
       SocketConnection.on("newconversation", handleNewConveration);
       SocketConnection.on("new-message", NewMessageHandler);
-      // (data) => {
-      //   setMessage({ ...message, text: "" });
-      //   setAllMessage((allMessages) => [...allMessages, data]);
-      //   console.log(data);
-      // }
-      // return () => {
-      //   SocketConnection.off("message", NewMessageHandler);
-      // };
+      SocketConnection.on("updated-message", handleUpdatedMessage);
     }
-  }, [Recever, SocketConnection]);
+  }, [Recever]);
 
   const isOnline = onlineUsers.includes(Recever.recever_id);
   const isBlocked = user.blockedUsers.includes(Recever.recever_id);
@@ -196,13 +262,17 @@ const ChatBox = () => {
       setMessage({ ...message, text: "" });
     }
     if (isEdit && SocketConnection && message.text.trim() !== "") {
-      // const payload = {
-      //   message_id: editMessage._id,
-      //   text: message.text,
-      //   sender: user._id,
-      //   reciver: Recever.recever_id,
-      // };
-      // SocketConnection.emit("edit-message", payload);
+      setAllMessage((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === editMessageID?._id ? { ...msg, text: message.text } : msg
+        )
+      );
+      const editedMessage = {
+        message: EncService.EncryptMessage(message.text),
+        reciver_id: Recever.recever_id,
+        message_id: editMessageID?._id,
+      };
+      await UpdateSingleMessage(editedMessage);
       setIsEdit(false);
       setMessage({ ...message, text: "" });
     }
@@ -236,17 +306,11 @@ const ChatBox = () => {
     setMessage({ ...message, text: "" });
   }, [Recever]);
 
-  const blockedByReciver = Recever.blockedUsers.includes(user._id);
-
-  const handleDeleteMessage = (msgId: string) => {
-    if (SocketConnection) {
-      SocketConnection.emit("delete-message", {
-        sender_id: user._id,
-        reciver_id: Recever.recever_id,
-        message_Id: msgId,
-        conversation_id: Recever.conversation_id,
-      });
-    }
+  const handleDeleteMessage = async (msgId: string) => {
+    const updatedMessages = allMessages.filter((msg) => msg._id !== msgId);
+    setAllMessage(updatedMessages);
+    const conversation_id: string | Recevier = Recever.conversation_id;
+    await DeleteSingleMessage(msgId, Recever.recever_id, conversation_id);
   };
 
   /*
@@ -279,6 +343,7 @@ const ChatBox = () => {
   --- Hundle Edit message
   */
   const handleEditMessage = (msg: AllMessage) => {
+    setEditMessageId(msg);
     setIsEdit(true);
     setEditMessage({ ...editMessage, text: msg.text, _id: msg._id });
     setMessage({ ...message, text: msg.text });
@@ -312,20 +377,16 @@ const ChatBox = () => {
           text: EncService.EncryptMessage(message.text),
           conversation: Recever.conversation_id || "",
         };
-        const response = await axios.post(
-          `${import.meta.env.VITE_BACK_END_URL}/api/create-message`,
-          payload,
-          {
-            withCredentials: true,
-          }
-        );
-        console.log(response);
+        await SendMessage(payload);
       }
     }
   };
   return (
-    <div className="">
-      <header className=" top-0 bg-[var(--dark-bg-color)] text-white h-24 flex items-center justify-between px-3 lg:px-8">
+    <div className="" onClick={handleClickOutside}>
+      <header
+        onClick={handleClickOutside}
+        className=" top-0 bg-[var(--dark-bg-color)] text-white h-24 flex items-center justify-between px-3 lg:px-8"
+      >
         <div className="flex items-center ">
           <div className="lg:hidden ml-1 me-4">
             <Link
@@ -424,7 +485,10 @@ const ChatBox = () => {
           <ChatMenu />
         </div>
       </header>
-      <section className=" h-[calc(100vh-160px)] bg-[var(--light-dark-color)] overflow-x-hidden overflow-y-scroll scrollbar  ">
+      <section
+        onClick={handleClickOutside}
+        className=" h-[calc(100vh-160px)] bg-[var(--light-dark-color)] overflow-x-hidden overflow-y-scroll scrollbar  "
+      >
         {allMessages.length === 0 && (
           <>
             <div className=" h-full flex items-center">
@@ -433,56 +497,71 @@ const ChatBox = () => {
           </>
         )}
         {allMessages.length > 0 &&
-          allMessages.map((msg, index) => {
+          allMessages.map((msg, _index) => {
             return (
               <div
+                onContextMenu={(event) => handleRightClick(event, msg._id)}
                 ref={currentMessage}
-                key={index}
-                className={`relative z-[200] text-gray-300 min-w-28 max-w-48 lg:max-w-96 mx-4 bg-[var(--medium-dard)]  mb-2
-                   p-3 py-1 rounded w-fit h-fit ${
-                     user._id === msg.msgByUserId
-                       ? "ml-auto bg-[var(--message-bg)]"
-                       : ""
-                   }`}
+                onClick={handleClickOutside}
+                key={_index}
+                className={`cursor-pointer relative  text-gray-300 min-w-28 max-w-48 lg:max-w-96 mx-4 bg-[var(--medium-dard)] mb-2
+                 p-3 py-1 rounded w-fit h-fit ${
+                   user._id === msg.msgByUserId
+                     ? "ml-auto bg-[var(--message-bg)]"
+                     : ""
+                 }`}
               >
-                {msg.imageURL != "" ? (
+                {msg.imageURL ? (
                   <img
                     src={`${URI}${msg.imageURL}`}
                     alt=""
                     className="w-full"
                   />
-                ) : (
-                  <></>
-                )}
+                ) : null}
                 <p className="break-words">{msg.text}</p>
                 <p className="text-x flex justify-between mt-1 items-center gap-8">
                   {moment(msg.createdAt).format("hh:mm")}
-                  {user._id === msg.msgByUserId && (
-                    <span className="flex gap-1">
-                      <span>
-                        <MdDelete
-                          onClick={() => handleDeleteMessage(msg._id)}
-                          className=" hover:scale-[2] cursor-pointer"
-                        />
-                      </span>
-                      <span>
-                        <MdEdit
-                          onClick={() => handleEditMessage(msg)}
-                          className=" hover:scale-[2] cursor-pointer"
-                        />
-                      </span>
-                    </span>
-                  )}
                 </p>
                 {user._id === msg.msgByUserId && msg.seen ? (
-                  <>
-                    <div className="absolute -right-3 -mt-3">
-                      <LiaCheckDoubleSolid size={20} />
+                  <div className="absolute -right-3 -mt-3">
+                    <LiaCheckDoubleSolid size={20} />
+                  </div>
+                ) : null}
+
+                {contextMenu &&
+                  contextMenu.messageId === msg._id &&
+                  contextMenu.visible && (
+                    <div
+                      className={`w-36 absolute ${
+                        msg.msgByUserId.trim() == user._id.trim()
+                          ? "right-10"
+                          : "-right-12"
+                      }  bg-[var(--dark-bg-color)]  rounded shadow-lg z-[4000]`}
+                    >
+                      <ul className="p-2 flex flex-col gap-4">
+                        {msg.msgByUserId.trim() === user._id.trim() && (
+                          <li
+                            className="hover:bg-[var(--light-dark-color)] flex items-center gap-2 cursor-pointer"
+                            onClick={() => {
+                              handleEditMessage(msg);
+                              setContextMenu(null); // Close menu after click
+                            }}
+                          >
+                            <MdModeEdit /> Edit
+                          </li>
+                        )}
+                        <li
+                          className="hover:bg-[var(--light-dark-color)] flex items-center gap-2 cursor-pointer"
+                          onClick={() => {
+                            handleDeleteMessage(msg._id);
+                            setContextMenu(null); // Close menu after click
+                          }}
+                        >
+                          <MdDelete /> Delete
+                        </li>
+                      </ul>
                     </div>
-                  </>
-                ) : (
-                  <></>
-                )}
+                  )}
               </div>
             );
           })}
@@ -574,7 +653,6 @@ const ChatBox = () => {
                     )}
                   </div>
                 </form>
-
                 <EmojiPicker onEmojiClick={handleEmojiPiker} />
               </>
             )}

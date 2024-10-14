@@ -9,11 +9,17 @@ import { clearReciver } from "../store/actions/getRecever";
 import { OpenConactInfo } from "../store/actions/AccountAction";
 import { ResetUserInfo } from "../store/actions/UserAction";
 import { OpenSetting } from "../store/actions/SettingActions";
+import { FaRegMoon } from "react-icons/fa6";
+import { useEffect } from "react";
+import { initializeTheme, toggleTheme } from "../store/themes/themeSlice";
 const MenuLayout = () => {
+  const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const user = useSelector((state: Root_State) => state.UserReducers);
   const navigateTo = useNavigate();
-  const dispatch = useDispatch();
   const menuBar = useSelector((state: Root_State) => state.menuReducer.isView);
+  const dispatch = useDispatch();
+  // Load theme from localStorage on component mount
+
   const handleMenuCancel = () => {
     dispatch(CloseMenu());
   };
@@ -43,7 +49,26 @@ const MenuLayout = () => {
     dispatch(CloseMenu());
     dispatch(OpenSetting());
   };
-
+  const handleThemeToggle = () => {
+    dispatch(toggleTheme());
+    // setDarkMode((prevMode) => {
+    //   const newMode = !prevMode;
+    //   const theme = newMode ? "dark" : "light";
+    //   localStorage.setItem("theme", theme);
+    //   document.documentElement.classList.toggle("dark", newMode);
+    //   return newMode;
+    // });
+  };
+  // useEffect(() => {
+  //   const savedTheme = localStorage.getItem("theme");
+  //   if (savedTheme) {
+  //     setDarkMode(savedTheme === "dark");
+  //     document.documentElement.classList.toggle("dark", savedTheme === "dark");
+  //   }
+  // }, []);
+  useEffect(() => {
+    dispatch(initializeTheme());
+  }, [dispatch]);
   return (
     <>
       {menuBar && (
@@ -94,6 +119,15 @@ const MenuLayout = () => {
           <button onClick={handleContactInfo}>Account</button>
           <button onClick={handleSetting}>Setting</button>
           <button onClick={HandleLogout}>Logout</button>
+          <button
+            onClick={handleThemeToggle}
+            className={`p-4 rounded-full ${
+              darkMode ? "bg-gray-800 text-white" : "bg-gray-200 text-black"
+            } transition duration-500`}
+          >
+            <FaRegMoon />
+            Night Mode
+          </button>
         </div>
       </div>
     </>

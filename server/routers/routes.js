@@ -29,6 +29,10 @@ const SendMessage = require("../controllers/message-controllers/SendMessage.js")
 const SendImage = require("../controllers/message-controllers/SendImage.js");
 const multer = require("multer");
 const path = require("path");
+const FetchConversations = require("../controllers/conversation-controllers/FetchConversations.js");
+const DeleteMessage = require("../controllers/message-controllers/DeleteMessage.js");
+const UpdateMessage = require("../controllers/message-controllers/UpdateMessage.js");
+const UserDetails = require("../controllers/UserDetails.js");
 const router = express.Router();
 /*
 -- configure route for upoading images if there is image sent form the clinet side
@@ -71,6 +75,9 @@ router.post("/block-user", VerifyToken, BlockUser);
 // Unblock user
 router.post("/unblock-user", VerifyToken, UnblockUser);
 
+// get user infromation
+router.post("/user-info", VerifyToken, UserDetails);
+
 // Enable two-step veerification
 router.post("/two-step-verification", VerifyToken, TwoStepVerification);
 
@@ -102,6 +109,12 @@ router.post("/search", searchUser);
 --- Messaging routes
 */
 router.post("/all-messages", VerifyToken, GetAllMessages); //fetch all messages
-router.post("/create-message", VerifyToken, SendMessage);
-router.post("/create-caption", VerifyToken, upload, SendImage);
+router.post("/create-message", VerifyToken, SendMessage); //create or send messge
+router.post("/create-caption", VerifyToken, upload, SendImage); //send image with text or with out text
+router.post("/del-msg", VerifyToken, DeleteMessage); // Delete single message
+router.post("/update-msg", VerifyToken, UpdateMessage); // update single message
+/*  
+--- Conversation Routes 
+*/
+router.get("/conversations", VerifyToken, FetchConversations);
 module.exports = router;

@@ -73,31 +73,9 @@ io.on("connection", async (socket) => {
   io.emit("onlineuser", Array.from(onLineUser));
   //sidenar event
   socket.on("side-bar", async (currentUserId) => {
-    console.log("Side bar requeted by", currentUserId);
     const conversation = await getConversations(currentUserId.toString());
     socket.emit("conversation", conversation || []);
   });
-
-  //new message
-  // socket.on("", async (data) => {
-  //   try {
-  //
-  //     const conversationSiender = await getConversations(data?.sender);
-  //     const conversationRecevier = await getConversations(data?.receiver);
-  //     // send the conversation t each users
-  //     io.to(data?.sender.toString()).emit(
-  //       "conversation",
-  //       conversationSiender || [],
-  //     );
-  //     io.to(data?.receiver.toString()).emit(
-  //       "conversation",
-  //       conversationRecevier || [],
-  //     );
-  //   } catch (error) {
-  //     console.error("Error handling new message:", error);
-  //   }
-  // });
-
   /*
   -- message seen socket request
   */
@@ -149,34 +127,6 @@ io.on("connection", async (socket) => {
     );
     io.to(messageByUser?.toString()).emit("message", {
       messages: getConversationMessage?.messages || [],
-    });
-  });
-
-  /*
-  --- On Edit Message 
-  */
-  socket.on("edit-message", async (data) => {
-    console.log(data);
-    await MessageModel.findByIdAndUpdate(data?.message_id, {
-      text: data?.text,
-    });
-    const getConversationMessage = await ConversationModel.findOne({
-      $or: [
-        { sender: data?.sender, receiver: data?.reciver },
-        { sender: data?.reciver, receiver: data?.sender },
-      ],
-    })
-      .populate("messages")
-      .sort({ updatedAt: -1 });
-    io.to(data?.sender.toString()).emit("message", {
-      reciver: data?.reciver?.toString(),
-      messages: getConversationMessage?.messages || [],
-      convID: getConversationMessage?._id,
-    });
-
-    io.to(data?.reciver.toString()).emit("message", {
-      messages: getConversationMessage?.messages || [],
-      convID: getConversationMessage?._id,
     });
   });
 
@@ -242,37 +192,6 @@ io.on("connection", async (socket) => {
       }
     } catch (error) {
       console.log(error.message || error);
-    }
-  });
-  /*
-  ---- // * On Delete Single Message
-  */
-  socket.on("delete-message", async (data) => {
-    const sender = data?.sender_id;
-    const reciver = data?.reciver_id;
-    const messageId = data?.message_Id;
-    const conversationId = data?.conversation_id;
-    console.log(messageId);
-    try {
-      await MessageModel.findByIdAndDelete(messageId);
-      const updatedConversation = await ConversationModel.findOneAndUpdate(
-        { _id: conversationId },
-        { $pull: { messages: messageId } },
-        { new: true }
-      ).populate("messages");
-
-      io.to(sender.toString()).emit("message", {
-        reciver: reciver,
-        convID: conversationId,
-        messages: updatedConversation?.messages || [],
-      });
-      io.to(reciver.toString()).emit("message", {
-        messages: updatedConversation?.messages || [],
-        reciver: reciver,
-        convID: conversationId,
-      });
-    } catch (error) {
-      console.log(error.message);
     }
   });
 

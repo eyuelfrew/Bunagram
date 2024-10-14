@@ -3,7 +3,7 @@ const logout = async (req, res) => {
     const cookieOption = {
       httpOnly: true,
       sameSite: "none",
-      secure: true,
+      //secure: true,
     };
     return res.cookie("token", "", cookieOption).status(200).json({
       message: "Session out",

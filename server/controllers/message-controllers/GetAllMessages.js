@@ -5,6 +5,21 @@ const GetAllMessages = async (req, res) => {
   const user = req.userId;
 
   try {
+    const covnersation = await ConversationModel.findOne({
+      $or: [
+        {
+          sender: user?.toString(),
+          receiver: reciver_id?.toString(),
+        },
+        {
+          sender: reciver_id.toString(),
+          receiver: user.toString(),
+        },
+      ],
+    });
+    if (!covnersation) {
+      return res.json([]);
+    }
     const Conversation = await ConversationModel.findOne({
       $or: [
         {
@@ -19,9 +34,9 @@ const GetAllMessages = async (req, res) => {
     })
       .populate("messages")
       .sort({ updatedAt: -1 });
-    return res.json(Conversation.messages);
+    return res.json(Conversation.messages || []);
   } catch (error) {
-    console.log(error.message || error);
+    console.log(error);
     return res.json({ message: error.message, error: true });
   }
 };

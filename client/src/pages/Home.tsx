@@ -22,6 +22,7 @@ import TwoStepVerification from "../auth/TwoStepVerification";
 import { useNavigate } from "react-router-dom";
 const Home = () => {
   const navigateTo = useNavigate();
+  const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const { setSocket, setOnlineUsers, clearSocketState } = UseSocket();
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const user = useSelector((state: Root_State) => state.UserReducers);
@@ -102,7 +103,9 @@ const Home = () => {
           <section
             className={`${
               Recever.full_name ? "hidden lg:flex " : "w-[100%]"
-            } h-screen   lg:w-[25%] bg-[var(--hard-dark)] `}
+            } h-screen   lg:w-[25%]  ${
+              darkMode ? "bg-[var(--royale-blue)]" : "bg-[var(--hard-dark)]"
+            }`}
           >
             <Sidebar />
           </section>
@@ -112,7 +115,13 @@ const Home = () => {
               <section
                 className={`hidden lg:block bg-[var(--light-dark-color)] lg:w-[75%]`}
               >
-                <div className="h-screen bg-[var(--light-dark-color)] w-full flex justify-center items-center">
+                <div
+                  className={`h-screen ${
+                    darkMode
+                      ? "bg-[var(--blue-grotto)]"
+                      : "bg-[var(--light-dark-color)]"
+                  } w-full flex justify-center items-center`}
+                >
                   <h1 className="text-xl text-white font-light">
                     select a chat to start messaging
                   </h1>

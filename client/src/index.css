@@ -10,6 +10,8 @@
   --messge-input-dark: #41414a;
   --search-result-bg: #151517;
   --menu-button: #d0d0d4;
+  --blue-grotto: #60a3d9;
+  --royale-blue: #0074b7;
 }
 .scrollbar::-webkit-scrollbar {
   width: 10px;

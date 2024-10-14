@@ -13,11 +13,13 @@ import { UseSocket } from "../context/SocketContext";
 import LoadingConversation from "./LoadingConversation";
 import { FaCheck } from "react-icons/fa6";
 import { BiCheckDouble } from "react-icons/bi";
+import { FetchConversations } from "../services/API";
 
 interface ConversationWithUserDetails extends Conversation {
   userDetails: User;
 }
 const Sidebar = () => {
+  const loggedInUser = useSelector((state: Root_State) => state.UserReducers);
   const [isLoading, setIsLoading] = useState(false);
   const audio = new Audio(
     "https://bunagram.vercel.app/discord_notification.mp3"
@@ -61,19 +63,46 @@ const Sidebar = () => {
   /*
   --- Fetch Conversation
   */
-
+  const fetchAllConversation = async () => {
+    setIsLoading(true);
+    const conversation = await FetchConversations();
+    const conversationUserData: ConversationWithUserDetails[] =
+      conversation?.map((conversationUser: Conversation) => {
+        if (
+          // menu side bar controller function
+          conversationUser?.sender?._id === conversationUser?.receiver?._id
+        ) {
+          return {
+            ...conversationUser,
+            userDetails: conversationUser?.sender,
+          };
+        } else if (conversationUser?.receiver?._id !== user?._id) {
+          return {
+            ...conversationUser,
+            userDetails: conversationUser.receiver,
+          };
+        } else {
+          return {
+            ...conversationUser,
+            userDetails: conversationUser.sender,
+          };
+        }
+      });
+    setAllUsers(conversationUserData);
+    setIsLoading(false);
+  };
   useEffect(() => {
+    fetchAllConversation();
     if (socket && user?._id) {
-      socket.emit("side-bar", user._id);
       socket.on("notif", () => {
         audio.play();
       });
 
       setIsLoading(true);
-
-      socket.on("conversation", (data) => {
-        const conversationUserData: ConversationWithUserDetails[] = data?.map(
-          (conversationUser: Conversation) => {
+      socket.on("new-message", async () => {
+        const conversation = await FetchConversations();
+        const conversationUserData: ConversationWithUserDetails[] =
+          conversation?.map((conversationUser: Conversation) => {
             if (
               // menu side bar controller function
               conversationUser?.sender?._id === conversationUser?.receiver?._id
@@ -93,10 +122,8 @@ const Sidebar = () => {
                 userDetails: conversationUser.sender,
               };
             }
-          }
-        );
+          });
         setAllUsers(conversationUserData);
-        setIsLoading(false);
       });
     }
   }, [SocketConnection, socket, user]);
@@ -131,8 +158,9 @@ const Sidebar = () => {
 
           <div className="relative w-[80%]  mx-auto rounded-full">
             <input
-              readOnly
+              // readOnly
               aria-label="Search users"
+              inputMode="text"
               autoComplete="off"
               type="text"
               name="usre_search_key_word"
@@ -140,7 +168,7 @@ const Sidebar = () => {
               onChange={handleSearchUser}
               className="w-[100%] bg-[var(--light-dark-color)] rounded-full border border-[var(--medium-dard)]  p-2 pr-10 focus:outline-none focus:ring-0 "
               placeholder="Search users..."
-              onFocus={(e) => e.target.removeAttribute("readonly")}
+              // onFocus={(e) => e.target.removeAttribute("readonly")}
             />
             {viewResult && (
               <button
@@ -186,10 +214,12 @@ const Sidebar = () => {
                         </>
                       ) : (
                         <>
-                          <SeachResult
-                            onClose={() => setViewSearchResult(false)}
-                            user={user}
-                          />
+                          {user._id.trim() != loggedInUser._id.trim() && (
+                            <SeachResult
+                              onClose={() => setViewSearchResult(false)}
+                              user={user}
+                            />
+                          )}
                         </>
                       )}
                     </div>
@@ -241,6 +271,7 @@ const Sidebar = () => {
                               user_name: conv?.userDetails.user_name,
                               blockedUsers: conv?.userDetails.blockedUsers,
                               lastSeen: conv?.userDetails?.lastSeen || "",
+                              createdAt: conv?.userDetails?.createdAt || "",
                             })
                           }
                           to={"#"}

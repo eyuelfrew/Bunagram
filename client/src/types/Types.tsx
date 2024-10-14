@@ -19,6 +19,7 @@ export interface User {
   public_id: string;
   lastSeen: string;
   twoStepVerification: boolean;
+  createdAt: string;
 }
 export interface UserState {
   user: User;
@@ -47,6 +48,7 @@ export interface Recevier {
   bio: string;
   lastSeen: string;
   blockedUsers: string[];
+  createdAt: string;
 }
 
 export interface SocketState {
@@ -86,4 +88,7 @@ export interface ContactMenu {
   isPhoneEdit: boolean;
   isUserNameEdit: boolean;
   isDeleteAccount: boolean;
+}
+export interface ThemeState {
+  darkMode: boolean;
 }

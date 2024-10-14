@@ -5,6 +5,8 @@ import { CiAt } from "react-icons/ci";
 import { FaTimes, FaUserCircle, FaPhoneSquareAlt } from "react-icons/fa";
 import { FaArrowLeft } from "react-icons/fa6";
 import { UseSocket } from "../context/SocketContext";
+import moment from "moment";
+import { MdEmail } from "react-icons/md";
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -14,6 +16,7 @@ const Profile = () => {
   );
   const onlineUsers = UseSocket().onlineUsers;
   const isOnline = onlineUsers.includes(Reciver.recever_id);
+
   return (
     <>
       {isProfileview && (
@@ -26,9 +29,9 @@ const Profile = () => {
       <div
         className={`${
           isProfileview ? "" : "hidden"
-        } absolute flex w-full justify-center items-center `}
+        } absolute flex w-full justify-center items-center`}
       >
-        <div className="bg-[var(--light-dark-color)] rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]">
+        <div className="bg-[var(--light-dark-color)] rounded-xl mt-6  w-[69%] lg:w-fit flex flex-col z-[2400]">
           <div className="flex items-center justify-between p-4">
             <div>
               <button
@@ -97,32 +100,50 @@ const Profile = () => {
             </span>
           </div>
           <div>
-            <div className="flex justify-between px-3 items-center hover:bg-[var(--medium-dard)] cursor-pointer py-2">
+            <div className="flex gap-3 justify-between px-3 items-center  cursor-pointer py-2">
               <span className="flex gap-4 text-md text-gray-300 items-center font-thin">
                 {" "}
-                <FaUserCircle size={25} className="" /> Name
+                <FaUserCircle size={20} className="" /> Name
               </span>
               <span className="text-md text-gray-300 font-thin ">
                 {Reciver.full_name}
               </span>
             </div>
-            <div className="flex justify-between px-3 items-center hover:bg-[var(--medium-dard)] cursor-pointer py-2">
+            <div className="flex gap-3 justify-between px-3 items-center  cursor-pointer py-2">
               <span className="flex gap-4 text-md text-gray-300 items-center font-thin">
                 {" "}
-                <FaPhoneSquareAlt size={25} className="" /> Phone number
+                <FaPhoneSquareAlt size={20} className="" /> Phone number
               </span>
               <span className="text-md text-gray-300">
                 {Reciver?.phone_number}
               </span>
             </div>
-            <div className="flex justify-between px-3 items-center hover:bg-[var(--medium-dard)] cursor-pointer py-2">
+            <div className="flex justify-between gap-3 px-3 items-center  cursor-pointer py-2">
               <span className="flex gap-4 text-md text-gray-300 items-center font-thin">
                 {" "}
-                <CiAt size={25} className="" />
+                <MdEmail size={20} className="" /> Email
+              </span>
+              <span className="text-sm text-gray-300">
+                {Reciver?.rece_email}
+              </span>
+            </div>
+            <div className="flex gap-3 justify-between px-3 items-center  cursor-pointer py-2">
+              <span className="flex gap-4 text-md text-gray-300 items-center font-thin">
+                {" "}
+                <CiAt size={20} className="" />
                 username
               </span>
               <span className="text-md text-gray-300 font-thin">
                 {Reciver?.user_name}
+              </span>
+            </div>
+            <div className="flex gap-3 justify-between px-3 items-center  cursor-pointer py-2">
+              <span className="flex gap-4 text-md text-gray-300 items-center font-thin">
+                {" "}
+                Joined In
+              </span>
+              <span className="text-md text-gray-300 font-thin">
+                {moment(Reciver?.createdAt).format("MMMM Do YYYY")}
               </span>
             </div>
           </div>
