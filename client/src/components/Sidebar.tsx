@@ -41,11 +41,11 @@ const Sidebar = () => {
     ConversationWithUserDetails[] | null
   >(null);
   const user = useSelector((state: Root_State) => state.UserReducers);
-  const EncService = new EncryptinService(
-    import.meta.env.VITE_TRANSIT_KEY,
-    import.meta.env.VITE_STORAGE_KEY,
-    import.meta.env.VITE_INCOMING_MESSAGE_KEY
-  );
+  // const EncService = new EncryptinService(
+  //   import.meta.env.VITE_TRANSIT_KEY,
+  //   import.meta.env.VITE_STORAGE_KEY,
+  //   import.meta.env.VITE_INCOMING_MESSAGE_KEY
+  // );
   const handleSearchUser = async (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setInputValue({ ...searchUser, [name]: value });
