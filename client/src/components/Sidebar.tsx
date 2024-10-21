@@ -402,9 +402,9 @@ const Sidebar = () => {
                                   {conv?.lastMessage?.text ? (
                                     <>
                                       {" "}
-                                      {EncService.DecryptMessage(
+                                      {/* {EncService.DecryptMessage(
                                         conv.lastMessage.text
-                                      )}
+                                      )} */}
                                     </>
                                   ) : (
                                     <>say hi 👋</>
