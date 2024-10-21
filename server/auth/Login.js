@@ -30,7 +30,7 @@ const Login = async (req, res) => {
         user.lockUntil = null;
       } else {
         const remainingTime = Math.ceil(
-          (unlockTime - currentTime) / (1000 * 60),
+          (unlockTime - currentTime) / (1000 * 60)
         );
         return res.send({
           minLeft: remainingTime,
@@ -74,6 +74,7 @@ const Login = async (req, res) => {
         httpOnly: true,
         sameSite: "none",
         secure: true,
+        domain: ".welllaptops.com",
       })
       .json({
         message: "Login Successful",
