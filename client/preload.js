@@ -1,7 +1,5 @@
-/* eslint-disable no-undef */
 // preload.js
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { contextBridge, ipcRenderer } = require("electron");
 
 // Expose the API to the renderer process

@@ -35,16 +35,12 @@ export const SendMessage = async (message: {
 };
 export const SendCaption = async (formData: FormData) => {
   try {
-    const response = await axios.post(
-      "http://localhost:5000/api/create-caption",
-      formData,
-      {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        withCredentials: true,
-      }
-    );
+    const response = await axios.post(`${URI}/api/create-caption`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    });
     return response.data;
   } catch (error) {
     console.log(error);
