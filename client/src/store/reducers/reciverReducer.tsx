@@ -19,6 +19,7 @@ const initState: Recevier = {
   lastSeen: "",
   blockedUsers: [],
   createdAt: "",
+  deletedAccount: false,
 };
 const receiverReducer = (
   state = initState,
