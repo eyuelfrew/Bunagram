@@ -14,7 +14,7 @@ import LoadingConversation from "./LoadingConversation";
 import { FaCheck } from "react-icons/fa6";
 import { BiCheckDouble } from "react-icons/bi";
 import { FetchConversations } from "../services/API";
-import EncryptinService from "../utils/EncryptionService";
+// import EncryptinService from "../utils/EncryptionService";
 
 interface ConversationWithUserDetails extends Conversation {
   userDetails: User;
