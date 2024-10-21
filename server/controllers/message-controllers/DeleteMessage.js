@@ -13,10 +13,6 @@ const DeleteMessage = async (req, res) => {
       return res.json({ message: "Message not found", status: 0 });
     }
     if (message.imageURL.trim() != "") {
-      console.log("There is image");
-      const imageURL = message.imageURL.startsWith("/")
-        ? message.imageURL.substring(1)
-        : message.imageURL;
       const imagePath = path.join(__dirname, "..", "..", message.imageURL);
       fs.unlink(imagePath, (err) => {
         if (err) {
@@ -36,7 +32,7 @@ const DeleteMessage = async (req, res) => {
     return res.json({ message: "Message Deleted Successfuly!", status: 1 });
   } catch (error) {
     console.log(error);
-    return response.json({
+    return res.json({
       message: error.message || error,
       error: true,
       info: "Server Side Error",

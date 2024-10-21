@@ -14,6 +14,9 @@ const initState: User = {
   public_id: "",
   lastSeen: "",
   twoStepVerification: false,
+  createdAt: "",
+  deletedAccount: false,
+  hint: "",
 };
 const UserReducers = (
   state = initState,

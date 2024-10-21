@@ -1,5 +1,5 @@
 const UserModel = require("../models/UserModels.js");
-
+const bcryptjs = require("bcryptjs");
 const TwoStepVerification = async (req, res) => {
   const { verificationCode, hint, backupEmail, cloudPassword, _id } = req.body;
   const user = await UserModel.findById(_id);
@@ -9,8 +9,10 @@ const TwoStepVerification = async (req, res) => {
   if (verificationCode !== user.verificationToken) {
     return res.json({ message: "Invaid token used", invalidToken: true });
   }
+  const salt = await bcryptjs.genSalt(10);
+  const hashedPassword = await bcryptjs.hash(cloudPassword, salt);
   user.backupEmail = backupEmail;
-  user.cloudPassword = cloudPassword;
+  user.cloudPassword = hashedPassword;
   user.hint = hint;
   user.twoStepVerification = true;
   user.verificationToken = undefined;

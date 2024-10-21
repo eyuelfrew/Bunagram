@@ -1,11 +1,13 @@
 import axios from "axios";
 import { ChangeEvent, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { SetUserInfo } from "../store/actions/UserAction";
-import { ResetLoginState } from "../store/actions/login";
+import { LogoutRequest } from "../services/authApi";
+import { Root_State } from "../store/store";
 
 const CloudPassword = () => {
+  const hint = useSelector((state: Root_State) => state.UserReducers.hint);
   const dispatch = useDispatch();
   const navigateTo = useNavigate();
   const [password, setPassword] = useState("");
@@ -33,17 +35,9 @@ const CloudPassword = () => {
     setPassword(e.target.value);
   };
   const handleBackToLogIn = async () => {
-    dispatch(ResetLoginState());
-    const response = await axios.get(
-      `${import.meta.env.VITE_BACK_END_URL}/api/logout`,
-      {
-        withCredentials: true,
-      }
-    );
-    if (response.data?.status === 1) {
-      navigateTo("/");
-    }
-    if (response.data?.notAuth) {
+    const response = await LogoutRequest();
+    if (response.status === 1) {
+      localStorage.clear();
       navigateTo("/");
     }
   };
@@ -63,12 +57,13 @@ const CloudPassword = () => {
             />
             <span className="text-red-500">{passwordError}</span>
           </div>
+          <span className="text-slate-300">{hint}</span>
           <div className="flex justify-between">
             <button
               onClick={handleBackToLogIn}
-              className="  rounded-lg  text-lg font-light text-blue-500"
+              className="  rounded-lg  text-lg font-light text-white"
             >
-              Forgot?
+              back
             </button>
             <button
               onClick={handleVerifyPassword}

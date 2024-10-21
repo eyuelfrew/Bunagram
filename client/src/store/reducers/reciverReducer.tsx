@@ -18,6 +18,7 @@ const initState: Recevier = {
   bio: "",
   lastSeen: "",
   blockedUsers: [],
+  createdAt: "",
 };
 const receiverReducer = (
   state = initState,
@@ -28,6 +29,7 @@ const receiverReducer = (
       return { ...state, ...action.payload };
     case UPDATE_RECIVER_INFO:
       return { ...state, conversation_id: action.payload };
+
     case CLEAR_RECEVIER_STATE:
       return initState;
     default:

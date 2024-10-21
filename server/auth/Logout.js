@@ -2,7 +2,6 @@ const UserModel = require("../models/UserModels.js");
 const jwt = require("jsonwebtoken");
 const Logout = async (req, res) => {
   const token = req.cookies.token || "";
-  console.log("token==", token);
   if (!token) {
     return res.json({
       message: "Unauthorized - no token provided",

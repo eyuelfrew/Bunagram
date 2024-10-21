@@ -7,7 +7,6 @@ const VerifyToken = require("../middleware/VerifyToken.js");
 const CheckAuth = require("../auth/CheckAuth.js");
 const RegisterUser = require("../controllers/RegisterUsers.js");
 const VerifyAccount = require("../auth/VerifyEmail.js");
-const DeleteAccount = require("../controllers/DeleteAccount.js");
 const {
   CheckUserName,
   EditBio,
@@ -33,6 +32,11 @@ const FetchConversations = require("../controllers/conversation-controllers/Fetc
 const DeleteMessage = require("../controllers/message-controllers/DeleteMessage.js");
 const UpdateMessage = require("../controllers/message-controllers/UpdateMessage.js");
 const UserDetails = require("../controllers/UserDetails.js");
+const ChangeCloudPass = require("../auth/ChangeCloudPass.js");
+const UploadProfilePic = require("../controllers/ProflePic");
+const DeleteConversation = require("../controllers/conversation-controllers/DeleteConversation.js");
+const DeleteAccount = require("../controllers/user/DeleteAccount.js");
+const DeleteAllMessages = require("../controllers/message-controllers/DeleteAllMessages.js");
 const router = express.Router();
 /*
 -- configure route for upoading images if there is image sent form the clinet side
@@ -87,6 +91,9 @@ router.post("/verify-backup-email", VerifyToken, SendToStepVerificationEmail);
 // verify cloud password
 router.post("/verify-cloud-password", VerifyToken, VerifyCloud);
 
+// change cloud password
+router.post("/change-cloud-pass", VerifyToken, ChangeCloudPass);
+
 // disable two step-password
 router.post("/disable-two-step", VerifyToken, DisableTwo);
 
@@ -113,8 +120,12 @@ router.post("/create-message", VerifyToken, SendMessage); //create or send messg
 router.post("/create-caption", VerifyToken, upload, SendImage); //send image with text or with out text
 router.post("/del-msg", VerifyToken, DeleteMessage); // Delete single message
 router.post("/update-msg", VerifyToken, UpdateMessage); // update single message
+router.post("/profile-pic", VerifyToken, upload, UploadProfilePic); //upload or update profile pic
+router.post("/delete-all-msg", VerifyToken, DeleteAllMessages); //upload or update profile pic
+
 /*  
 --- Conversation Routes 
 */
 router.get("/conversations", VerifyToken, FetchConversations);
+router.post("/delete-conversation", VerifyToken, DeleteConversation);
 module.exports = router;

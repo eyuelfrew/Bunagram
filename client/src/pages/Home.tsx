@@ -2,7 +2,7 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Sidebar from "../components/Sidebar";
-import { getUserDetail } from "../store/actions/getUserDetail";
+// import { getUserDetail } from "../store/actions/getUserDetail";
 import { io } from "socket.io-client";
 
 import { Root_State } from "../store/store";
@@ -65,10 +65,6 @@ const Home = () => {
   }, [token, user]);
 
   useEffect(() => {
-    dispatch(getUserDetail());
-  }, []);
-
-  useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -89,7 +85,7 @@ const Home = () => {
           navigateTo("/");
         }
       } catch (error) {
-        console.error("Auth check failed:", error);
+        console.error(error);
       }
     };
     checkAuth();
@@ -104,7 +100,9 @@ const Home = () => {
             className={`${
               Recever.full_name ? "hidden lg:flex " : "w-[100%]"
             } h-screen   lg:w-[25%]  ${
-              darkMode ? "bg-[var(--royale-blue)]" : "bg-[var(--hard-dark)]"
+              darkMode
+                ? "bg-[var(--hard-dark)]"
+                : "bg-[var(--royale-blue)] transition duration-500"
             }`}
           >
             <Sidebar />
@@ -118,8 +116,8 @@ const Home = () => {
                 <div
                   className={`h-screen ${
                     darkMode
-                      ? "bg-[var(--blue-grotto)]"
-                      : "bg-[var(--light-dark-color)]"
+                      ? "bg-[var(--light-dark-color)]"
+                      : "bg-[var(--blue-grotto)]"
                   } w-full flex justify-center items-center`}
                 >
                   <h1 className="text-xl text-white font-light">

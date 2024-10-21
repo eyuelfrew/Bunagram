@@ -1,4 +1,4 @@
-import { MdCancel } from "react-icons/md";
+import { MdCancel, MdManageAccounts } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { Root_State } from "../store/store";
 import { CloseMenu } from "../store/actions/MenuControllers";
@@ -9,10 +9,13 @@ import { clearReciver } from "../store/actions/getRecever";
 import { OpenConactInfo } from "../store/actions/AccountAction";
 import { ResetUserInfo } from "../store/actions/UserAction";
 import { OpenSetting } from "../store/actions/SettingActions";
-import { FaRegMoon } from "react-icons/fa6";
+import { FaRegMoon, FaSun } from "react-icons/fa6";
 import { useEffect } from "react";
 import { initializeTheme, toggleTheme } from "../store/themes/themeSlice";
+import { IoMdLogOut } from "react-icons/io";
+import { IoSettings } from "react-icons/io5";
 const MenuLayout = () => {
+  const URI = import.meta.env.VITE_BACK_END_URL;
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const user = useSelector((state: Root_State) => state.UserReducers);
   const navigateTo = useNavigate();
@@ -80,7 +83,9 @@ const MenuLayout = () => {
       <div
         className={`${
           menuBar ? "translate-x-0" : "-translate-x-full"
-        } transition-transform duration-300 ease-in-out absolute z-[3000] bg-[var(--medium-dard)] w-[50%] lg:w-[25%]  h-screen p-3 text-white`}
+        } duration-500  absolute z-[3000] ${
+          darkMode ? "bg-[var(--medium-dard)]" : "bg-[var(--blue-de-france)]"
+        } w-[50%] lg:w-[25%]  h-screen p-3 text-white transition  `}
       >
         <div className="flex justify-between items-center">
           <div>
@@ -89,7 +94,7 @@ const MenuLayout = () => {
                 <>
                   <img
                     className="w-20 h-20  rounded-full"
-                    src={`${user.profile_pic}`}
+                    src={`${URI}${user.profile_pic}`}
                     alt={`${user.profile_pic}`}
                   />
                 </>
@@ -116,18 +121,41 @@ const MenuLayout = () => {
           </div>
         </div>
         <div className="mx-5 mt-11 flex flex-col gap-5">
-          <button onClick={handleContactInfo}>Account</button>
-          <button onClick={handleSetting}>Setting</button>
-          <button onClick={HandleLogout}>Logout</button>
+          <button
+            className="flex  items-center  gap-4 rounded-full"
+            onClick={handleContactInfo}
+          >
+            <MdManageAccounts />
+            Account
+          </button>
+          <button
+            className="flex  items-center  gap-4 rounded-full"
+            onClick={handleSetting}
+          >
+            <IoSettings />
+            Setting
+          </button>
+          <button
+            className="flex  items-center  gap-4 rounded-full"
+            onClick={HandleLogout}
+          >
+            <IoMdLogOut /> Logout
+          </button>
           <button
             onClick={handleThemeToggle}
-            className={`p-4 rounded-full ${
-              darkMode ? "bg-gray-800 text-white" : "bg-gray-200 text-black"
-            } transition duration-500`}
+            className={`flex  items-center  gap-4 rounded-full  transition duration-500`}
           >
-            <FaRegMoon />
-            Night Mode
+            {darkMode ? <FaSun /> : <FaRegMoon />}
+            {darkMode ? <span>Light Mode</span> : <span>Night Mode</span>}
           </button>
+        </div>
+        <div
+          className={`${
+            darkMode ? "text-slate-400 " : "text-slate-700"
+          } mt-[84%] flex flex-col font-light text-center`}
+        >
+          <span>Coffegram Desktop</span>
+          <span>Version 0.0.1</span>
         </div>
       </div>
     </>

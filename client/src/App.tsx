@@ -33,7 +33,6 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
         } else {
           localStorage.clear();
           navigateTo("/");
-          setIsAuthenticated(false);
         }
       } catch (error) {
         setIsAuthenticated(false);

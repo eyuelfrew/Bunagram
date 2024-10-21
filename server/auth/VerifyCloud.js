@@ -7,8 +7,11 @@ const VerifyCloud = async (req, res) => {
   const userId = req.userId;
   const user = await UserModel.findById(userId);
   if (!user) return res.json({ message: "User not found", notFound: true });
-  const checkCloud = user.cloudPassword.trim() === cloud_password.trim();
-  if (!checkCloud) {
+  const checkPassword = await bcryptjs.compare(
+    cloud_password,
+    user.cloudPassword
+  );
+  if (!checkPassword) {
     return res.json({ message: "wrong password", wrongCloud: true });
   }
   const tokenData = {

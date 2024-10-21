@@ -9,6 +9,8 @@ import moment from "moment";
 import { MdEmail } from "react-icons/md";
 
 const Profile = () => {
+  const URI = import.meta.env.VITE_BACK_END_URL;
+  const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const dispatch = useDispatch();
   const Reciver = useSelector((state: Root_State) => state.receiverReducer);
   const isProfileview = useSelector(
@@ -31,7 +33,13 @@ const Profile = () => {
           isProfileview ? "" : "hidden"
         } absolute flex w-full justify-center items-center`}
       >
-        <div className="bg-[var(--light-dark-color)] rounded-xl mt-6  w-[69%] lg:w-fit flex flex-col z-[2400]">
+        <div
+          className={`${
+            darkMode
+              ? "bg-[var(--light-dark-color)]"
+              : "bg-[var(--cobalt-blue)]"
+          } rounded-xl mt-6  w-[69%] lg:w-fit flex flex-col z-[2400]`}
+        >
           <div className="flex items-center justify-between p-4">
             <div>
               <button
@@ -69,7 +77,7 @@ const Profile = () => {
                   <>
                     <img
                       className="w-20 h-20 rounded-full "
-                      src={`${Reciver.profile_pic}`}
+                      src={`${URI}${Reciver.profile_pic}`}
                       alt=""
                     />
                   </>

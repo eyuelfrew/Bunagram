@@ -8,7 +8,7 @@ const Encryption = require("../../service/EncriptionServce");
 
 const SendMessage = async (req, res) => {
   // The multer upload will handle the file upload before this function is invoked
-  const { reciver_id, text } = req.body; // Extract necessary fields from req.body
+  const { reciver_id, text, replyToMessageId } = req.body; // Extract necessary fields from req.body
   const SenderId = req.userId;
   const EncService = new Encryption(
     process.env.TRANSIT_SECERETE_KEY,
@@ -51,6 +51,7 @@ const SendMessage = async (req, res) => {
       imageURL: imageURL || "", // Store the image URL if the image was uploaded
       sender: SenderId,
       msgByUserId: SenderId,
+      replyToMessageId: replyToMessageId ? replyToMessageId : null,
     });
 
     const savedMessage = await message.save();

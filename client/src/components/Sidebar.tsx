@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Root_State } from "../store/store";
 import { ChangeEvent, useEffect, useState } from "react";
 import { FiArrowUpLeft } from "react-icons/fi";
-import { getReceiverInit } from "../store/actions/getRecever";
+import { clearReciver, getReceiverInit } from "../store/actions/getRecever";
 import { Conversation, Recevier, User } from "../types/Types";
 import axios, { AxiosResponse } from "axios";
 import SeachResult from "./SeachResult";
@@ -14,11 +14,13 @@ import LoadingConversation from "./LoadingConversation";
 import { FaCheck } from "react-icons/fa6";
 import { BiCheckDouble } from "react-icons/bi";
 import { FetchConversations } from "../services/API";
+import EncryptinService from "../utils/EncryptionService";
 
 interface ConversationWithUserDetails extends Conversation {
   userDetails: User;
 }
 const Sidebar = () => {
+  const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const loggedInUser = useSelector((state: Root_State) => state.UserReducers);
   const [isLoading, setIsLoading] = useState(false);
   const audio = new Audio(
@@ -39,7 +41,11 @@ const Sidebar = () => {
     ConversationWithUserDetails[] | null
   >(null);
   const user = useSelector((state: Root_State) => state.UserReducers);
-
+  const EncService = new EncryptinService(
+    import.meta.env.VITE_TRANSIT_KEY,
+    import.meta.env.VITE_STORAGE_KEY,
+    import.meta.env.VITE_INCOMING_MESSAGE_KEY
+  );
   const handleSearchUser = async (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setInputValue({ ...searchUser, [name]: value });
@@ -99,7 +105,7 @@ const Sidebar = () => {
       });
 
       setIsLoading(true);
-      socket.on("new-message", async () => {
+      socket.on("conversation", async () => {
         const conversation = await FetchConversations();
         const conversationUserData: ConversationWithUserDetails[] =
           conversation?.map((conversationUser: Conversation) => {
@@ -125,8 +131,27 @@ const Sidebar = () => {
           });
         setAllUsers(conversationUserData);
       });
+      socket.on("con-del", (data) => {
+        setAllUsers(
+          (prevUsers) =>
+            prevUsers &&
+            prevUsers.filter(
+              (conversation) => conversation._id !== data?.conversation_id
+            )
+        );
+        dispatch(clearReciver());
+      });
+      socket.on("del-conversation", (data) => {
+        setAllUsers(
+          (prevUsers) =>
+            prevUsers &&
+            prevUsers.filter(
+              (conversation) => conversation._id !== data?.conversation_id
+            )
+        );
+      });
     }
-  }, [SocketConnection, socket, user]);
+  }, [SocketConnection]);
 
   const handleStartChat = (payload: Recevier) => {
     dispatch(getReceiverInit(payload));
@@ -166,7 +191,13 @@ const Sidebar = () => {
               name="usre_search_key_word"
               value={searchUser.usre_search_key_word}
               onChange={handleSearchUser}
-              className="w-[100%] bg-[var(--light-dark-color)] rounded-full border border-[var(--medium-dard)]  p-2 pr-10 focus:outline-none focus:ring-0 "
+              className={`w-[100%] ${
+                darkMode
+                  ? "bg-[var(--light-dark-color)]"
+                  : "bg-[var(--blue-de-france)]"
+              } rounded-full border ${
+                darkMode ? "border-[var(--medium-dard)]" : "border-blue-500"
+              }  p-2 pr-10 focus:outline-none focus:ring-0  placeholder-gray-300`}
               placeholder="Search users..."
               // onFocus={(e) => e.target.removeAttribute("readonly")}
             />
@@ -192,7 +223,11 @@ const Sidebar = () => {
             {viewResult && (
               <div
                 onBlur={handleBlur}
-                className="z-[1000] overflow-scroll emoji-scroll-bar overflow-x-hidden rounded-t-2xl p-1 absolute h-[400px] w-full bg-[var(--light-dark-color)] flex flex-col gap-3"
+                className={`${
+                  darkMode
+                    ? "bg-[var(--light-dark-color)]"
+                    : "bg-[var(--blue-grotto)]"
+                } z-[1000] overflow-scroll emoji-scroll-bar overflow-x-hidden rounded-t-2xl p-1 absolute h-[400px] w-full  flex flex-col gap-3`}
               >
                 {users.length !== 0 &&
                   users.map((user, index) => (
@@ -256,7 +291,7 @@ const Sidebar = () => {
                       {user._id !== conv.userDetails._id && (
                         <Link
                           key={index}
-                          className="  text-white"
+                          className="text-white "
                           onClick={() =>
                             handleStartChat({
                               full_name: conv?.userDetails.name,
@@ -272,6 +307,7 @@ const Sidebar = () => {
                               blockedUsers: conv?.userDetails.blockedUsers,
                               lastSeen: conv?.userDetails?.lastSeen || "",
                               createdAt: conv?.userDetails?.createdAt || "",
+                              deletedAccount: conv?.userDetails?.deletedAccount,
                             })
                           }
                           to={"#"}
@@ -279,9 +315,17 @@ const Sidebar = () => {
                           <div
                             className={`${
                               Recever.recever_id === conv?.userDetails?._id
-                                ? "bg-[var(--light-dark-color)] "
+                                ? ` ${
+                                    darkMode
+                                      ? "bg-[var(--light-dark-color)]"
+                                      : "bg-[var(--brandeis-blue)]"
+                                  } `
                                 : ""
-                            } hover:bg-[var(--medium-dard)] flex px-2 py-1 justify-between items-center`}
+                            } ${
+                              darkMode
+                                ? "hover:bg-[var(--medium-dard)]"
+                                : "hover:bg-[var(--blue-de-france)]"
+                            }  flex px-2 py-1 justify-between items-center`}
                           >
                             <div className="flex">
                               <div className="flex px-2 py-1 relative">
@@ -297,22 +341,34 @@ const Sidebar = () => {
                                   </>
                                 ) : (
                                   <>
-                                    {conv?.userDetails.profile_pic.trim() ===
-                                    "" ? (
+                                    {conv?.userDetails.deletedAccount ? (
                                       <>
                                         <img
                                           className="w-16 h-16 rounded-full"
-                                          src={`/userpic.png`}
+                                          src={`/deletedccount.jpg`}
                                           alt=""
                                         />
                                       </>
                                     ) : (
                                       <>
-                                        <img
-                                          className="w-16 h-16 rounded-full"
-                                          src={`${conv?.userDetails.profile_pic}`}
-                                          alt=""
-                                        />
+                                        {conv?.userDetails.profile_pic.trim() ===
+                                        "" ? (
+                                          <>
+                                            <img
+                                              className="w-16 h-16 rounded-full"
+                                              src={`/userpic.png`}
+                                              alt=""
+                                            />
+                                          </>
+                                        ) : (
+                                          <>
+                                            <img
+                                              className="w-16 h-16 rounded-full"
+                                              src={`${URL}${conv?.userDetails.profile_pic}`}
+                                              alt=""
+                                            />
+                                          </>
+                                        )}
                                       </>
                                     )}
                                   </>
@@ -335,15 +391,21 @@ const Sidebar = () => {
                               </div>
                               <div className="mt-2">
                                 <p className="text-lg font-semibold">
-                                  {user._id !== conv?.userDetails._id ? (
+                                  {user._id !== conv?.userDetails._id &&
+                                  !conv?.userDetails?.deletedAccount ? (
                                     <>{conv?.userDetails?.name}</>
                                   ) : (
-                                    <>Saved Message</>
+                                    <>Deleted Account</>
                                   )}
                                 </p>
                                 <p className="truncate w-36 text-sm">
                                   {conv?.lastMessage?.text ? (
-                                    conv.lastMessage.text
+                                    <>
+                                      {" "}
+                                      {EncService.DecryptMessage(
+                                        conv.lastMessage.text
+                                      )}
+                                    </>
                                   ) : (
                                     <>say hi 👋</>
                                   )}

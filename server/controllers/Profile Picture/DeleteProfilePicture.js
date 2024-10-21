@@ -1,9 +1,10 @@
 const UserModel = require("../../models/UserModels.js");
-
+const fs = require("fs");
+const path = require("path");
 const DeletProfilePic = async (req, res) => {
-  const { user_id } = req.params;
+  const userId = req.userId;
   try {
-    const user = await UserModel.findById(user_id);
+    const user = await UserModel.findById(userId);
     if (!user) {
       return res.json({
         message: "User not found!",
@@ -11,9 +12,17 @@ const DeletProfilePic = async (req, res) => {
         status: 0,
       });
     }
-
+    if (user.profile_pic != "") {
+      const imagePath = path.join(__dirname, "..", "..", user.profile_pic);
+      fs.unlink(imagePath, (err) => {
+        if (err) {
+          console.log("Error Deleting Profile Picture", err);
+        } else {
+          console.log("Profile Picture Deleted Successfuly", user.profile_pic);
+        }
+      });
+    }
     user.profile_pic = "";
-    user.public_id = "";
     const newUserData = await user.save();
     return res.json({
       message: "Profile Pic Deleted!",

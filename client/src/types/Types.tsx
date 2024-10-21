@@ -14,12 +14,14 @@ export interface User {
   profile_pic: string;
   user_name: string;
   bio: string;
+  hint: string;
   phone_number: string;
   blockedUsers: string[];
   public_id: string;
   lastSeen: string;
   twoStepVerification: boolean;
   createdAt: string;
+  deletedAccount: boolean;
 }
 export interface UserState {
   user: User;
@@ -48,6 +50,7 @@ export interface Recevier {
   bio: string;
   lastSeen: string;
   blockedUsers: string[];
+  deletedAccount: boolean;
   createdAt: string;
 }
 

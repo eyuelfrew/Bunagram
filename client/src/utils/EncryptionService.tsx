@@ -27,7 +27,7 @@ class EncryptinService {
     -- decrypt all messages sent as an array from the back end
     */
   DecryptMessage(cyphertext: string): string {
-    if (cyphertext.trim() == "") {
+    if (!cyphertext) {
       return "";
     }
     const bytes = CryptoJS.AES.decrypt(cyphertext, this.stored_dec_key);
@@ -42,7 +42,6 @@ class EncryptinService {
     */
   DecryptIncomingMessage(CypherText: string): string {
     if (CypherText.trim() == "") {
-      console.log("epitiy text");
       return "";
     }
     const bytes = CryptoJS.AES.decrypt(CypherText, this.incoming_message_key);

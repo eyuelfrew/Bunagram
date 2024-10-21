@@ -20,11 +20,14 @@ import {
   OpenEditUserName,
 } from "../store/actions/AccountAction";
 import { ViewMenu } from "../store/actions/MenuControllers";
-import uploadFile from "../helpers/UploadImage";
-import toast from "react-hot-toast";
+// import toast from "react-hot-toast";
 import { MdDelete } from "react-icons/md";
+import { UploadProfile } from "../services/API";
+import toast from "react-hot-toast";
 
 const ContactInfo = () => {
+  const URI = import.meta.env.VITE_BACK_END_URL;
+  const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const [loading, setLoading] = useState(false);
   const { name, phone_number, user_name, bio, _id, profile_pic } = useSelector(
     (state: Root_State) => state.UserReducers
@@ -83,25 +86,11 @@ const ContactInfo = () => {
     if (!file) {
       throw new Error("No file selected");
     }
-
-    const uploadPhoto = await uploadFile(file);
-    if (uploadPhoto) {
-      const payload = {
-        pic_url: uploadPhoto.secure_url,
-        user_id: _id,
-        public_id: uploadPhoto.public_id,
-      };
-      const response = await axios.post(
-        `${import.meta.env.VITE_BACK_END_URL}/api/update-pp`,
-        payload,
-        { withCredentials: true }
-      );
-      console.log(response.data);
-      if (response.data.status === 1) {
-        toast.success("Profile Changed!");
-        setLoading(false);
-        dispatch(SetUserInfo(response.data.user));
-      }
+    const response = await UploadProfile(file);
+    setLoading(false);
+    if (response.status == 1) {
+      dispatch(SetUserInfo(response?.user));
+      toast("Profile Pic Updated!");
     }
   };
   const handleDeleteProfile = async () => {
@@ -111,7 +100,6 @@ const ContactInfo = () => {
         `${import.meta.env.VITE_BACK_END_URL}/api/delete-profile/${user_id}`,
         { withCredentials: true }
       );
-      console.log(response.data);
       if (response.data.status === 1) {
         dispatch(SetUserInfo(response?.data?.user));
       }
@@ -133,7 +121,13 @@ const ContactInfo = () => {
           isContactInfo ? "" : "hidden"
         } absolute flex w-full justify-center items-center `}
       >
-        <div className="bg-[var(--light-dark-color)] rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]">
+        <div
+          className={`${
+            darkMode
+              ? "bg-[var(--light-dark-color)]"
+              : "bg-[var(--cobalt-blue)]"
+          } rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]`}
+        >
           <div className="flex items-center justify-between p-4">
             <div>
               <button
@@ -194,7 +188,7 @@ const ContactInfo = () => {
                     <>
                       <img
                         className="w-20 h-20 rounded-full "
-                        src={`${profile_pic}`}
+                        src={`${URI}${profile_pic}`}
                         alt=""
                       />
                     </>

@@ -4,7 +4,7 @@ const Password_Reset_Success_Email = async (email) => {
   console.log("Email sending ... ...");
 
   const mailOptions = {
-    from: '"Bunagram" <eyumanfrew@gmail.com>',
+    from: '"Coffeegram" <eyumanfrew@gmail.com>',
     to: `${email}`,
     subject: "Password Reset Successful!",
     html: `<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">

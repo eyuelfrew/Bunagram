@@ -5,18 +5,12 @@ import { Recevier, User } from "../types/Types";
 import { Link } from "react-router-dom";
 import { UseSocket } from "../context/SocketContext";
 
-// interface User {
-//   name: string;
-//   email: string;
-//   _id: string;
-//   profile_pic: string;
-//   blockedUsers: string;
-// }
 interface SearchUserProps {
   user: User;
   onClose: () => void;
 }
 const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
+  const URI = import.meta.env.VITE_BACK_END_URL;
   const logedInUser = useSelector(
     (state: Root_State) => state.UserReducers._id
   );
@@ -24,7 +18,6 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
   const onlineUser: string[] = UseSocket().onlineUsers;
   const isOnline = onlineUser.includes(user._id);
   const handleStartChat = (payload: Recevier) => {
-    console.log(payload);
     onClose();
     dispatch(getReceiverInit(payload));
   };
@@ -44,6 +37,8 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
           user_name: user.user_name,
           blockedUsers: user.blockedUsers,
           lastSeen: "",
+          createdAt: "",
+          deletedAccount: false,
         })
       }
       to={"#"}
@@ -57,7 +52,7 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
                 <>
                   <img
                     className="w-[58px] h-[58px] md:w-[77px] md:h-[77px] lg:w-[60px] lg:h-[60px] rounded-full object-cover"
-                    src={`${user.profile_pic}`}
+                    src={`${URI}${user.profile_pic}`}
                     alt="buna chat"
                   />
                 </>

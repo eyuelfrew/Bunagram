@@ -206,7 +206,6 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiClick }) => {
   };
   const handleClickOutside = (event: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-      console.log("Menu clieke");
       setOpenMenu(false);
     }
   };
@@ -232,9 +231,9 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiClick }) => {
           >
             {openEmoji && (
               <div>
-                {emojis.map((emoji) => (
+                {emojis.map((emoji, index) => (
                   <button
-                    key={emoji}
+                    key={index}
                     onClick={() => onEmojiClick(emoji)}
                     style={{ fontSize: "24px", padding: "5px" }}
                   >

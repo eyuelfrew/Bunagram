@@ -10,12 +10,17 @@ import { UseSocket } from "../context/SocketContext";
 import { getReceiverInit } from "../store/actions/getRecever";
 import { CgProfile } from "react-icons/cg";
 import { ViewProfile } from "../store/actions/ViewProfile";
+import { RiChatDeleteFill } from "react-icons/ri";
+import { ClearChats, DeleteConversation } from "../services/API";
+import toast from "react-hot-toast";
 
 const ChatMenu: React.FC = () => {
+  const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const { socket } = UseSocket();
   const user = useSelector((state: Root_State) => state.UserReducers);
   const dispatch = useDispatch();
   const reciver = useSelector((state: Root_State) => state.receiverReducer);
+  const conversation_id = reciver.conversation_id.toString();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -26,7 +31,6 @@ const ChatMenu: React.FC = () => {
 
   const handleClickOutside = (event: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-      console.log("Menu clieke");
       setOpenMenu(false);
     }
   };
@@ -44,7 +48,6 @@ const ChatMenu: React.FC = () => {
   }, [openMenu]);
   const handleBlockUser = async () => {
     const payload = {
-      blocker_id: user._id,
       blocked_id: reciver.recever_id,
     };
     const response: AxiosResponse = await axios.post(
@@ -54,6 +57,7 @@ const ChatMenu: React.FC = () => {
     );
 
     if (response.data?.status === 1) {
+      console.log(response.data?.user);
       dispatch(SetUserInfo(response.data?.user));
       const payload = {
         blocker: user._id,
@@ -64,7 +68,6 @@ const ChatMenu: React.FC = () => {
   };
 
   const isBlocked = user.blockedUsers.includes(reciver.recever_id);
-  useEffect(() => {}, [user, dispatch]);
   const handleUnblockUser = async () => {
     const payload = {
       blocker_id: user._id,
@@ -77,12 +80,15 @@ const ChatMenu: React.FC = () => {
     );
     if (response.data?.status === 1) {
       dispatch(SetUserInfo(response.data?.user));
-      const payload = {
-        blocker: user._id,
-        blocked: reciver.recever_id,
-      };
-      socket?.emit("unblockuser", payload);
     }
+  };
+
+  const handleDeleteConversation = async () => {
+    const payload = {
+      reciver_id: reciver.recever_id,
+      conversation_id: conversation_id,
+    };
+    await DeleteConversation(payload);
   };
   useEffect(() => {
     socket?.on("blockedby", (data) => {
@@ -101,6 +107,8 @@ const ChatMenu: React.FC = () => {
             blockedUsers: data.blockedUsers,
             bio: data.bio || "",
             lastSeen: "",
+            createdAt: "",
+            deletedAccount: data?.deletedAccount,
           })
         );
       }
@@ -121,20 +129,18 @@ const ChatMenu: React.FC = () => {
             phone_number: data?.phone_number,
             blockedUsers: data.blockedUsers,
             lastSeen: "",
+            createdAt: "",
+            deletedAccount: data?.deletedAccount,
           })
         );
       }
     });
-  }, [dispatch, socket]);
+  }, [socket]);
 
-  const handleClearChat = () => {
-    if (socket) {
-      const payload = {
-        sender_id: user._id,
-        reciver_id: reciver.recever_id,
-      };
-      socket.emit("clear-chat", payload);
-      setOpenMenu(!openMenu);
+  const handleClearChat = async () => {
+    const response = await ClearChats(reciver?.conversation_id.toString());
+    if (response.status == 1) {
+      toast.success(response.message);
     }
   };
   return (
@@ -146,7 +152,9 @@ const ChatMenu: React.FC = () => {
         <div
           onClick={(e) => e.stopPropagation()}
           ref={menuRef}
-          className="absolute bg-gray-700 h-fit -ml-32  p-3 flex flex-col gap-3 w-36"
+          className={`${
+            darkMode ? "bg-gray-700 " : "bg-[var(--blue-de-france)]"
+          } absolute h-fit -ml-32  p-3 flex flex-col gap-3 w-36`}
         >
           <button
             onClick={() => dispatch(ViewProfile())}
@@ -154,6 +162,13 @@ const ChatMenu: React.FC = () => {
           >
             <CgProfile />
             Profile
+          </button>
+          <button
+            onClick={handleDeleteConversation}
+            className="flex items-center gap-2 "
+          >
+            <RiChatDeleteFill />
+            Delete chat
           </button>
           <button
             onClick={handleClearChat}

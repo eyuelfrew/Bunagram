@@ -1,40 +1,51 @@
-const { ConversationModel } = require("../../models/ConversationModel");
+const {
+  ConversationModel,
+  MessageModel,
+} = require("../../models/ConversationModel");
 
 const GetAllMessages = async (req, res) => {
   const { reciver_id } = req.body;
-  const user = req.userId;
+  const userId = req.userId;
 
   try {
-    const covnersation = await ConversationModel.findOne({
+    const conversation = await ConversationModel.findOne({
       $or: [
         {
-          sender: user?.toString(),
+          sender: userId?.toString(),
           receiver: reciver_id?.toString(),
         },
         {
           sender: reciver_id.toString(),
-          receiver: user.toString(),
+          receiver: userId.toString(),
         },
       ],
     });
-    if (!covnersation) {
+    if (!conversation) {
       return res.json([]);
     }
-    const Conversation = await ConversationModel.findOne({
+    // Mark messages as seen if they belong to the receiver
+    const messageIds = conversation?.messages || [];
+    await MessageModel.updateMany(
+      { _id: { $in: messageIds }, msgByUserId: reciver_id.toString() },
+      { $set: { seen: true } }
+    );
+    const updatedConversation = await ConversationModel.findOne({
       $or: [
-        {
-          sender: user?.toString(),
-          receiver: reciver_id?.toString(),
-        },
-        {
-          sender: reciver_id.toString(),
-          receiver: user.toString(),
-        },
+        { sender: userId.toString(), receiver: reciver_id.toString() },
+        { sender: reciver_id.toString(), receiver: userId.toString() },
       ],
     })
-      .populate("messages")
+      .populate({
+        path: "messages",
+        populate: {
+          path: "replyToMessageId", // Populate the replyTo field
+          model: "Message", // Reference to the Message model
+          select: "text", // Only get the text field from the replied message
+        },
+      })
       .sort({ updatedAt: -1 });
-    return res.json(Conversation.messages || []);
+
+    return res.json(updatedConversation?.messages || []);
   } catch (error) {
     console.log(error);
     return res.json({ message: error.message, error: true });

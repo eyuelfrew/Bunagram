@@ -4,17 +4,14 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Root_State } from "../store/store";
 import axios, { AxiosResponse } from "axios";
 import toast from "react-hot-toast";
-import { LoginRequest, ResetLoginState } from "../store/actions/login";
+import { ResetLoginState } from "../store/actions/login";
 import DOMPurify from "dompurify";
+import { LoginRequest } from "../services/authApi";
+import { SetUserInfo } from "../store/actions/UserAction";
 const Login = () => {
-  const {
-    isLoading,
-    LoginStatus,
-    error,
-    account_not_found,
-    isLocked,
-    isTwoStep,
-  } = useSelector((state: Root_State) => state.LoginReducer);
+  const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
+  const { isLoading, error, account_not_found, isLocked, isTwoStep } =
+    useSelector((state: Root_State) => state.LoginReducer);
   const navigateTo = useNavigate();
   const dispatch = useDispatch();
   const [rememberMe, setRememberMe] = useState(false);
@@ -33,13 +30,30 @@ const Login = () => {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
-    dispatch(LoginRequest(loginForm));
+    const res = await LoginRequest(loginForm);
+    console.log(res);
+
+    if (res.isLocked) {
+      toast.error("To many attempts, Try again later!");
+    }
+    if (res.loggedIn) {
+      localStorage.setItem("token", res.token);
+      dispatch(SetUserInfo(res?.user));
+      if (res.twoStepVerification) {
+        navigateTo("/cloudpass");
+      } else {
+        navigateTo("/chat");
+      }
+    } else if (res.wrongCredentials) {
+      toast.error(res.message);
+      return;
+    }
   };
   useEffect(() => {
     const token = localStorage.getItem("token");
 
     if (token) {
-      toast.success("Login Success");
+      toast.success("Auth Success");
       navigateTo("/chat");
     }
     if (error) {
@@ -60,7 +74,7 @@ const Login = () => {
     if (isTwoStep) {
       navigateTo("/cloudpass");
     }
-  }, [LoginStatus, account_not_found, error, isLocked, isTwoStep]);
+  }, [account_not_found, error, isLocked, isTwoStep]);
 
   /*
   
@@ -75,7 +89,6 @@ const Login = () => {
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
           { withCredentials: true }
         );
-        console.log(response.data);
         if (response.data?.status === 1) {
           setIsAuthenticated(true);
           navigateTo("/chat");
@@ -103,13 +116,26 @@ const Login = () => {
   return isAuthenticated ? (
     <Navigate to="/chat" replace />
   ) : (
-    <section className="bg-[var(--medium-dard)] flex h-screen justify-center items-center">
-      <div className="w-80 lg:w-full  rounded-lg shadow bg-[var(--light-dark-color)] dark:border md:mt-0 sm:max-w-md xl:p-0 dark:border-gray-700">
-        <div className="p-6 space-y-4 md:space-y-6 sm:p-8">
+    <section
+      className={`${
+        darkMode ? "bg-[var(--medium-dard)]" : "bg-white"
+      } flex h-screen justify-center items-center`}
+    >
+      <div
+        className={`${
+          darkMode ? "bg-[var(--light-dark-color)]" : "bg-white"
+        } md:w-[80] lg:w-[60%]  flex rounded-lg shadow-xl  dark:border md:mt-0  xl:p-0 dark:border-gray-700`}
+      >
+        <img
+          src="/coffegram.jfif"
+          className="w-80 hidden md:flex lg:flex "
+          alt=""
+        />
+        <div className="p-6 space-y-4 md:space-y-6 sm:p-8 w-full">
           <h1 className="text-center text-xl font-light leading-tight tracking-tight  text-gray-500 dark:text-gray-400">
             Login
           </h1>
-          <form className="space-y-4 md:space-y-6" onSubmit={handleLogin}>
+          <form className="space-y-4 md:space-y-6 " onSubmit={handleLogin}>
             <div>
               <label
                 htmlFor="email"
@@ -121,8 +147,10 @@ const Login = () => {
                 type="email"
                 name="email"
                 id="email"
-                className="focus:outline-none text-gray-900 rounded-3xl  block w-full p-2.5 bg-[var(--hard-dark)]  border-0 dark:placeholder-gray-400 dark:text-white"
-                placeholder="name@company.com"
+                className={`${
+                  darkMode ? "bg-[var(--hard-dark)] " : ""
+                } focus:outline-none text-gray-900 rounded-3xl shadow-lg  block w-full p-2.5  border-0 dark:placeholder-gray-400 dark:text-white`}
+                placeholder="example@gmail.com"
                 required
                 onChange={handleChange}
                 value={loginForm?.email}
@@ -141,13 +169,15 @@ const Login = () => {
                 name="password"
                 id="password"
                 placeholder="••••••••"
-                className="focus:outline-none text-gray-900 rounded-3xl  block w-full p-2.5 bg-[var(--hard-dark)]  border-0 dark:placeholder-gray-400 dark:text-white"
+                className={`${
+                  darkMode ? "bg-[var(--hard-dark)]" : ""
+                } focus:outline-none text-gray-900 rounded-3xl shadow-lg  block w-full p-2.5  border-0 dark:placeholder-gray-400 dark:text-white`}
                 required
                 onChange={handleChange}
                 value={loginForm?.password}
               />
             </div>
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               <div className="flex items-start">
                 <div className="flex items-center h-5">
                   <input
@@ -177,7 +207,9 @@ const Login = () => {
             <button
               disabled={false}
               type="submit"
-              className="w-full transition ease-in  delay-150 text-white  hover:bg-[var(--dark-bg-color)] focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800"
+              className={`${
+                darkMode ? "hover:bg-[var(--dark-bg-color)]" : "hover:shadow-lg"
+              } w-full transition ease-in  delay-150   text-gray-500 dark:text-gray-400 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800`}
             >
               {isLoading ? (
                 <div role="status" className="flex justify-center items-center">

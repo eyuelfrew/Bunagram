@@ -18,24 +18,31 @@ import ChatMenu from "./ChatMenu";
 
 import LottieAnimation from "./LottieAnimation";
 import SendImage from "./SendImage";
-import { MdCheck, MdDelete, MdModeEdit } from "react-icons/md";
+import {
+  MdContentCopy,
+  MdDelete,
+  MdModeEdit,
+  MdOutlineReply,
+} from "react-icons/md";
 import EmojiPicker from "./EmojiPicker";
 import { LiaCheckDoubleSolid } from "react-icons/lia";
 import { ImCross } from "react-icons/im";
-import axios from "axios";
 import {
   DeleteSingleMessage,
+  FetchAllMessage,
   SendMessage,
   UpdateSingleMessage,
 } from "../services/API";
 import EncryptinService from "../utils/EncryptionService";
 import { Recevier } from "../types/Types";
+import toast from "react-hot-toast";
 
 interface Message {
   text: string;
   imageURL: string;
   _id: string;
   msgByUserId: string;
+  replyToMessageId: { text: string; _id: string };
   createdAt: string;
   updatedAt: string;
 }
@@ -46,6 +53,7 @@ interface AllMessage {
   msgByUserId: string;
   seen: boolean;
   imageURL: string;
+  replyToMessageId: { text: string; _id: string };
 }
 interface ContextMenuProps {
   visible: boolean;
@@ -54,6 +62,7 @@ interface ContextMenuProps {
   y: number;
 }
 const ChatBox = () => {
+  const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const [contextMenu, setContextMenu] = useState<ContextMenuProps | null>(null);
   const currentMessage = useRef<HTMLDivElement>(null);
   const dispatch = useDispatch();
@@ -67,9 +76,13 @@ const ChatBox = () => {
   const messageEndRef = useRef<HTMLDivElement>(null);
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const [allMessages, setAllMessage] = useState<AllMessage[]>([]);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [isReply, setIsReplay] = useState(false);
+  const [replayMessage, setReplyMessage] = useState<string | undefined>("");
   const [message, setMessage] = useState({
     text: "",
     imageURL: "",
+    replyToMessageId: "",
   });
   const [editMessageID, setEditMessageId] = useState<AllMessage>();
   /* 
@@ -78,6 +91,8 @@ const ChatBox = () => {
   const [isEdit, setIsEdit] = useState(false);
   const [editMessage, setEditMessage] = useState({ text: "", _id: "" });
   const blockedByReciver = Recever.blockedUsers.includes(user._id);
+  const [previousRoom, setPreviousRoom] = useState<string | null>(null);
+
   /*
   -- handle right clikc context menu
   */
@@ -103,10 +118,22 @@ const ChatBox = () => {
       y: yPos,
     });
   };
-
+  // hande reply clikc
+  const handleReplay = (message_id: string) => {
+    const messageToReply = allMessages.find((msg) => msg._id === message_id);
+    const text = messageToReply?.text.toString();
+    setMessage({ ...message, replyToMessageId: message_id });
+    setIsReplay(true);
+    setReplyMessage(text);
+  };
   // close right clicked menu when clicked some where else
   const handleClickOutside = () => {
     setContextMenu(null);
+  };
+  //cansle reply
+  const handleCancelReplay = () => {
+    setIsReplay(false);
+    setReplyMessage("");
   };
   /*
   -- instantiate the encrition service
@@ -120,31 +147,45 @@ const ChatBox = () => {
   -- Fetch Messages One Time When Reciver State Changes
   -- 
   */
-  useEffect(() => {
-    if (Recever.recever_id.trim() != "") {
-      const fetchAllMessages = async () => {
-        const response = await axios.post(
-          `${import.meta.env.VITE_BACK_END_URL}/api/all-messages`,
-          {
-            reciver_id: Recever.recever_id,
-          },
-          {
-            withCredentials: true,
-          }
-        );
-        let AllMessages = response?.data;
-        AllMessages = AllMessages.map((message: Message) => {
-          return {
-            ...message,
-            text: EncService.DecryptMessage(message.text),
-          };
-        });
-        setAllMessage(AllMessages);
+  const fetchAllMessages = async () => {
+    const response = await FetchAllMessage(Recever.recever_id);
+    let AllMessages = response;
+    AllMessages = AllMessages.map((message: Message) => {
+      return {
+        ...message,
+        text: EncService.DecryptMessage(message.text),
       };
+    });
+    setAllMessage(AllMessages);
+    // SocketConnection?.emit("seen-all", { rec_id: Recever.recever_id });
+  };
+  useEffect(() => {
+    setAllMessage([]);
+    if (Recever.recever_id.trim() != "") {
       fetchAllMessages();
     }
-  }, [Recever]);
 
+    if (SocketConnection) {
+      // Leave the old room if there is a previous conversation
+      if (previousRoom) {
+        SocketConnection.emit("leave-room", { roomName: previousRoom });
+      }
+
+      // Join the new room
+      const newRoom = `conversation_${Recever.conversation_id}`;
+      SocketConnection.emit("join-room", { roomName: newRoom });
+
+      // Update the current room reference
+      setPreviousRoom(newRoom);
+    }
+  }, [Recever.conversation_id]);
+  useEffect(() => {
+    if (SocketConnection) {
+      // Join the new room
+      const newRoom = `conversation_${Recever.conversation_id}`;
+      SocketConnection.emit("join-room", { roomName: newRoom });
+    }
+  }, [Recever, SocketConnection]);
   /*
   --- message scroll down effect
   */
@@ -193,39 +234,36 @@ const ChatBox = () => {
       const NewMessageHandler = async (data: {
         reciver: string;
         message: AllMessage;
-        convID: string | Recevier;
+        convID: string;
+        sender_id: string;
       }) => {
         setMessage({ ...message, text: "" });
-        const test = Recever.recever_id === data.reciver;
         data.message.text = await EncService.DecryptIncomingMessage(
           data?.message?.text
         );
-        if (test) {
-          setAllMessage((allMessages) => {
-            const messageExists = allMessages.some(
-              (msg) => msg._id === data?.message._id
-            );
-            if (!messageExists) {
-              return [...allMessages, data?.message];
-            }
-            return allMessages;
-          });
+        const string_con = (Recever.conversation_id || "").toString().trim();
+        const new_conversation_id = (data?.convID || "").toString().trim();
 
-          return;
-        } else if (data?.convID === Recever.conversation_id) {
-          setAllMessage((allMessages) => {
-            const messageExists = allMessages.some(
-              (msg) => msg._id === data?.message._id
-            );
-            if (!messageExists) {
-              return [...allMessages, data?.message];
-            }
-            return allMessages;
-          });
-          // SocketConnection.emit("seen", Recever?.messageByUser);
-        } else {
-          return;
+        // Only dispatch if the current conversation_id is empty or different
+        if (!string_con || string_con !== new_conversation_id) {
+          dispatch(updateReceiver(new_conversation_id));
         }
+        setAllMessage((allMessages) => {
+          const messageExists = allMessages.some(
+            (msg) => msg._id === data?.message._id
+          );
+          if (!messageExists) {
+            return [...allMessages, data?.message];
+          }
+          return allMessages;
+        });
+        // If the recipient and sender are in the same room, send a "message seen" event
+        SocketConnection.emit("message-seen", {
+          conversationId: data.convID,
+          messageId: data.message._id,
+          senderId: data.sender_id,
+          receiverId: Recever.recever_id,
+        });
       };
 
       const handleNewConveration = (newConversationId: { convID: string }) => {
@@ -241,11 +279,23 @@ const ChatBox = () => {
           )
         );
       };
+      const handleClearChatSocket = () => {
+        setAllMessage([]);
+      };
       SocketConnection.on("newconversation", handleNewConveration);
       SocketConnection.on("new-message", NewMessageHandler);
       SocketConnection.on("updated-message", handleUpdatedMessage);
+      SocketConnection.on("clear-chat", handleClearChatSocket);
+
+      SocketConnection.on("message-seen", (data) => {
+        setAllMessage((prevMessages) =>
+          prevMessages.map((msg) =>
+            msg._id === data.messageId ? { ...msg, seen: true } : msg
+          )
+        );
+      });
     }
-  }, [Recever]);
+  }, [Recever.conversation_id, SocketConnection]);
 
   const isOnline = onlineUsers.includes(Recever.recever_id);
   const isBlocked = user.blockedUsers.includes(Recever.recever_id);
@@ -259,22 +309,7 @@ const ChatBox = () => {
       };
       await SendMessage(payload);
 
-      setMessage({ ...message, text: "" });
-    }
-    if (isEdit && SocketConnection && message.text.trim() !== "") {
-      setAllMessage((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg._id === editMessageID?._id ? { ...msg, text: message.text } : msg
-        )
-      );
-      const editedMessage = {
-        message: EncService.EncryptMessage(message.text),
-        reciver_id: Recever.recever_id,
-        message_id: editMessageID?._id,
-      };
-      await UpdateSingleMessage(editedMessage);
-      setIsEdit(false);
-      setMessage({ ...message, text: "" });
+      setMessage({ ...message });
     }
   };
 
@@ -316,13 +351,12 @@ const ChatBox = () => {
   /*
 -- Hundle emoji selection or picker
 */
-  const inputRef = useRef<HTMLTextAreaElement>(null);
+  // const inputRef = useRef<HTMLTextAreaElement>(null);
   const handleEmojiPiker = (emoji: string) => {
-    const inputElement = inputRef.current;
+    const inputElement = textareaRef.current;
     if (inputElement) {
       const start = inputElement.selectionStart ?? 0;
       const end = inputElement.selectionEnd ?? 0;
-
       // Insert the emoji at the current cursor position
       const newText =
         message.text.slice(0, start) + emoji + message.text.slice(end);
@@ -367,33 +401,92 @@ const ChatBox = () => {
       const { name, value } = e.currentTarget;
       setMessage({ ...message, [name]: value + "\n" });
     }
-    if (e.key === "Enter") {
+    if (e.key === "Enter" && !isEdit) {
       if (e.shiftKey) {
         return;
       } else {
         e.preventDefault();
+        setIsReplay(false);
+        setReplyMessage("");
         const payload = {
           reciver_id: Recever.recever_id,
           text: EncService.EncryptMessage(message.text),
           conversation: Recever.conversation_id || "",
+          replyToMessageId: message?.replyToMessageId
+            ? message.replyToMessageId
+            : null,
         };
+        const textarea = textareaRef.current;
+        if (textarea) {
+          // textarea.style.height = "45px"; // Reset to initial height
+        }
         await SendMessage(payload);
+        setMessage({
+          text: "",
+          imageURL: "",
+          replyToMessageId: "",
+        });
       }
     }
+    if (isEdit && e.key === "Enter" && message.text.trim() !== "") {
+      setAllMessage((prevMessages) =>
+        prevMessages.map((msg) =>
+          msg._id === editMessageID?._id ? { ...msg, text: message.text } : msg
+        )
+      );
+      const editedMessage = {
+        message: EncService.EncryptMessage(message.text),
+        reciver_id: Recever.recever_id,
+        message_id: editMessageID?._id,
+      };
+      await UpdateSingleMessage(editedMessage);
+      setIsEdit(false);
+      setMessage({ ...message, text: "" });
+    }
+  };
+
+  const handleInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const textarea = event.target;
+    // Reset the height to auto so it can shrink if necessary
+    textarea.style.height = "45px";
+    // Set the height to the scrollHeight to expand
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  };
+  // Function to resize the textarea based on its scrollHeight
+  const resizeTextarea = () => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "45px"; // Reset height first
+      textarea.style.height = `${textarea.scrollHeight}px`; // Adjust based on scrollHeight
+    }
+  }; // Use effect to adjust the height when the message changes
+  useEffect(() => {
+    resizeTextarea(); // Call resizeTextarea whenever the message.text changes
+
+    // Reset height when the message is cleared
+    if (message.text === "") {
+      const textarea = textareaRef.current;
+      if (textarea) {
+        textarea.style.height = "45px"; // Reset height to the initial value
+      }
+    }
+  }, [message.text]);
+  const handleClearRecever = () => {
+    SocketConnection &&
+      SocketConnection.emit("leave-room", { roomName: previousRoom });
+    dispatch(clearReciver());
   };
   return (
     <div className="" onClick={handleClickOutside}>
       <header
         onClick={handleClickOutside}
-        className=" top-0 bg-[var(--dark-bg-color)] text-white h-24 flex items-center justify-between px-3 lg:px-8"
+        className={`${
+          darkMode ? "bg-[var(--dark-bg-color)]" : "bg-[var(--cobalt-blue)]"
+        } top-0  text-white h-24 flex items-center justify-between px-3 lg:px-8 transition duration-500`}
       >
         <div className="flex items-center ">
           <div className="lg:hidden ml-1 me-4">
-            <Link
-              onClick={() => dispatch(clearReciver())}
-              className="bg-red-400 "
-              to={""}
-            >
+            <Link onClick={handleClearRecever} className="bg-red-400 " to={""}>
               <FaArrowLeft />
             </Link>
           </div>
@@ -408,21 +501,33 @@ const ChatBox = () => {
               </>
             ) : (
               <>
-                {blockedByReciver || Recever.profile_pic.trim() === "" ? (
+                {Recever.deletedAccount ? (
                   <>
                     <img
                       className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
-                      src={`/userpic.png`}
+                      src={`/deletedccount.jpg`}
                       alt={`${Recever.full_name}`}
                     />
                   </>
                 ) : (
                   <>
-                    <img
-                      className="w-[55px] h-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
-                      src={`${Recever.profile_pic}`}
-                      alt=""
-                    />
+                    {blockedByReciver || Recever.profile_pic.trim() === "" ? (
+                      <>
+                        <img
+                          className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
+                          src={`/userpic.png`}
+                          alt={`${Recever.full_name}`}
+                        />
+                      </>
+                    ) : (
+                      <>
+                        <img
+                          className="w-[55px] h-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
+                          src={`${URI}${Recever.profile_pic}`}
+                          alt=""
+                        />
+                      </>
+                    )}
                   </>
                 )}
               </>
@@ -436,7 +541,7 @@ const ChatBox = () => {
                   <>
                     <div className="absolute w-4 h-4 rounded-full bg-red-500 right-0 top-10 lg:top-14"></div>
                     <span className="absolute ml-10 w-[270%] top-8 left-6  lg:top-12 lg:left-10 flex">
-                      {Recever?.lastSeen ? (
+                      {Recever?.lastSeen && !blockedByReciver ? (
                         <>
                           last seen at{" "}
                           {moment(Recever?.lastSeen || "").format("hh:mm") ||
@@ -453,10 +558,18 @@ const ChatBox = () => {
           </div>
           <div className="">
             <p className="text-xl lg:text-2xl ml-4">
-              {user._id === Recever.recever_id ? (
-                <></>
+              {Recever.deletedAccount ? (
+                <>
+                  <span>Deleted Account</span>
+                </>
               ) : (
-                <> {Recever.full_name}</>
+                <>
+                  {user._id === Recever.recever_id ? (
+                    <></>
+                  ) : (
+                    <> {Recever.full_name}</>
+                  )}
+                </>
               )}
             </p>
             {user._id !== Recever.recever_id && (
@@ -487,7 +600,9 @@ const ChatBox = () => {
       </header>
       <section
         onClick={handleClickOutside}
-        className=" h-[calc(100vh-160px)] bg-[var(--light-dark-color)] overflow-x-hidden overflow-y-scroll scrollbar  "
+        className={`h-[calc(100vh-160px)] ${
+          darkMode ? "bg-[var(--light-dark-color)]" : "bg-[var(--blue-grotto)]"
+        } overflow-x-hidden overflow-y-scroll scrollbar`}
       >
         {allMessages.length === 0 && (
           <>
@@ -500,75 +615,173 @@ const ChatBox = () => {
           allMessages.map((msg, _index) => {
             return (
               <div
-                onContextMenu={(event) => handleRightClick(event, msg._id)}
-                ref={currentMessage}
-                onClick={handleClickOutside}
                 key={_index}
-                className={`cursor-pointer relative  text-gray-300 min-w-28 max-w-48 lg:max-w-96 mx-4 bg-[var(--medium-dard)] mb-2
+                id={`${msg._id}`}
+                className="  transition duration-500"
+                ref={currentMessage}
+              >
+                <div
+                  onContextMenu={(event) => handleRightClick(event, msg._id)}
+                  onClick={handleClickOutside}
+                  className={`cursor-pointer relative min-w-28 max-w-48 lg:max-w-96 mx-4 ${
+                    darkMode
+                      ? "bg-[var(--medium-dard)] text-slate-300"
+                      : "bg-white text-slate-700"
+                  } mb-2
                  p-3 py-1 rounded w-fit h-fit ${
                    user._id === msg.msgByUserId
-                     ? "ml-auto bg-[var(--message-bg)]"
+                     ? `ml-auto ${
+                         darkMode ? "bg-[var(--message-bg)]" : "bg-green-200"
+                       }`
                      : ""
-                 }`}
-              >
-                {msg.imageURL ? (
-                  <img
-                    src={`${URI}${msg.imageURL}`}
-                    alt=""
-                    className="w-full"
-                  />
-                ) : null}
-                <p className="break-words">{msg.text}</p>
-                <p className="text-x flex justify-between mt-1 items-center gap-8">
+                 } transition duration-500`}
+                >
+                  {msg?.replyToMessageId && (
+                    <div className="min-w-28 max-w-48 lg:max-w-96 bg-slate-600 overflow-hidden">
+                      <Link
+                        to={`#${msg?.replyToMessageId}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          const elementMessage = document.getElementById(
+                            msg?.replyToMessageId._id
+                          );
+
+                          if (elementMessage) {
+                            elementMessage.scrollIntoView({
+                              behavior: "smooth",
+                            });
+                            elementMessage.classList.add("bg-slate-500");
+                            setTimeout(() => {
+                              elementMessage.classList.remove("bg-slate-500");
+                            }, 2000);
+                          }
+                        }}
+                        className=" min-w-28 max-w-48 lg:max-w-96 border-l-4  border-green-500 mb-3 p-3 "
+                      >
+                        <span
+                          className={`${
+                            darkMode ? "" : "text-slate-200"
+                          } truncate ...`}
+                        >
+                          {" "}
+                          {msg?.replyToMessageId?.text != "" &&
+                            EncService.DecryptMessage(
+                              msg?.replyToMessageId?.text
+                            )}{" "}
+                        </span>
+                      </Link>
+                    </div>
+                  )}
+                  {msg.imageURL ? (
+                    <img
+                      src={`${URI}${msg.imageURL}`}
+                      alt=""
+                      className="w-full"
+                    />
+                  ) : null}
+                  <p className="break-words">{msg.text}</p>
+                  {/* <p className=" justify-end">
                   {moment(msg.createdAt).format("hh:mm")}
-                </p>
-                {user._id === msg.msgByUserId && msg.seen ? (
+                </p> */}
+                  <div className="">
+                    {moment(msg.createdAt).format("hh:mm")}
+                    {user._id === msg.msgByUserId && msg.seen ? (
+                      <div className="absolute -right-3 -mt-3">
+                        <LiaCheckDoubleSolid size={20} />
+                      </div>
+                    ) : null}
+                  </div>
+                  {/* {user._id === msg.msgByUserId && msg.seen ? (
                   <div className="absolute -right-3 -mt-3">
                     <LiaCheckDoubleSolid size={20} />
                   </div>
-                ) : null}
+                ) : null} */}
 
-                {contextMenu &&
-                  contextMenu.messageId === msg._id &&
-                  contextMenu.visible && (
-                    <div
-                      className={`w-36 absolute ${
-                        msg.msgByUserId.trim() == user._id.trim()
-                          ? "right-10"
-                          : "-right-12"
-                      }  bg-[var(--dark-bg-color)]  rounded shadow-lg z-[4000]`}
-                    >
-                      <ul className="p-2 flex flex-col gap-4">
-                        {msg.msgByUserId.trim() === user._id.trim() && (
+                  {contextMenu &&
+                    contextMenu.messageId === msg._id &&
+                    contextMenu.visible && (
+                      <div
+                        className={`w-36 absolute ${
+                          msg.msgByUserId.trim() == user._id.trim()
+                            ? "right-10"
+                            : "-right-12"
+                        }  ${
+                          darkMode
+                            ? "bg-[var(--dark-bg-color)]"
+                            : "bg-slate-100"
+                        }  rounded shadow-lg z-[4000]`}
+                      >
+                        <ul className="p-2 flex flex-col gap-4">
                           <li
-                            className="hover:bg-[var(--light-dark-color)] flex items-center gap-2 cursor-pointer"
+                            className={`${
+                              darkMode
+                                ? "hover:bg-[var(--light-dark-color)]"
+                                : "hover:bg-slate-400"
+                            } flex items-center gap-2 cursor-pointer`}
                             onClick={() => {
-                              handleEditMessage(msg);
+                              handleReplay(msg._id);
                               setContextMenu(null); // Close menu after click
                             }}
                           >
-                            <MdModeEdit /> Edit
+                            <MdOutlineReply /> Replay
                           </li>
-                        )}
-                        <li
-                          className="hover:bg-[var(--light-dark-color)] flex items-center gap-2 cursor-pointer"
-                          onClick={() => {
-                            handleDeleteMessage(msg._id);
-                            setContextMenu(null); // Close menu after click
-                          }}
-                        >
-                          <MdDelete /> Delete
-                        </li>
-                      </ul>
-                    </div>
-                  )}
+                          {msg.msgByUserId.trim() === user._id.trim() && (
+                            <li
+                              className={`${
+                                darkMode
+                                  ? "hover:bg-[var(--light-dark-color)]"
+                                  : "hover:bg-slate-400"
+                              } flex items-center gap-2 cursor-pointer`}
+                              onClick={() => {
+                                handleEditMessage(msg);
+                                setContextMenu(null); // Close menu after click
+                              }}
+                            >
+                              <MdModeEdit /> Edit
+                            </li>
+                          )}
+                          <li
+                            className={`${
+                              darkMode
+                                ? "hover:bg-[var(--light-dark-color)]"
+                                : "hover:bg-slate-400"
+                            } flex items-center gap-2 cursor-pointer`}
+                            onClick={() => {
+                              handleDeleteMessage(msg._id);
+                              setContextMenu(null); // Close menu after click
+                            }}
+                          >
+                            <MdDelete /> Delete
+                          </li>
+                          <li
+                            className={`${
+                              darkMode
+                                ? "hover:bg-[var(--light-dark-color)]"
+                                : "hover:bg-slate-400"
+                            } flex items-center gap-2 cursor-pointer`}
+                            onClick={() => {
+                              navigator.clipboard.writeText(msg.text);
+                              setContextMenu(null);
+                              toast.success("Text copied!");
+                            }}
+                          >
+                            <MdContentCopy /> Copy
+                          </li>
+                        </ul>
+                      </div>
+                    )}
+                </div>
               </div>
             );
           })}
         <div ref={messageEndRef}></div>
       </section>
 
-      <section className="relative flex items-center h-16 bg-[var(--medium-dard)] ">
+      <section
+        className={`${
+          darkMode ? " bg-[var(--medium-dard)]" : "bg-[var(--cobalt-blue)]"
+        } relative flex items-center h-16 `}
+      >
         {/* {showScrollButton && ( */}
         {/* <button
           onClick={scrollDown}
@@ -579,23 +792,67 @@ const ChatBox = () => {
         {/* )} */}
 
         {isEdit ? (
-          <div className="flex justify-between px-4  z-[5000] absolute w-[99%]  top-0 -mt-16 h-16 bg-[var(--messge-input-dark)] items-center">
-            <div className="   bg-[var(--messge-input-dark)]">
+          <div
+            className={`${
+              darkMode
+                ? "bg-[var(--messge-input-dark)] text-slate-300"
+                : "bg-slate-300 w-full text-slate-600"
+            } flex justify-between px-4  z-[5000] absolute w-[99%]  top-0 -mt-16 h-16  items-center`}
+          >
+            <div
+              className={`w-full ${
+                darkMode
+                  ? "bg-[var(--messge-input-dark)] text-slate-300"
+                  : "bg-slate-300 w-full text-slate-600"
+              }`}
+            >
               <div className="flex justify-between items-center">
                 <div className="flex">
                   <div className="w-1 bg-green-300  h-6"></div>
-                  <h1 className="text-slate-300 text-md">Edit message </h1>
+                  <h1 className=" text-md">Edit message </h1>
                 </div>
               </div>
 
-              <p className="truncate ... text-slate-300">
+              <p className="truncate ... ">
                 <span>{editMessage.text}</span>
+              </p>
+            </div>
+            <div className="flex">
+              <button
+                onClick={handleCancelEdit}
+                className="rounded-full text-slate-500  text-md  hover:bg-[var(--light-dark-color)]"
+              >
+                <ImCross />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <></>
+        )}
+        {isReply ? (
+          <div className="flex justify-between px-4  z-[5000] absolute w-[99%]  top-0 -mt-16 h-16  items-center">
+            <div
+              className={`w-full ${
+                darkMode
+                  ? "bg-[var(--dark-bg-color)] text-slate-300"
+                  : "bg-slate-300 w-full text-black"
+              }`}
+            >
+              <div className="flex justify-between items-center">
+                <div className="flex">
+                  <div className="w-1 bg-green-300  h-6"></div>
+                  <h1 className=" text-md">Reply to.. </h1>
+                </div>
+              </div>
+
+              <p className="truncate ...  mx-1">
+                <span>{replayMessage}</span>
               </p>
             </div>
             <div>
               <button
-                onClick={handleCancelEdit}
-                className="rounded-full  text-md text-slate-300 hover:bg-[var(--light-dark-color)]"
+                onClick={handleCancelReplay}
+                className="rounded-full  text-md  hover:bg-[var(--light-dark-color)]"
               >
                 <ImCross />
               </button>
@@ -632,25 +889,23 @@ const ChatBox = () => {
                 <form className="h-full w-full  " onSubmit={handleSendMessage}>
                   <div className=" w-full flex items-center">
                     <textarea
-                      // ref={inputRef}
+                      style={{ height: "45px" }}
+                      ref={textareaRef}
                       autoComplete="off"
                       id="message_input"
+                      onInput={handleInput}
                       name="text"
-                      className="overflow-x-hidden overflow-y-scroll scrollbar mt-2 rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-white"
+                      className={` absolute bottom-2 ${
+                        darkMode
+                          ? "bg-[var(--messge-input-dark)] text-slate-300"
+                          : "text-slate-600"
+                      } overflow-x-hidden  w-[80%] md:w-[90%] lg:w-[90%]  scrollbar   rounded-2xl py-1 px-4 outline-none  `}
                       placeholder="Write a message..."
                       value={message.text}
                       onChange={handleOnMessageChange}
                       onKeyDown={handleKeyDown}
                       rows={1}
                     />
-                    {isEdit && (
-                      <button
-                        type="submit"
-                        className="rounded-full text-4xl text-slate-500 hover:bg-[var(--light-dark-color)]"
-                      >
-                        <MdCheck />
-                      </button>
-                    )}
                   </div>
                 </form>
                 <EmojiPicker onEmojiClick={handleEmojiPiker} />

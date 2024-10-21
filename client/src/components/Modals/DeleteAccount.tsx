@@ -4,6 +4,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Root_State } from "../../store/store";
 import { CloseDeleteAccount } from "../../store/actions/AccountAction";
+import { DeleteUserAccount } from "../../services/API";
 
 const DeleteAccount = () => {
   const dispatch = useDispatch();
@@ -15,21 +16,15 @@ const DeleteAccount = () => {
   const navigateTo = useNavigate();
   const handleDelete = async () => {
     setIsLoading(true);
-    console.log(_id);
-    try {
-      const response = await axios.delete(
-        `${import.meta.env.VITE_BACK_END_URL}/api/del-acc/${_id}`,
-        { withCredentials: true }
-      );
+    const response = await DeleteUserAccount(_id);
+    if (response.status == 1) {
       setIsLoading(false);
-      console.log(response.data);
-      if (response.data.status === 1) {
-        navigateTo("/user-sorry");
-      }
-    } catch (error) {
-      console.log(error);
+      await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
+        withCredentials: true,
+      });
+      navigateTo("/");
     }
-    console.log(isLoading);
+    setIsLoading(false);
   };
   return (
     <>
@@ -47,12 +42,12 @@ const DeleteAccount = () => {
         <div className="p-3 -mt-40 h-[40%] w-[22%] bg-[var(--light-dark-color)] z-[6000] rounded-md">
           <div className="mt-0">
             <div>
-              <h2 className="text-slate-300 text-xl">
+              <h2 className="text-slate-300 text-md">
                 Are you sure! you want to{" "}
                 <span className="text-red-400">Delete</span> your account!
               </h2>
             </div>
-            <span className="text-red-400">action is not revesible</span>
+            <span className="text-red-400">action is not reversible!</span>
             <div>
               {isLoading && (
                 <div className="flex justify-center">

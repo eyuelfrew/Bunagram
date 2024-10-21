@@ -15,6 +15,7 @@ import toast from "react-hot-toast";
 import { SetUserInfo } from "../store/actions/UserAction";
 
 const TwoStepVerification = () => {
+  const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const user = useSelector((state: Root_State) => state.UserReducers);
   const [displayVerifyEmail, setVerifyEmailDisplay] = useState(false);
   const [isEmailView, setEmailView] = useState(false);
@@ -124,7 +125,9 @@ const TwoStepVerification = () => {
       { email: backupEmail, _id: user._id },
       { withCredentials: true }
     );
-    console.log(response.data);
+    if (response.data.status === 1) {
+      toast.success(response.data.message);
+    }
     setEmailError("");
     setEmailView(false);
     setVerifyEmailDisplay(true);
@@ -160,7 +163,6 @@ const TwoStepVerification = () => {
       payload,
       { withCredentials: true }
     );
-    console.log(response.data);
     if (response.data?.twoStepVerification) {
       setVerifyEmailDisplay(false);
       setDisplayTwoStepVerificationMenu(true);
@@ -189,7 +191,13 @@ const TwoStepVerification = () => {
           isTwoStepVerifiction ? "" : "hidden"
         } absolute flex w-full justify-center items-center `}
       >
-        <div className="bg-[var(--light-dark-color)] rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]">
+        <div
+          className={`${
+            darkMode
+              ? "bg-[var(--light-dark-color)]"
+              : "bg-[var(--cobalt-blue)]"
+          } rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]`}
+        >
           <div className="flex items-center justify-between p-4">
             <div>
               <button
@@ -225,7 +233,11 @@ const TwoStepVerification = () => {
             <div className="flex justify-center px-3 items-center  cursor-pointer py-2">
               <button
                 onClick={handleCreatePassword}
-                className="hover:bg-[var(--medium-dard)] p-4 rounded-lg mt-5 mb-4 text-slate-300"
+                className={`${
+                  darkMode
+                    ? "hover:bg-[var(--medium-dard)]"
+                    : "hover:bg-[var(--blue-grotto)]"
+                } p-4 rounded-lg mt-5 mb-4 text-slate-300`}
               >
                 Create Password
               </button>
@@ -249,7 +261,13 @@ const TwoStepVerification = () => {
           passwordForm ? "" : "hidden"
         } absolute flex w-full justify-center items-center `}
       >
-        <div className="bg-[var(--light-dark-color)] rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]">
+        <div
+          className={`${
+            darkMode
+              ? "bg-[var(--light-dark-color)]"
+              : "bg-[var(--cobalt-blue)]"
+          } rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]`}
+        >
           <div className="flex items-center justify-between p-4">
             <div>
               <button
@@ -278,7 +296,7 @@ const TwoStepVerification = () => {
           <div>
             <form
               onSubmit={handleContinueToHint}
-              className="max-w-md mx-auto p-4 bg-[var(--light-dark-color)] rounded-lg "
+              className="max-w-md mx-auto p-4  rounded-lg "
             >
               <div className="mb-4">
                 <label className="block text-sm text-slate-300 mb-2 font-light">
@@ -288,7 +306,11 @@ const TwoStepVerification = () => {
                   type="password"
                   value={password}
                   onChange={handlePasswordChange}
-                  className="text-slate-200 w-full px-3 py-2 focus:outline-none  bg-[var(--dark-bg-color)] rounded-2xl"
+                  className={`${
+                    darkMode
+                      ? "bg-[var(--dark-bg-color)] text-slate-200"
+                      : "text-slate-600"
+                  }  w-full px-3 py-2 focus:outline-none rounded-2xl`}
                   placeholder=""
                 />
               </div>
@@ -300,7 +322,11 @@ const TwoStepVerification = () => {
                   type="password"
                   value={confirmPassword}
                   onChange={handleConfirmPasswordChange}
-                  className="text-slate-200 w-full px-3 py-2 focus:outline-none  bg-[var(--dark-bg-color)] rounded-2xl"
+                  className={`${
+                    darkMode
+                      ? "bg-[var(--dark-bg-color)] text-slate-200"
+                      : "text-slate-600"
+                  }  w-full px-3 py-2 focus:outline-none rounded-2xl`}
                   placeholder=""
                 />
               </div>
@@ -335,7 +361,13 @@ const TwoStepVerification = () => {
           isHintView ? "" : "hidden"
         } absolute flex w-full justify-center items-center `}
       >
-        <div className="bg-[var(--light-dark-color)] rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]">
+        <div
+          className={`${
+            darkMode
+              ? "bg-[var(--light-dark-color)]"
+              : "bg-[var(--cobalt-blue)]"
+          } rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]`}
+        >
           <div className="flex items-center justify-between p-4">
             <div>
               <button
@@ -364,7 +396,7 @@ const TwoStepVerification = () => {
           <div>
             <form
               onSubmit={handleContinueToEmail}
-              className="max-w-md mx-auto p-4 bg-[var(--light-dark-color)] rounded-lg "
+              className="max-w-md mx-auto p-4 rounded-lg "
             >
               <div className="mb-4">
                 <label className="block text-sm text-slate-300 mb-2 font-light">
@@ -374,14 +406,16 @@ const TwoStepVerification = () => {
                   type="text"
                   value={hint}
                   onChange={handleHintChange}
-                  className="text-slate-200 w-full px-3 py-2 focus:outline-none  bg-[var(--dark-bg-color)] rounded-2xl"
+                  className={`${
+                    darkMode ? "bg-[var(--dark-bg-color)]" : "text-slate-800"
+                  } text-slate-200 w-full px-3 py-2 focus:outline-none   rounded-2xl`}
                   placeholder=""
                 />
                 <span className="text-red-500">{hintError}</span>
               </div>
               <span
                 onClick={handleSkipHint}
-                className="cursor-pointer mb-4 p-3 rounded-xl mx-3 text-slate-300 font-light hover:bg-slate-600"
+                className="cursor-pointer mb-4 p-3 rounded-xl mx-3 text-slate-300 font-light "
               >
                 Skip hint!
               </span>
@@ -412,7 +446,13 @@ const TwoStepVerification = () => {
           isEmailView ? "" : "hidden"
         } absolute flex w-full justify-center items-center `}
       >
-        <div className="bg-[var(--light-dark-color)] rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]">
+        <div
+          className={`${
+            darkMode
+              ? "bg-[var(--light-dark-color)]"
+              : "bg-[var(--cobalt-blue)]"
+          } rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]`}
+        >
           <div className="flex items-center justify-between p-4">
             <div>
               <button
@@ -443,7 +483,7 @@ const TwoStepVerification = () => {
           <div>
             <form
               onSubmit={handleContinueToVerification}
-              className="max-w-md mx-auto p-4 bg-[var(--light-dark-color)] rounded-lg "
+              className="max-w-md mx-auto p-4 rounded-lg "
             >
               <div className="mb-4">
                 <label className="block text-sm text-slate-300 mb-2 font-light">
@@ -453,7 +493,9 @@ const TwoStepVerification = () => {
                   type="email"
                   value={backupEmail}
                   onChange={handleEmailChange}
-                  className="text-slate-200 w-full px-3 py-2 focus:outline-none  bg-[var(--dark-bg-color)] rounded-2xl"
+                  className={`${
+                    darkMode ? " bg-[var(--dark-bg-color)]" : "text-slate-700"
+                  } text-slate-200 w-full px-3 py-2 focus:outline-none  rounded-2xl`}
                   placeholder=""
                 />
                 <span className="text-red-500">{emailError}</span>
@@ -486,7 +528,13 @@ const TwoStepVerification = () => {
           displayVerifyEmail ? "" : "hidden"
         } absolute flex w-full justify-center items-center `}
       >
-        <div className="bg-[var(--light-dark-color)] rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]">
+        <div
+          className={`${
+            darkMode
+              ? "bg-[var(--light-dark-color)]"
+              : "bg-[var(--cobalt-blue)]"
+          } rounded-xl mt-6  w-[69%] lg:w-[25%] flex flex-col z-[2400]`}
+        >
           <div className="flex items-center justify-between p-4">
             <div>
               <button
@@ -517,7 +565,7 @@ const TwoStepVerification = () => {
           <div>
             <form
               onSubmit={handleVerifyEmail}
-              className="max-w-md mx-auto p-4 bg-[var(--light-dark-color)] rounded-lg "
+              className="max-w-md mx-auto p-4 rounded-lg "
             >
               <div className="mb-4">
                 <label className="block text-sm text-slate-300 mb-2 font-light">
@@ -527,7 +575,9 @@ const TwoStepVerification = () => {
                   type="text"
                   value={verificationCode}
                   onChange={handlVerifyCode}
-                  className="text-slate-200 w-full px-3 py-2 focus:outline-none  bg-[var(--dark-bg-color)] rounded-2xl"
+                  className={`${
+                    darkMode ? "bg-[var(--dark-bg-color)]" : "text-slate-800"
+                  } text-slate-200 w-full px-3 py-2 focus:outline-none rounded-2xl`}
                   placeholder=""
                 />
                 <span className="text-red-500">{verificationError}</span>
@@ -556,7 +606,7 @@ const TwoStepVerification = () => {
 };
 
 export default TwoStepVerification;
-const EmailSvg = () => {
+export const EmailSvg = () => {
   return (
     <svg
       viewBox="0 0 36 36"

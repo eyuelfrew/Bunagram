@@ -9,11 +9,11 @@ const FetchConversations = async (req, res) => {
         .populate("messages")
         .populate(
           "sender",
-          "_id name email profile_pic blockedUsers phone_number bio user_name lastSeen createdAt"
+          "_id name email profile_pic blockedUsers phone_number bio user_name lastSeen deletedAccount createdAt"
         )
         .populate(
           "receiver",
-          "_id name email profile_pic blockedUsers phone_number bio user_name lastSeen createdAt"
+          "_id name email profile_pic blockedUsers phone_number bio user_name lastSeen deletedAccount createdAt"
         )
         .sort({ updatedAt: -1 });
 
