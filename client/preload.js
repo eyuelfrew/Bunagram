@@ -1,25 +1,12 @@
+/* eslint-disable no-undef */
 // preload.js
-import { contextBridge, ipcRenderer } from "electron";
 
-// Expose process and platform safely to the renderer process
-contextBridge.exposeInMainWorld("electron", {
-  process: {
-    // eslint-disable-next-line no-undef
-    platform: process.platform,
-    // eslint-disable-next-line no-undef
-    versions: process.versions, // Expose version info like Node.js, Chrome, etc.
-  },
-  // Example: Expose functions for sending messages to and from the main process
-  send: (channel, data) => {
-    const validChannels = ["toMain"]; // Define valid channels for security
-    if (validChannels.includes(channel)) {
-      ipcRenderer.send(channel, data);
-    }
-  },
-  receive: (channel, func) => {
-    const validChannels = ["fromMain"]; // Define valid channels for security
-    if (validChannels.includes(channel)) {
-      ipcRenderer.on(channel, (event, ...args) => func(...args));
-    }
-  },
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { contextBridge, ipcRenderer } = require("electron");
+
+// Expose the API to the renderer process
+contextBridge.exposeInMainWorld("myApi", {
+  sendMessage: (message) => ipcRenderer.send("message", message),
+  onMessage: (callback) =>
+    ipcRenderer.on("message", (event, message) => callback(message)),
 });
