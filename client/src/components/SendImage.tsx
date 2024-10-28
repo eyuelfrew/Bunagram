@@ -3,7 +3,7 @@ import PreviewComponent from "./Modals/PreviewComponent";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { Root_State } from "../store/store";
-import EncryptinService from "../utils/EncryptionService";
+// import EncryptinService from "../utils/EncryptionService";
 import { SendCaption } from "../services/API";
 
 const SendImage = () => {
@@ -12,11 +12,11 @@ const SendImage = () => {
   const [image, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
   const [caption, setCaption] = useState<string>("");
-  const EncService = new EncryptinService(
-    import.meta.env.VITE_TRANSIT_KEY,
-    import.meta.env.VITE_STORAGE_KEY,
-    import.meta.env.VITE_INCOMING_MESSAGE_KEY
-  );
+  // const EncService = new EncryptinService(
+  //   import.meta.env.VITE_TRANSIT_KEY,
+  //   import.meta.env.VITE_STORAGE_KEY,
+  //   import.meta.env.VITE_INCOMING_MESSAGE_KEY
+  // );
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     setIsLoading(false);
@@ -36,7 +36,7 @@ const SendImage = () => {
       setIsLoading(true);
       const formData = new FormData();
       if (caption.trim() != "") {
-        formData.append("text", EncService.EncryptMessage(caption));
+        formData.append("text", "EncService.EncryptMessage(caption)");
       } else {
         formData.append("text", "");
       }

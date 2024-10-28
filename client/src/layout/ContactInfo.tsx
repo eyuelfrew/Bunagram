@@ -24,14 +24,14 @@ import { ViewMenu } from "../store/actions/MenuControllers";
 import { MdDelete } from "react-icons/md";
 import { UploadProfile } from "../services/API";
 import toast from "react-hot-toast";
+import moment from "moment";
 
 const ContactInfo = () => {
   const URI = import.meta.env.VITE_BACK_END_URL;
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const [loading, setLoading] = useState(false);
-  const { name, phone_number, user_name, bio, _id, profile_pic } = useSelector(
-    (state: Root_State) => state.UserReducers
-  );
+  const { name, phone_number, user_name, bio, _id, profile_pic, createdAt } =
+    useSelector((state: Root_State) => state.UserReducers);
   const [bioUser, setBioUser] = useState<string>(bio);
 
   const isContactInfo = useSelector(
@@ -280,6 +280,13 @@ const ContactInfo = () => {
               <span className="text-md text-gray-300 font-thin">
                 {user_name}
               </span>
+            </div>
+            <div className="flex justify-between px-3 items-center hover:bg-[var(--medium-dard)] cursor-pointer py-2">
+              <span className="flex gap-4 text-md text-gray-300 items-center font-thin">
+                {" "}
+                Joined in
+              </span>
+              <span>{moment(createdAt).format("MMMM Do YYYY")}</span>
             </div>
           </div>
           <div className=" flex flex-col justify-center mt-5">

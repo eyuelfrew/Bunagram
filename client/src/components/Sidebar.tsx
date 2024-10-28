@@ -14,7 +14,7 @@ import LoadingConversation from "./LoadingConversation";
 import { FaCheck } from "react-icons/fa6";
 import { BiCheckDouble } from "react-icons/bi";
 import { FetchConversations } from "../services/API";
-// import EncryptinService from "../utils/EncryptionService";
+import { decryptMessage } from "../utils/EncryptionService";
 
 interface ConversationWithUserDetails extends Conversation {
   userDetails: User;
@@ -41,11 +41,7 @@ const Sidebar = () => {
     ConversationWithUserDetails[] | null
   >(null);
   const user = useSelector((state: Root_State) => state.UserReducers);
-  // const EncService = new EncryptinService(
-  //   import.meta.env.VITE_TRANSIT_KEY,
-  //   import.meta.env.VITE_STORAGE_KEY,
-  //   import.meta.env.VITE_INCOMING_MESSAGE_KEY
-  // );
+  // const encryptionService = new WebCryptoEncryptionService();
   const handleSearchUser = async (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setInputValue({ ...searchUser, [name]: value });
@@ -73,27 +69,28 @@ const Sidebar = () => {
     setIsLoading(true);
     const conversation = await FetchConversations();
     const conversationUserData: ConversationWithUserDetails[] =
-      conversation?.map((conversationUser: Conversation) => {
-        if (
-          // menu side bar controller function
-          conversationUser?.sender?._id === conversationUser?.receiver?._id
-        ) {
-          return {
-            ...conversationUser,
-            userDetails: conversationUser?.sender,
-          };
-        } else if (conversationUser?.receiver?._id !== user?._id) {
-          return {
-            ...conversationUser,
-            userDetails: conversationUser.receiver,
-          };
-        } else {
-          return {
-            ...conversationUser,
-            userDetails: conversationUser.sender,
-          };
-        }
-      });
+      await Promise.all(
+        conversation?.map(async (conversationUser: Conversation) => {
+          if (
+            conversationUser?.sender?._id === conversationUser?.receiver?._id
+          ) {
+            return {
+              ...conversationUser,
+              userDetails: conversationUser?.sender,
+            };
+          } else if (conversationUser?.receiver?._id !== user?._id) {
+            return {
+              ...conversationUser,
+              userDetails: conversationUser.receiver,
+            };
+          } else {
+            return {
+              ...conversationUser,
+              userDetails: conversationUser.sender,
+            };
+          }
+        }) || []
+      );
     setAllUsers(conversationUserData);
     setIsLoading(false);
   };
@@ -176,7 +173,7 @@ const Sidebar = () => {
         <div className="flex p-4 items-center gap-1 text-white ">
           <button
             onClick={handleSideNavBar}
-            className="text-[var(--menu-button)]"
+            className={`${darkMode ? "text-slate-300" : "text-white"}`}
           >
             <IoMenu size={35} />
           </button>
@@ -249,12 +246,13 @@ const Sidebar = () => {
                         </>
                       ) : (
                         <>
-                          {user._id.trim() != loggedInUser._id.trim() && (
-                            <SeachResult
-                              onClose={() => setViewSearchResult(false)}
-                              user={user}
-                            />
-                          )}
+                          {user._id.trim() != loggedInUser._id.trim() &&
+                            !user.deletedAccount && (
+                              <SeachResult
+                                onClose={() => setViewSearchResult(false)}
+                                user={user}
+                              />
+                            )}
                         </>
                       )}
                     </div>
@@ -265,11 +263,11 @@ const Sidebar = () => {
         </div>
         <div className="h-[calc(100vh-74px)] overflow-x-hidden overflow-y-auto scrollbar">
           {allUsers && allUsers.length === 0 && (
-            <div>
-              <div className="flex justify-center mt-10 text-slate-400">
+            <div className="">
+              <div className="flex justify-center mt-10 text-slate-200">
                 <FiArrowUpLeft size={40} />
               </div>
-              <p className="text-lg text-center text-slate-400">
+              <p className="text-lg text-center text-slate-200">
                 explore users to start conversation!
               </p>
             </div>
@@ -318,13 +316,13 @@ const Sidebar = () => {
                                 ? ` ${
                                     darkMode
                                       ? "bg-[var(--light-dark-color)]"
-                                      : "bg-[var(--brandeis-blue)]"
+                                      : "bg-gray-700"
                                   } `
                                 : ""
                             } ${
                               darkMode
                                 ? "hover:bg-[var(--medium-dard)]"
-                                : "hover:bg-[var(--blue-de-france)]"
+                                : "hover:bg-gray-600"
                             }  flex px-2 py-1 justify-between items-center`}
                           >
                             <div className="flex">
@@ -402,9 +400,7 @@ const Sidebar = () => {
                                   {conv?.lastMessage?.text ? (
                                     <>
                                       {" "}
-                                      {/* {EncService.DecryptMessage(
-                                        conv.lastMessage.text
-                                      )} */}
+                                      {decryptMessage(conv.lastMessage.text)}
                                     </>
                                   ) : (
                                     <>say hi 👋</>

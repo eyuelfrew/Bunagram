@@ -2,18 +2,18 @@ const {
   ConversationModel,
   MessageModel,
 } = require("../../models/ConversationModel");
-const Encryption = require("../../service/EncriptionServce");
+const {
+  decryptMessage,
+  encryptMessageToStore,
+  decryptStoredMessage,
+  messageEncryptToClient,
+} = require("../../service/EncriptionServce");
 
 const SendMessage = async (req, res) => {
   const { reciver_id, text, replyToMessageId } = req.body;
-  console.log(replyToMessageId);
   const SenderId = req.userId;
   const userSocketMap = req.userSocketMap;
-  const EncService = new Encryption(
-    process.env.TRANSIT_SECERETE_KEY,
-    process.env.STORAGE_SECRETE_KEY,
-    process.env.BACK_TO_CLIENT_KEY
-  );
+
   try {
     let conversation = await ConversationModel.findOne({
       $or: [
@@ -45,11 +45,11 @@ const SendMessage = async (req, res) => {
     /*
      * Decrypt the coming message and encrypt it for storage
      * */
-    const PlainText = EncService.decryptIncomingSingleMessage(text);
-
+    const PlainText = decryptMessage(text);
+    const cypgerText = encryptMessageToStore(PlainText);
     //store the sent message in data base
     const message = new MessageModel({
-      text: EncService.encryptForStorage(PlainText),
+      text: cypgerText,
       imageURL: "",
       sender: SenderId,
       msgByUserId: SenderId,
@@ -67,10 +67,8 @@ const SendMessage = async (req, res) => {
      * Decrypted the saved message or stored message and encrypt it using
      * Different Key and Send to each user(conversation)
      * */
-    let messageToBeSent = EncService.decrypteStoredMessage(
-      savedMessageWithReply.text
-    );
-    messageToBeSent = EncService.encryptSingleMessage(messageToBeSent);
+    let messageToBeSent = decryptStoredMessage(savedMessageWithReply.text);
+    messageToBeSent = messageEncryptToClient(messageToBeSent);
     savedMessageWithReply.text = messageToBeSent;
     const payload = {
       sender_id: SenderId,

@@ -42,35 +42,47 @@ const CloudPassword = () => {
     }
   };
   return (
-    <div className="flex justify-center items-center h-screen bg-[var(--hard-dark)]">
-      <div className="max-w-md w-full bg-[var(--dark-bg-color)] bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-xl overflow-hidden">
-        <p className="text-center text-gray-300 mb-6 text-xl font-light">
-          Two-Step Veriication
-        </p>
-        <div className="space-y-6 px-4 py-5">
-          <div className="flex  flex-col">
-            <input
-              type="password"
-              value={password}
-              onChange={handlePasswordChange}
-              className="w-full h-12 text-center text-2xl font-bold bg-gray-700 text-white border-2 border-gray-600 rounded-lg focus:border-gray-400 focus:outline-none"
-            />
-            <span className="text-red-500">{passwordError}</span>
-          </div>
-          <span className="text-slate-300">{hint}</span>
-          <div className="flex justify-between">
-            <button
-              onClick={handleBackToLogIn}
-              className="  rounded-lg  text-lg font-light text-white"
-            >
-              back
-            </button>
-            <button
-              onClick={handleVerifyPassword}
-              className="h-5 flex text-white items-center justify-center  rounded-lg  text-lg font-light"
-            >
-              Continue
-            </button>
+    <div className="flex justify-center items-center h-screen bg-gradient-to-r from-blue-100 to-purple-300">
+      <div className="max-w-md w-full bg-gradient-to-r from-indigo-800 to-purple-900 bg-opacity-50 backdrop-filter backdrop-blur-xl rounded-2xl shadow-lg overflow-hidden">
+        <div className="px-8 py-10">
+          <h2 className="text-3xl font-semibold text-center text-white mb-6">
+            Two-Step Verification
+          </h2>
+
+          <div className="space-y-6 flex flex-col">
+            <div className="relative">
+              <input
+                type="password"
+                value={password}
+                onChange={handlePasswordChange}
+                className="w-full h-12 px-4 bg-[var(--input-bg)] text-white text-center rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-150 ease-in-out"
+                placeholder="Enter cloud password"
+              />
+              {passwordError && (
+                <span className=" bottom-0 left-0 text-red-500 text-sm mt-1">
+                  {passwordError}
+                </span>
+              )}
+            </div>
+
+            <span className="block text-slate-400 text-center ">
+              Hint: {hint}
+            </span>
+
+            <div className="flex justify-between items-center mt-4">
+              <button
+                onClick={handleBackToLogIn}
+                className="text-white font-light hover:text-indigo-500 transition duration-150 ease-in-out"
+              >
+                Back
+              </button>
+              <button
+                onClick={handleVerifyPassword}
+                className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg transition duration-150 ease-in-out"
+              >
+                Continue
+              </button>
+            </div>
           </div>
         </div>
       </div>

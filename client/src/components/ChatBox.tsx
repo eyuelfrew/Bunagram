@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { Root_State } from "../store/store";
 import moment from "moment";
 import { clearReciver, updateReceiver } from "../store/actions/getRecever";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaCheckDouble } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import { UseSocket } from "../context/SocketContext";
 import ChatMenu from "./ChatMenu";
@@ -26,16 +26,25 @@ import {
 } from "react-icons/md";
 import EmojiPicker from "./EmojiPicker";
 import { LiaCheckDoubleSolid } from "react-icons/lia";
-import { ImCross } from "react-icons/im";
+import { ImCancelCircle, ImCross } from "react-icons/im";
 import {
   DeleteSingleMessage,
   FetchAllMessage,
   SendMessage,
   UpdateSingleMessage,
 } from "../services/API";
-import EncryptinService from "../utils/EncryptionService";
 import { Recevier } from "../types/Types";
 import toast from "react-hot-toast";
+import {
+  decryptIncomingMessage,
+  decryptMessage,
+  encryptMessage,
+} from "../utils/EncryptionService";
+import { FaCheck } from "react-icons/fa6";
+import { DeleteSelectedMessages } from "../services/MessagesApi";
+import { TiCancelOutline } from "react-icons/ti";
+import { UnblockUser } from "../apis/UserApi";
+import { SetUserInfo } from "../store/actions/UserAction";
 
 interface Message {
   text: string;
@@ -62,6 +71,8 @@ interface ContextMenuProps {
   y: number;
 }
 const ChatBox = () => {
+  // array of selected message handle state
+  const [selectedMessages, setSelectedMessages] = useState<string[]>([]);
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const [contextMenu, setContextMenu] = useState<ContextMenuProps | null>(null);
   const currentMessage = useRef<HTMLDivElement>(null);
@@ -135,14 +146,8 @@ const ChatBox = () => {
     setIsReplay(false);
     setReplyMessage("");
   };
-  /*
-  -- instantiate the encrition service
-  */
-  const EncService = new EncryptinService(
-    import.meta.env.VITE_TRANSIT_KEY,
-    import.meta.env.VITE_STORAGE_KEY,
-    import.meta.env.VITE_INCOMING_MESSAGE_KEY
-  );
+
+  // import.meta.env.VITE_TRANSIT_KEY
   /*
   -- Fetch Messages One Time When Reciver State Changes
   -- 
@@ -153,7 +158,7 @@ const ChatBox = () => {
     AllMessages = AllMessages.map((message: Message) => {
       return {
         ...message,
-        text: EncService.DecryptMessage(message.text),
+        text: decryptMessage(message.text),
       };
     });
     setAllMessage(AllMessages);
@@ -238,9 +243,7 @@ const ChatBox = () => {
         sender_id: string;
       }) => {
         setMessage({ ...message, text: "" });
-        data.message.text = await EncService.DecryptIncomingMessage(
-          data?.message?.text
-        );
+        data.message.text = await decryptIncomingMessage(data?.message?.text);
         const string_con = (Recever.conversation_id || "").toString().trim();
         const new_conversation_id = (data?.convID || "").toString().trim();
 
@@ -269,13 +272,11 @@ const ChatBox = () => {
       const handleNewConveration = (newConversationId: { convID: string }) => {
         dispatch(updateReceiver(newConversationId.convID));
       };
-      const handleUpdatedMessage = (updatedMessage: AllMessage) => {
-        const decryptedMessage = EncService.DecryptMessage(updatedMessage.text);
+      const handleUpdatedMessage = async (updatedMessage: AllMessage) => {
+        const plan_text = await decryptMessage(updatedMessage.text);
         setAllMessage((prevMessages) =>
           prevMessages.map((msg) =>
-            msg._id === updatedMessage._id
-              ? { ...msg, text: decryptedMessage }
-              : msg
+            msg._id === updatedMessage._id ? { ...msg, text: plan_text } : msg
           )
         );
       };
@@ -286,6 +287,11 @@ const ChatBox = () => {
       SocketConnection.on("new-message", NewMessageHandler);
       SocketConnection.on("updated-message", handleUpdatedMessage);
       SocketConnection.on("clear-chat", handleClearChatSocket);
+      SocketConnection.on("mutli-message-deleted", (deletedMessages) => {
+        setAllMessage((prevMessages) =>
+          prevMessages.filter((msg) => !deletedMessages.includes(msg._id))
+        );
+      });
 
       SocketConnection.on("message-seen", (data) => {
         setAllMessage((prevMessages) =>
@@ -410,7 +416,7 @@ const ChatBox = () => {
         setReplyMessage("");
         const payload = {
           reciver_id: Recever.recever_id,
-          text: EncService.EncryptMessage(message.text),
+          text: await encryptMessage(message.text),
           conversation: Recever.conversation_id || "",
           replyToMessageId: message?.replyToMessageId
             ? message.replyToMessageId
@@ -435,7 +441,8 @@ const ChatBox = () => {
         )
       );
       const editedMessage = {
-        message: EncService.EncryptMessage(message.text),
+        // message: await EncService.EncryptMessage(message.text),
+        message: await encryptMessage(message.text),
         reciver_id: Recever.recever_id,
         message_id: editMessageID?._id,
       };
@@ -476,6 +483,55 @@ const ChatBox = () => {
       SocketConnection.emit("leave-room", { roomName: previousRoom });
     dispatch(clearReciver());
   };
+
+  /*
+ -- Selecting message function
+ */
+  const handleSelectMessage = (messageId: string) => {
+    if (selectedMessages.includes(messageId)) {
+      setSelectedMessages(
+        selectedMessages.filter((msgId) => msgId !== messageId)
+      );
+    } else {
+      setSelectedMessages([...selectedMessages, messageId]);
+    }
+    console.log(selectedMessages);
+  };
+  /*
+  --- hande unlselect all
+  */
+  const handleSelectAll = () => {
+    setSelectedMessages(allMessages.map((msg) => msg._id)); // Select all
+  };
+  /*
+  --- handle unselect all
+  */
+  const handleUnSelectAll = () => {
+    setSelectedMessages([]);
+  };
+  /*
+  --- handle delet selected messages
+  */
+  const handleDeleteSelected = async () => {
+    if (selectedMessages.length > 0) {
+      const updatedMessages = allMessages.filter(
+        (msg) => !selectedMessages.includes(msg._id)
+      );
+
+      setAllMessage(updatedMessages);
+    } else {
+      return;
+    }
+
+    const conversation_id = Recever.conversation_id.toString();
+    setSelectedMessages([]);
+    const res = await DeleteSelectedMessages(selectedMessages, conversation_id);
+    if (res.success) {
+      setSelectedMessages([]);
+      toast.success(res.message);
+    }
+  };
+
   return (
     <div className="" onClick={handleClickOutside}>
       <header
@@ -617,27 +673,31 @@ const ChatBox = () => {
               <div
                 key={_index}
                 id={`${msg._id}`}
-                className="  transition duration-500"
+                className={`${
+                  selectedMessages.includes(msg._id) ? "bg-slate-700 " : ""
+                } transition duration-500`}
                 ref={currentMessage}
               >
                 <div
                   onContextMenu={(event) => handleRightClick(event, msg._id)}
                   onClick={handleClickOutside}
-                  className={`cursor-pointer relative min-w-28 max-w-48 lg:max-w-96 mx-4 ${
-                    darkMode
-                      ? "bg-[var(--medium-dard)] text-slate-300"
-                      : "bg-white text-slate-700"
-                  } mb-2
+                  className={` cursor-pointer relative min-w-28 max-w-48 lg:max-w-96 mx-4 mb-2
                  p-3 py-1 rounded w-fit h-fit ${
                    user._id === msg.msgByUserId
                      ? `ml-auto ${
-                         darkMode ? "bg-[var(--message-bg)]" : "bg-green-200"
+                         darkMode
+                           ? "bg-[var(--message-bg)] text-slate-300 "
+                           : "bg-green-300"
                        }`
-                     : ""
-                 } transition duration-500`}
+                     : `${
+                         darkMode
+                           ? "bg-[var(--hard-dark)] text-slate-300 "
+                           : "bg-red-200"
+                       }`
+                 } transition duration-500 `}
                 >
                   {msg?.replyToMessageId && (
-                    <div className="min-w-28 max-w-48 lg:max-w-96 bg-slate-600 overflow-hidden">
+                    <div className="bg-slate-600 overflow-hidden mb-3">
                       <Link
                         to={`#${msg?.replyToMessageId}`}
                         onClick={(e) => {
@@ -645,7 +705,6 @@ const ChatBox = () => {
                           const elementMessage = document.getElementById(
                             msg?.replyToMessageId._id
                           );
-
                           if (elementMessage) {
                             elementMessage.scrollIntoView({
                               behavior: "smooth",
@@ -656,109 +715,167 @@ const ChatBox = () => {
                             }, 2000);
                           }
                         }}
-                        className=" min-w-28 max-w-48 lg:max-w-96 border-l-4  border-green-500 mb-3 p-3 "
+                        className="block w-full border-l-4 border-green-500 p-3 text-slate-200 bg-slate-600"
                       >
-                        <span
-                          className={`${
-                            darkMode ? "" : "text-slate-200"
-                          } truncate ...`}
-                        >
-                          {" "}
-                          {msg?.replyToMessageId?.text != "" &&
-                            EncService.DecryptMessage(
-                              msg?.replyToMessageId?.text
-                            )}{" "}
+                        <span className="truncate ...">
+                          {decryptMessage(msg?.replyToMessageId?.text)}
                         </span>
                       </Link>
                     </div>
                   )}
-                  {msg.imageURL ? (
+
+                  {msg.imageURL && (
                     <img
                       src={`${URI}${msg.imageURL}`}
-                      alt=""
-                      className="w-full"
+                      alt="Image"
+                      className="w-full rounded-lg mb-2"
                     />
-                  ) : null}
+                  )}
+
                   <p className="break-words">{msg.text}</p>
-                  {/* <p className=" justify-end">
-                  {moment(msg.createdAt).format("hh:mm")}
-                </p> */}
-                  <div className="">
-                    {moment(msg.createdAt).format("hh:mm")}
-                    {user._id === msg.msgByUserId && msg.seen ? (
-                      <div className="absolute -right-3 -mt-3">
-                        <LiaCheckDoubleSolid size={20} />
+
+                  <div className="text-xs mt-1 text-right">
+                    {moment(msg.createdAt).format("hh:mm A")}
+                    {user._id === msg.msgByUserId && msg.seen && (
+                      <div className="inline-block ml-2">
+                        <LiaCheckDoubleSolid size={16} />
                       </div>
-                    ) : null}
+                    )}
                   </div>
-                  {/* {user._id === msg.msgByUserId && msg.seen ? (
-                  <div className="absolute -right-3 -mt-3">
-                    <LiaCheckDoubleSolid size={20} />
-                  </div>
-                ) : null} */}
 
                   {contextMenu &&
                     contextMenu.messageId === msg._id &&
                     contextMenu.visible && (
                       <div
-                        className={`w-36 absolute ${
-                          msg.msgByUserId.trim() == user._id.trim()
+                        className={`absolute w-40 z-50 rounded-lg shadow-lg p-2 ${
+                          msg.msgByUserId.trim() === user._id.trim()
                             ? "right-10"
                             : "-right-12"
-                        }  ${
+                        } ${
                           darkMode
                             ? "bg-[var(--dark-bg-color)]"
                             : "bg-slate-100"
-                        }  rounded shadow-lg z-[4000]`}
+                        }`}
                       >
-                        <ul className="p-2 flex flex-col gap-4">
+                        <ul className="flex flex-col gap-4">
                           <li
-                            className={`${
+                            className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 ${
                               darkMode
                                 ? "hover:bg-[var(--light-dark-color)]"
-                                : "hover:bg-slate-400"
-                            } flex items-center gap-2 cursor-pointer`}
+                                : "hover:bg-slate-300"
+                            }`}
                             onClick={() => {
                               handleReplay(msg._id);
-                              setContextMenu(null); // Close menu after click
+                              setContextMenu(null);
                             }}
                           >
-                            <MdOutlineReply /> Replay
+                            <MdOutlineReply /> Reply
+                          </li>{" "}
+                          <li
+                            className={` flex items-center gap-2 cursor-pointer transition-colors duration-300 ${
+                              darkMode
+                                ? "hover:bg-[var(--light-dark-color)]"
+                                : "hover:bg-slate-300"
+                            }`}
+                            onClick={() => handleSelectMessage(msg._id)}
+                          >
+                            {" "}
+                            {selectedMessages.includes(msg._id) ? (
+                              <span>
+                                <TiCancelOutline />
+                              </span>
+                            ) : (
+                              <span>
+                                <FaCheck />
+                              </span>
+                            )}
+                            {selectedMessages.includes(msg._id) ? (
+                              <span>Unselect</span>
+                            ) : (
+                              <span>Select</span>
+                            )}
                           </li>
+                          {selectedMessages.length > 0 ? (
+                            <>
+                              <li
+                                className={` flex items-center gap-2 cursor-pointer transition-colors duration-300 ${
+                                  darkMode
+                                    ? "hover:bg-[var(--light-dark-color)]"
+                                    : "hover:bg-slate-300"
+                                }`}
+                                onClick={handleUnSelectAll}
+                              >
+                                <TiCancelOutline />
+                                Unselect All
+                              </li>
+                            </>
+                          ) : (
+                            <>
+                              <li
+                                className={` flex items-center gap-2 cursor-pointer transition-colors duration-300 ${
+                                  darkMode
+                                    ? "hover:bg-[var(--light-dark-color)]"
+                                    : "hover:bg-slate-300"
+                                }`}
+                                onClick={handleSelectAll}
+                              >
+                                <FaCheckDouble />
+                                Select All
+                              </li>
+                            </>
+                          )}
                           {msg.msgByUserId.trim() === user._id.trim() && (
                             <li
-                              className={`${
+                              className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 ${
                                 darkMode
                                   ? "hover:bg-[var(--light-dark-color)]"
-                                  : "hover:bg-slate-400"
-                              } flex items-center gap-2 cursor-pointer`}
+                                  : "hover:bg-slate-300"
+                              }`}
                               onClick={() => {
                                 handleEditMessage(msg);
-                                setContextMenu(null); // Close menu after click
+                                setContextMenu(null);
                               }}
                             >
                               <MdModeEdit /> Edit
                             </li>
                           )}
+                          {selectedMessages.length > 0 ? (
+                            <>
+                              {" "}
+                              <li
+                                className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 ${
+                                  darkMode
+                                    ? "hover:bg-[var(--light-dark-color)]"
+                                    : "hover:bg-slate-300"
+                                }`}
+                                onClick={handleDeleteSelected}
+                              >
+                                <MdDelete /> Delete Selected
+                              </li>
+                            </>
+                          ) : (
+                            <>
+                              <li
+                                className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 ${
+                                  darkMode
+                                    ? "hover:bg-[var(--light-dark-color)]"
+                                    : "hover:bg-slate-300"
+                                }`}
+                                onClick={() => {
+                                  handleDeleteMessage(msg._id);
+                                  setContextMenu(null);
+                                }}
+                              >
+                                <MdDelete /> Delete
+                              </li>
+                            </>
+                          )}
                           <li
-                            className={`${
+                            className={`flex items-center gap-2 cursor-pointer transition-colors duration-300 ${
                               darkMode
                                 ? "hover:bg-[var(--light-dark-color)]"
-                                : "hover:bg-slate-400"
-                            } flex items-center gap-2 cursor-pointer`}
-                            onClick={() => {
-                              handleDeleteMessage(msg._id);
-                              setContextMenu(null); // Close menu after click
-                            }}
-                          >
-                            <MdDelete /> Delete
-                          </li>
-                          <li
-                            className={`${
-                              darkMode
-                                ? "hover:bg-[var(--light-dark-color)]"
-                                : "hover:bg-slate-400"
-                            } flex items-center gap-2 cursor-pointer`}
+                                : "hover:bg-slate-300"
+                            }`}
                             onClick={() => {
                               navigator.clipboard.writeText(msg.text);
                               setContextMenu(null);
@@ -774,6 +891,7 @@ const ChatBox = () => {
               </div>
             );
           })}
+
         <div ref={messageEndRef}></div>
       </section>
 
@@ -830,17 +948,17 @@ const ChatBox = () => {
           <></>
         )}
         {isReply ? (
-          <div className="flex justify-between px-4  z-[5000] absolute w-[99%]  top-0 -mt-16 h-16  items-center">
+          <div className=" flex justify-between px-4  z-[5000] absolute w-[99%]  top-0 -mt-16 h-16  items-center">
             <div
-              className={`w-full ${
+              className={`rounded-lg w-full ${
                 darkMode
                   ? "bg-[var(--dark-bg-color)] text-slate-300"
                   : "bg-slate-300 w-full text-black"
               }`}
             >
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-center p-1">
                 <div className="flex">
-                  <div className="w-1 bg-green-300  h-6"></div>
+                  <div className="w-1 bg-green-700  h-6"></div>
                   <h1 className=" text-md">Reply to.. </h1>
                 </div>
               </div>
@@ -852,7 +970,7 @@ const ChatBox = () => {
             <div>
               <button
                 onClick={handleCancelReplay}
-                className="rounded-full  text-md  hover:bg-[var(--light-dark-color)]"
+                className={`${darkMode ? "" : "text-slate-600"} text-xl`}
               >
                 <ImCross />
               </button>
@@ -866,7 +984,7 @@ const ChatBox = () => {
             <div className="h-full w-full flex justify-around items-center ">
               <div className=" w-full flex items-center">
                 <button className="rounded-2xl py-1 px-4 h-12  outline-none w-full bg-[var(--messge-input-dark)] text-red-400">
-                  unblock user
+                  user blocked
                 </button>
               </div>
             </div>
@@ -899,7 +1017,7 @@ const ChatBox = () => {
                         darkMode
                           ? "bg-[var(--messge-input-dark)] text-slate-300"
                           : "text-slate-600"
-                      } overflow-x-hidden  w-[80%] md:w-[90%] lg:w-[90%]  scrollbar   rounded-2xl py-1 px-4 outline-none  `}
+                      } transition duration-500 overflow-x-hidden  w-[80%] md:w-[80%] lg:w-[88%]  scrollbar   rounded-2xl py-1 px-4 outline-none  `}
                       placeholder="Write a message..."
                       value={message.text}
                       onChange={handleOnMessageChange}

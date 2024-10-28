@@ -1,58 +1,62 @@
-import { useEffect } from "react";
 import "./App.css";
-import Sidebar from "./components/Sidebar";
-import { Route, Routes } from "react-router-dom";
-import Statistics from "./pages/Statistics";
-function App() {
-  useEffect(() => {
-    import("flowbite")
-      .then(({ default: Flowbite }) => {
-        Flowbite.initFlowbite();
-      })
-      .catch((error) => console.log(error));
-  }, []);
-  return (
-    <div>
-      <button
-        data-drawer-target="logo-sidebar"
-        data-drawer-toggle="logo-sidebar"
-        aria-controls="logo-sidebar"
-        type="button"
-        className="sticky top-0 inline-flex items-center p-2 mt-2 ms-3 text-sm text-gray-500 rounded-lg sm:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-      >
-        <span className="sr-only">Open sidebar</span>
-        <svg
-          className="w-6 h-6"
-          aria-hidden="true"
-          fill="currentColor"
-          viewBox="0 0 20 20"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            clip-rule="evenodd"
-            fill-rule="evenodd"
-            d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-          ></path>
-        </svg>
-      </button>
-      {/* 
-      
-      ----- Side bar component 
-      
-      */}
-      <Sidebar />
+import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
+import Login from "./pages/Login";
+import Home from "./pages/Home";
+import { useEffect, useState } from "react";
+import axios, { AxiosResponse } from "axios";
+const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
+  const navigateTo = useNavigate();
+  const URL = import.meta.env.VITE_BACK_END;
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
 
-      <div className="p-4 sm:ml-64">
-        <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700 ">
-          <Routes>
-            <Route path={"/"} element={<Statistics />}></Route>
-          </Routes>
-          {/* <div className="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 dark:bg-gray-800"></div>
-          <div className="grid grid-cols-2 gap-4 mb-4"></div>
-          <div className="flex items-center justify-center h-48 mb-4 rounded bg-gray-50 dark:bg-gray-800"></div> */}
-        </div>
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response: AxiosResponse = await axios.get(
+          `${URL}/api/admin-auth`,
+          { withCredentials: true }
+        );
+        console.log(response.data);
+
+        if (response.data?.status === 1) {
+          localStorage.setItem("adminId", response.data?.admin._id);
+          setIsAuthenticated(true);
+        } else {
+          localStorage.clear();
+          navigateTo("/");
+        }
+      } catch (error) {
+        console.log(error);
+        setIsAuthenticated(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  if (isAuthenticated === null) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-[var(--light-dark-color)]">
+        <div className="rounded-full h-20 w-20 bg-violet-800 animate-ping"></div>
       </div>
-    </div>
+    );
+  }
+
+  return isAuthenticated ? children : <Navigate to="/" replace />;
+};
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Login />} />
+      <Route
+        path="/home/*"
+        element={
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 }
 

@@ -3,7 +3,10 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Root_State } from "../../store/store";
-import { CloseDeleteAccount } from "../../store/actions/AccountAction";
+import {
+  CloseContactInfo,
+  CloseDeleteAccount,
+} from "../../store/actions/AccountAction";
 import { DeleteUserAccount } from "../../services/API";
 
 const DeleteAccount = () => {
@@ -22,6 +25,8 @@ const DeleteAccount = () => {
       await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
         withCredentials: true,
       });
+      dispatch(CloseDeleteAccount());
+      dispatch(CloseContactInfo());
       navigateTo("/");
     }
     setIsLoading(false);

@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import "./App.css";
+
 import Login from "./auth/Login";
+
 import Home from "./pages/Home";
 import { useEffect, useState } from "react";
 import axios, { AxiosResponse } from "axios";
@@ -26,6 +28,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
           { withCredentials: true }
         );
+        console.log(response.data);
         if (response.data?.status === 1) {
           dispatch(SetUserInfo(response.data?.user));
           setIsAuthenticated(true);
@@ -56,6 +59,7 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 function App() {
   return (
     <main>
+      {/* <Test /> */}
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<SignUp />}></Route>

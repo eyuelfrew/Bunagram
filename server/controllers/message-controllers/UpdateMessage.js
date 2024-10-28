@@ -1,23 +1,22 @@
 const { MessageModel } = require("../../models/ConversationModel");
-const Encryption = require("../../service/EncriptionServce");
+const {
+  decryptMessage,
+  encryptMessageToStore,
+} = require("../../service/EncriptionServce");
 
 const UpdateMessage = async (req, res) => {
   const { message, reciver_id, message_id } = req.body;
-  const EncService = new Encryption(
-    process.env.TRANSIT_SECERETE_KEY,
-    process.env.STORAGE_SECRETE_KEY,
-    process.env.BACK_TO_CLIENT_KEY
-  );
+
   try {
-    const decryptIncomingMessage =
-      EncService.decryptIncomingSingleMessage(message);
-    const EncrypyForStorage = EncService.encryptForStorage(
-      decryptIncomingMessage
-    );
+    /*
+     * Decrypt the coming message and encrypt it for storage
+     * */
+    const PlainText = await decryptMessage(message);
+    const cypgerText = await encryptMessageToStore(PlainText);
     const updatedMessage = await MessageModel.findByIdAndUpdate(
       message_id,
       {
-        text: EncrypyForStorage,
+        text: cypgerText,
       },
       { new: true }
     );

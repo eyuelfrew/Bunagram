@@ -35,8 +35,19 @@ const UserDetails = require("../controllers/UserDetails.js");
 const ChangeCloudPass = require("../auth/ChangeCloudPass.js");
 const UploadProfilePic = require("../controllers/ProflePic");
 const DeleteConversation = require("../controllers/conversation-controllers/DeleteConversation.js");
-const DeleteAccount = require("../controllers/user/DeleteAccount.js");
+const DeleteAccount = require("../controllers/users/DeleteAccount.js");
 const DeleteAllMessages = require("../controllers/message-controllers/DeleteAllMessages.js");
+const DeleteSelectedMessages = require("../controllers/message-controllers/DeleteSelectedMessages.js");
+const GetBlockedUsers = require("../controllers/users/GetBlockedUsers.js");
+const MessageVolumeData = require("../admin/dashbord/MessageVolumeData.js");
+const UserStatus = require("../admin/dashbord/UsersStatus.js");
+const ConversationData = require("../admin/dashbord/ConversationData.js");
+const AllStatics = require("../admin/dashbord/OverAllData.js");
+const CreateAdminAccount = require("../admin/auth/CreateAdminAccount.js");
+const AdminLogin = require("../admin/auth/Login.js");
+const checkAdmin = require("../admin/auth/checkAdmin.js");
+const AdminLogout = require("../admin/auth/Logout.js");
+const CheckAdminAuth = require("../admin/auth/CheckAdminAuth.js");
 const router = express.Router();
 /*
 -- configure route for upoading images if there is image sent form the clinet side
@@ -108,6 +119,7 @@ router.post("/check-user-name", CheckUserName);
 router.delete("/del-acc/:id", VerifyToken, DeleteAccount);
 router.post("/update-pp", VerifyToken, UpdateProfilePicture);
 router.delete("/delete-profile/:user_id", VerifyToken, DeleteProfilePic);
+router.get("/blocked-users", VerifyToken, GetBlockedUsers);
 
 // Search users
 router.post("/search", searchUser);
@@ -119,6 +131,7 @@ router.post("/all-messages", VerifyToken, GetAllMessages); //fetch all messages
 router.post("/create-message", VerifyToken, SendMessage); //create or send messge
 router.post("/create-caption", VerifyToken, upload, SendImage); //send image with text or with out text
 router.post("/del-msg", VerifyToken, DeleteMessage); // Delete single message
+router.post("/del-multi-msg", VerifyToken, DeleteSelectedMessages); //delete selected messages
 router.post("/update-msg", VerifyToken, UpdateMessage); // update single message
 router.post("/profile-pic", VerifyToken, upload, UploadProfilePic); //upload or update profile pic
 router.post("/delete-all-msg", VerifyToken, DeleteAllMessages); //upload or update profile pic
@@ -128,4 +141,19 @@ router.post("/delete-all-msg", VerifyToken, DeleteAllMessages); //upload or upda
 */
 router.get("/conversations", VerifyToken, FetchConversations);
 router.post("/delete-conversation", VerifyToken, DeleteConversation);
+
+/*
+--- Dashbord routes
+*/
+router.get("/message-volume", checkAdmin, MessageVolumeData);
+router.get("/user-status", checkAdmin, UserStatus);
+router.get("/conversation-data", checkAdmin, ConversationData);
+router.get("/all-stats", checkAdmin, AllStatics);
+/*
+-- admins autentication
+*/
+router.post("/admin", CreateAdminAccount);
+router.post("/admin-login", AdminLogin);
+router.get("/admin", AdminLogout);
+router.get("/admin-auth", checkAdmin, CheckAdminAuth);
 module.exports = router;

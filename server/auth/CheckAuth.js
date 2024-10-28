@@ -1,6 +1,7 @@
 const UserModel = require("../models/UserModels.js");
 
 const CheckAuth = async (req, res) => {
+  console.log(req.userId);
   try {
     const user = await UserModel.findById(req.userId);
     if (!user) {
@@ -17,7 +18,7 @@ const CheckAuth = async (req, res) => {
       user: { ...user._doc, password: undefined },
     });
   } catch (error) {
-    console.log(error.message);
+    console.log(error);
     return res.json({ message: error.message, serverError: true, status: 0 });
   }
 };

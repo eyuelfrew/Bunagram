@@ -10,15 +10,18 @@ import { OpenConactInfo } from "../store/actions/AccountAction";
 import { ResetUserInfo } from "../store/actions/UserAction";
 import { OpenSetting } from "../store/actions/SettingActions";
 import { FaRegMoon, FaSun } from "react-icons/fa6";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { initializeTheme, toggleTheme } from "../store/themes/themeSlice";
 import { IoMdLogOut } from "react-icons/io";
 import { IoSettings } from "react-icons/io5";
+import BlockedUsers from "../components/Modals/BlockedUsers";
+import { FaHandPaper } from "react-icons/fa";
 const MenuLayout = () => {
   const URI = import.meta.env.VITE_BACK_END_URL;
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const user = useSelector((state: Root_State) => state.UserReducers);
   const navigateTo = useNavigate();
+  const [blockedUsers, setBlockedUsers] = useState(false);
   const menuBar = useSelector((state: Root_State) => state.menuReducer.isView);
   const dispatch = useDispatch();
   // Load theme from localStorage on component mount
@@ -35,6 +38,7 @@ const MenuLayout = () => {
         withCredentials: true,
       }
     );
+
     if (response.data?.status === 1) {
       navigateTo("/");
     }
@@ -54,24 +58,15 @@ const MenuLayout = () => {
   };
   const handleThemeToggle = () => {
     dispatch(toggleTheme());
-    // setDarkMode((prevMode) => {
-    //   const newMode = !prevMode;
-    //   const theme = newMode ? "dark" : "light";
-    //   localStorage.setItem("theme", theme);
-    //   document.documentElement.classList.toggle("dark", newMode);
-    //   return newMode;
-    // });
   };
-  // useEffect(() => {
-  //   const savedTheme = localStorage.getItem("theme");
-  //   if (savedTheme) {
-  //     setDarkMode(savedTheme === "dark");
-  //     document.documentElement.classList.toggle("dark", savedTheme === "dark");
-  //   }
-  // }, []);
+
   useEffect(() => {
     dispatch(initializeTheme());
   }, [dispatch]);
+  const handleBlockedUsersModal = () => {
+    dispatch(CloseMenu());
+    setBlockedUsers(true);
+  };
   return (
     <>
       {menuBar && (
@@ -111,12 +106,15 @@ const MenuLayout = () => {
               <></>
             )}
             <p className="text-xl">{user.name}</p>
+            <p className="text-sm text-slate-300  w-full truncate ...">
+              {user.email}
+            </p>
           </div>
 
           <div>
             <button onClick={handleMenuCancel}>
               {" "}
-              <MdCancel size={30} />
+              <MdCancel size={20} />
             </button>
           </div>
         </div>
@@ -125,27 +123,34 @@ const MenuLayout = () => {
             className="flex  items-center  gap-4 rounded-full"
             onClick={handleContactInfo}
           >
-            <MdManageAccounts />
+            <MdManageAccounts size={20} />
             Account
+          </button>{" "}
+          <button
+            className="flex  items-center  gap-4 rounded-full"
+            onClick={handleBlockedUsersModal}
+          >
+            <FaHandPaper size={20} />
+            Blocked Users
           </button>
           <button
             className="flex  items-center  gap-4 rounded-full"
             onClick={handleSetting}
           >
-            <IoSettings />
+            <IoSettings size={20} />
             Setting
           </button>
           <button
             className="flex  items-center  gap-4 rounded-full"
             onClick={HandleLogout}
           >
-            <IoMdLogOut /> Logout
+            <IoMdLogOut size={20} /> Logout
           </button>
           <button
             onClick={handleThemeToggle}
             className={`flex  items-center  gap-4 rounded-full  transition duration-500`}
           >
-            {darkMode ? <FaSun /> : <FaRegMoon />}
+            {darkMode ? <FaSun size={20} /> : <FaRegMoon size={20} />}
             {darkMode ? <span>Light Mode</span> : <span>Night Mode</span>}
           </button>
         </div>
@@ -158,6 +163,10 @@ const MenuLayout = () => {
           <span>Version 0.0.1</span>
         </div>
       </div>
+      <BlockedUsers
+        blockedUsers={blockedUsers}
+        handleToggle={setBlockedUsers}
+      />
     </>
   );
 };

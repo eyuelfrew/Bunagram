@@ -1,5 +1,5 @@
 const UserModel = require("../models/UserModels.js");
-
+const bcryptjs = require("bcryptjs");
 const DisableTwo = async (req, res) => {
   const { cloud_password } = req.body;
   const user_id = req.userId;
@@ -8,7 +8,10 @@ const DisableTwo = async (req, res) => {
     if (!user) {
       return res.json({ message: "User not found!", notFound: true });
     }
-    const checkPassword = user.cloudPassword.trim() === cloud_password.trim();
+    const checkPassword = await bcryptjs.compare(
+      cloud_password.trim(),
+      user.cloudPassword.trim()
+    );
     if (!checkPassword) {
       return res.json({ message: "Wrong cloud password!", notAuth: true });
     }

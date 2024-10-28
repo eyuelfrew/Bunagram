@@ -74,81 +74,91 @@ const SignUp = () => {
     setSignUpForm({ ...form, [e.target.name]: sanitizedValue });
   };
   return (
-    <div className="flex h-screen items-center justify-center bg-[var(--dark-bg-color)]">
-      <form
-        className="flex flex-col gap-4 w-[90%] lg:w-[30%] bg-[var(--light-dark-color)]  text-white p-4 rounded-lg"
-        onSubmit={handleSubmit}
-      >
-        <h1 className="text-2xl text-center font-light text-gray-500 dark:text-gray-400">
-          Create Account
-        </h1>
-        <div className="flex flex-col ">
-          <input
-            autoComplete="off"
-            type="text"
-            id="name"
-            name="name"
-            placeholder="enter your name"
-            className="bg-[var(--hard-dark)] border-0 mx-3 h-12 text-gray-400 px-4 rounded-3xl focus:outline-none"
-            value={form.name}
-            onChange={handleChange}
-          />
-          <p className="text-red-400">{formErrors.nameError}</p>
+    <section className="bg-gradient-to-r from-blue-100 to-purple-300 flex h-screen justify-center items-center">
+      <div className="flex rounded-3xl shadow-2xl  md:w-[80%] lg:w-[60%]">
+        <img
+          src="/coffegram.jfif"
+          className="w-80 hidden md:flex lg:flex rounded-l-3xl"
+          alt="Signup illustration"
+        />
+        <div className="flex-1 bg-gradient-to-r from-blue-500 to-blue-700 p-6 space-y-6 md:space-y-8 rounded-r-3xl text-white">
+          <h1 className="text-center text-2xl font-semibold leading-tight tracking-tight">
+            Create Account
+          </h1>
+          <form className="space-y-6 md:space-y-8" onSubmit={handleSubmit}>
+            <div>
+              <input
+                autoComplete="off"
+                type="text"
+                id="name"
+                name="name"
+                placeholder="Enter your name"
+                className="bg-blue-600/50 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full shadow-md block w-full p-3 text-gray-100 placeholder-gray-300"
+                value={form.name}
+                onChange={handleChange}
+              />
+              <p className="text-red-400">{formErrors.nameError}</p>
+            </div>
+            <div>
+              <input
+                autoComplete="off"
+                type="email"
+                id="email"
+                name="email"
+                placeholder="Enter your email"
+                className="bg-blue-600/50 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full shadow-md block w-full p-3 text-gray-100 placeholder-gray-300"
+                value={form.email}
+                onChange={handleChange}
+              />
+              <p className="text-red-400">{formErrors.emailError}</p>
+            </div>
+            <div>
+              <input
+                autoComplete="off"
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter your password"
+                className="bg-blue-600/50 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full shadow-md block w-full p-3 text-gray-100 placeholder-gray-300"
+                value={form.password}
+                onChange={handleChange}
+              />
+              <p className="text-red-400">{formErrors.passwordError}</p>
+            </div>
+            <div>
+              <input
+                autoComplete="off"
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="Confirm your password"
+                className="bg-blue-600/50 focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-full shadow-md block w-full p-3 text-gray-100 placeholder-gray-300"
+                value={form.confirmPassword}
+                onChange={handleChange}
+              />
+              <p className="text-red-400">{formErrors.confirmPasswordError}</p>
+            </div>
+            <div className="flex justify-center">
+              <button
+                type="submit"
+                className="w-full bg-white/10 text-white font-medium rounded-full px-5 py-3 text-center transition ease-in-out duration-150 hover:bg-white/20"
+              >
+                Register
+              </button>
+            </div>
+            <p className="text-sm font-light">
+              Already have an account?{" "}
+              <Link
+                to={"/"}
+                className="font-medium text-blue-300 hover:underline"
+              >
+                Login
+              </Link>
+            </p>
+          </form>
         </div>
-        <div className="flex flex-col">
-          <input
-            autoComplete="off"
-            id="email"
-            name="email"
-            placeholder="enter your email "
-            className="bg-[var(--hard-dark)]  mx-3 h-12 text-gray-400  px-4 rounded-3xl focus:outline-none"
-            value={form.email}
-            onChange={handleChange}
-          />
-          <p className="text-red-400">{formErrors.emailError}</p>
-        </div>
-        <div className="flex flex-col">
-          <input
-            autoComplete="off"
-            type="password"
-            id="password"
-            name="password"
-            placeholder="enter your password"
-            className="bg-[var(--hard-dark)]  mx-3 h-12 text-gray-400  px-4 rounded-3xl focus:outline-none"
-            value={form.password}
-            onChange={handleChange}
-          />
-          <p className="text-red-400">{formErrors.passwordError}</p>
-        </div>
-        <div className="flex flex-col">
-          <input
-            autoComplete="off"
-            type="password"
-            id="confirmPassword"
-            name="confirmPassword"
-            placeholder="enter your password"
-            className="bg-[var(--hard-dark)]  mx-3 h-12 text-gray-400  px-4 rounded-3xl focus:outline-none"
-            value={form.confirmPassword}
-            onChange={handleChange}
-          />
-          <p className="text-red-400">{formErrors.confirmPasswordError}</p>
-        </div>
-        <div className="flex justify-center ">
-          <button
-            type="submit"
-            className={`hover:bg-[var(--hard-dark)]  text-white w-28 p-2 text-lg rounded-xl `}
-          >
-            Register
-          </button>
-        </div>
-        <p className="font-light text-gray-500 dark:text-gray-400">
-          Already have an account?{" "}
-          <Link to={"/"} className=" font-bold hover:underline">
-            Login
-          </Link>
-        </p>
-      </form>
-    </div>
+      </div>
+    </section>
   );
 };
 

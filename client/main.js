@@ -1,39 +1,51 @@
-// electron.js
-
 import { app, BrowserWindow } from "electron";
-import { join } from "path";
+import { fileURLToPath } from "url";
+import { join, dirname } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+let mainWindow;
 
 function createWindow() {
-  // Create the browser window.
-  const win = new BrowserWindow({
-    width: 900,
-    height: 680,
+  mainWindow = new BrowserWindow({
+    width: 800,
+    height: 600,
     webPreferences: {
       preload: join(__dirname, "preload.js"),
-      nodeIntegration: false, // Enable Node.js integration
-      contextIsolation: true, // Disable context isolation for simplicity
+      // Enable context isolation for security
+      contextIsolation: true,
+      enableRemoteModule: false, // For security, avoid using this unless needed
+      nodeIntegration: false, // Only use preload.js for exposing APIs
     },
-    icon: join(__dirname, "assets", "bunagram.ico"),
   });
 
-  // Load the React app
-  win.loadFile(join(__dirname, "dist", "index.html"));
-  win.webContents.openDevTools();
+  if (process.env.NODE_ENV === "development") {
+    mainWindow.loadURL("http://localhost:5173"); // Vite dev server URL
+    mainWindow.webContents.openDevTools();
+  } else {
+    console.log("Production Environemnt!!");
+    mainWindow.loadFile(join(__dirname, "dist/index.html")); // Path to your Vite build files
+    mainWindow.webContents.openDevTools();
+  }
+
+  mainWindow.on("closed", () => {
+    mainWindow = null;
+  });
 }
 
-// This method will be called when Electron has finished initialization
-app.whenReady().then(createWindow);
+app.whenReady().then(() => {
+  createWindow();
 
-// Quit when all windows are closed, except on macOS
+  app.on("activate", () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
+
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
-  }
-});
-
-// Re-create a window in the app when the dock icon is clicked (macOS)
-app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
   }
 });

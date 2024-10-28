@@ -20,12 +20,13 @@ import Profile from "../layout/Profile";
 import Setting from "../layout/Setting";
 import TwoStepVerification from "../auth/TwoStepVerification";
 import { useNavigate } from "react-router-dom";
+import ProtectedAnimation from "../components/animations/ProtectedAnimation";
 const Home = () => {
   const navigateTo = useNavigate();
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const { setSocket, setOnlineUsers, clearSocketState } = UseSocket();
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
-  const user = useSelector((state: Root_State) => state.UserReducers);
+  // const user = useSelector((state: Root_State) => state.UserReducers);
   const dispatch = useDispatch();
   const token = localStorage.getItem("token");
 
@@ -37,6 +38,7 @@ const Home = () => {
           withCredentials: true,
         }
       );
+
       if (response.data?.status === 1) {
         navigateTo("/");
       }
@@ -62,8 +64,7 @@ const Home = () => {
         clearSocketState();
       };
     }
-  }, [token, user]);
-
+  }, [token]);
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("token");
@@ -82,6 +83,7 @@ const Home = () => {
           dispatch(SetUserInfo(response?.data?.user));
           navigateTo("/chat");
         } else {
+          console.log(response);
           navigateTo("/");
         }
       } catch (error) {
@@ -93,62 +95,65 @@ const Home = () => {
 
   return (
     <>
-      <>
-        <div className=" h-96   flex w-full">
-          <MenuLayout />
+      <div className="flex w-[100%] h-screen  ">
+        <MenuLayout />
+
+        {/* Sidebar for Chat List */}
+        <section
+          className={`${
+            Recever.full_name
+              ? "w-[0%] md:w-[40%] lg:w-[30%]"
+              : "w-[100%] md:w-[30%]"
+          } h-screen transition-all duration-500 ease-in-out ${
+            darkMode
+              ? "bg-gradient-to-t from-gray-800 via-gray-600 to-gray-900"
+              : "bg-gradient-to-t from-blue-600 via-blue-500 to-blue-400"
+          } `}
+        >
+          <Sidebar />
+        </section>
+
+        {Recever.recever_id.trim().length === 0 ? (
           <section
-            className={`${
-              Recever.full_name ? "hidden lg:flex " : "w-[100%]"
-            } h-screen   lg:w-[25%]  ${
+            className={`hidden md:block lg:block transition-all duration-500 ease-in-out  justify-center items-center ${
               darkMode
-                ? "bg-[var(--hard-dark)]"
-                : "bg-[var(--royale-blue)] transition duration-500"
-            }`}
+                ? "bg-gradient-to-t from-gray-800 via-gray-600 to-gray-900"
+                : "bg-gradient-to-t from-blue-300 via-blue-200 to-blue-100"
+            } md:w-[70%] lg:w-[70%]`}
           >
-            <Sidebar />
+            <div className="flex justify-center items-center flex-col h-full">
+              <ProtectedAnimation />
+              <h1
+                className={`text-2xl font-light ${
+                  darkMode ? "text-gray-300" : "text-slate-600"
+                }`}
+              >
+                Select a chat to start messaging!
+              </h1>
+            </div>
           </section>
-          {/* message box component */}
-          {Recever.recever_id.trim().length === 0 ? (
-            <>
-              <section
-                className={`hidden lg:block bg-[var(--light-dark-color)] lg:w-[75%]`}
-              >
-                <div
-                  className={`h-screen ${
-                    darkMode
-                      ? "bg-[var(--light-dark-color)]"
-                      : "bg-[var(--blue-grotto)]"
-                  } w-full flex justify-center items-center`}
-                >
-                  <h1 className="text-xl text-white font-light">
-                    select a chat to start messaging
-                  </h1>
-                </div>
-              </section>
-            </>
-          ) : (
-            <>
-              <section
-                className={`${
-                  Recever.full_name
-                    ? "translate-x-0 block w-[100%] lg:block"
-                    : "-translate-x-full"
-                } transition-transform duration-1000 ease-in-out bg-[var(--light-dark-color)] lg:block lg:w-[75%] relative `}
-              >
-                <ChatBox />
-              </section>
-            </>
-          )}
-          {/* Modal Components  */} <ContactInfo />
-          <EditName />
-          <EditYourNumber />
-          <EditUserName />
-          <DeleteAccount />
-          <Profile />
-          <Setting />
-          <TwoStepVerification />
-        </div>
-      </>
+        ) : (
+          <section
+            className={`bg-red-600 ${
+              Recever.full_name
+                ? "translate-x-0 block w-full"
+                : "-translate-x-full"
+            } transition-transform duration-1000 ease-in-out relative w-full  md:w-[60%] lg:w-[70%]`}
+          >
+            <ChatBox />
+          </section>
+        )}
+
+        {/* Additional Modal Components */}
+        <ContactInfo />
+        <EditName />
+        <EditYourNumber />
+        <EditUserName />
+        <DeleteAccount />
+        <Profile />
+        <Setting />
+        <TwoStepVerification />
+      </div>
     </>
   );
 };

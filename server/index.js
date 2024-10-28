@@ -8,15 +8,16 @@ const path = require("path");
 const multer = require("multer");
 const { Server } = require("socket.io");
 const getUserDetailFromToken = require("./helpers/getUserDetailsFromToken.js");
-const {
-  ConversationModel,
-  MessageModel,
-} = require("./models/ConversationModel.js");
+const { MessageModel } = require("./models/ConversationModel.js");
 const getConversations = require("./helpers/getConversation.js");
 const bodyParser = require("body-parser");
 dotenv.config();
 const app = express();
-const allowedOrigins = ["http://localhost:5173", "https://bunagram.vercel.app"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://bunagram.vercel.app",
+  "http://localhost:5174",
+];
 const corsOptions = {
   origin: allowedOrigins,
   credentials: true,
@@ -56,7 +57,7 @@ const server = app.listen(port, () => {
 //socket configuration
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173"],
+    origin: ["http://localhost:5173", "http://localhost:5174"],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -68,10 +69,10 @@ const roomUsers = {};
 
 io.on("connection", async (socket) => {
   const token = socket.handshake.auth.token;
-  const user = await getUserDetailFromToken(token);
-  const userId = user?._id?.toString();
-  if (user?._id) {
-    userToSocketMap[user._id.toString()] = socket.id; // Map user ID to socket ID
+  const user_id = await getUserDetailFromToken(token);
+  const userId = user_id?.toString();
+  if (user_id) {
+    userToSocketMap[userId.toString()] = socket.id; // Map user ID to socket ID
   }
   socket.join(userId);
   onLineUser.add(userId);
@@ -92,6 +93,7 @@ io.on("connection", async (socket) => {
   });
   // Handle leaving a room
   socket.on("leave-room", ({ roomName }) => {
+    console.log("User Left the room");
     if (roomUsers[roomName]) {
       roomUsers[roomName].delete(socket.id);
       socket.leave(roomName);
@@ -151,7 +153,7 @@ io.on("connection", async (socket) => {
     socket.in(userId).emit("stop typing");
   });
   socket.on("disconnect", (socket) => {
-    onLineUser.delete(user?._id?.toString());
+    onLineUser.delete(userId?.toString());
     io.emit("onlineuser", Array.from(onLineUser));
   });
 });

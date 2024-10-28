@@ -14,6 +14,8 @@ const DeleteAccount = async (req, res) => {
     }
     const randomString = crypto.randomBytes(16).toString("hex");
     user.email = `${randomString}@deleted.com`;
+    user.name = "Deleted Account";
+    user.user_name = `${randomString}@deltedusenames`;
     user.deletedAccount = true;
     user.twoStepVerification = false;
     req.io.emit("conversation");

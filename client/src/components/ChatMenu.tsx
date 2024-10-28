@@ -4,7 +4,6 @@ import { GiBroom } from "react-icons/gi";
 import { MdOutlineBlock } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { Root_State } from "../store/store";
-import axios, { AxiosResponse } from "axios";
 import { SetUserInfo } from "../store/actions/UserAction";
 import { UseSocket } from "../context/SocketContext";
 import { getReceiverInit } from "../store/actions/getRecever";
@@ -13,6 +12,7 @@ import { ViewProfile } from "../store/actions/ViewProfile";
 import { RiChatDeleteFill } from "react-icons/ri";
 import { ClearChats, DeleteConversation } from "../services/API";
 import toast from "react-hot-toast";
+import { BlockUser, UnblockUser } from "../apis/UserApi";
 
 const ChatMenu: React.FC = () => {
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
@@ -50,15 +50,10 @@ const ChatMenu: React.FC = () => {
     const payload = {
       blocked_id: reciver.recever_id,
     };
-    const response: AxiosResponse = await axios.post(
-      `${import.meta.env.VITE_BACK_END_URL}/api/block-user`,
-      payload,
-      { withCredentials: true }
-    );
+    const response = await BlockUser(payload);
 
-    if (response.data?.status === 1) {
-      console.log(response.data?.user);
-      dispatch(SetUserInfo(response.data?.user));
+    if (response?.status === 1) {
+      dispatch(SetUserInfo(response?.user));
       const payload = {
         blocker: user._id,
         blocked: reciver.recever_id,
@@ -73,13 +68,9 @@ const ChatMenu: React.FC = () => {
       blocker_id: user._id,
       blocked_id: reciver.recever_id,
     };
-    const response: AxiosResponse = await axios.post(
-      `${import.meta.env.VITE_BACK_END_URL}/api/unblock-user`,
-      payload,
-      { withCredentials: true }
-    );
-    if (response.data?.status === 1) {
-      dispatch(SetUserInfo(response.data?.user));
+    const response = await UnblockUser(payload);
+    if (response?.status === 1) {
+      dispatch(SetUserInfo(response?.user));
     }
   };
 
@@ -191,7 +182,7 @@ const ChatMenu: React.FC = () => {
             <>
               <button
                 onClick={handleBlockUser}
-                className="flex items-center gap-2 text-red-400"
+                className="flex items-center gap-2 "
               >
                 <MdOutlineBlock />
                 Block user

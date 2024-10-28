@@ -1,55 +1,72 @@
-import CryptoJS from "crypto-js";
+import nacl from "tweetnacl";
+import naclUtil from "tweetnacl-util";
+// import { Buffer } from "buffer";
 
-class EncryptinService {
-  private transit_key: string;
-  private stored_dec_key: string;
-  private incoming_message_key: string;
-  constructor(
-    transit_key: string,
-    stored_dec_key: string,
-    incoming_message_key: string
-  ) {
-    this.transit_key = transit_key;
-    this.stored_dec_key = stored_dec_key;
-    this.incoming_message_key = incoming_message_key;
-  }
-  /*
-    -- ecrypt single message before sending to server
-    */
-  EncryptMessage(message: string): string {
-    if (message.trim() == "") {
-      return "";
-    }
-    return CryptoJS.AES.encrypt(message, this.transit_key).toString();
+// function arrayToBase64(
+//   arr: WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>
+// ) {
+//   return Buffer.from(arr).toString("base64");
+// }
+// function base64ToArray(
+//   base64Str:
+//     | WithImplicitCoercion<string>
+//     | { [Symbol.toPrimitive](hint: "string"): string }
+// ) {
+//   return Uint8Array.from(Buffer.from(base64Str, "base64"));
+// }
+// Encryption
+// const secretKey = nacl.randomBytes(nacl.secretbox.keyLength);
+// const base64Key = arrayToBase64(secretKey);
+// console.log(base64Key);
+export const encryptMessage = (message: string) => {
+  const transitKey = import.meta.env.VITE_TRANSIT_KEY;
+  const secretKey = naclUtil.decodeBase64(transitKey);
+  const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+  const messageUint8 = naclUtil.decodeUTF8(message);
+  const box = nacl.secretbox(messageUint8, nonce, secretKey);
+
+  // Combine nonce and box
+  const fullMessage = new Uint8Array(nonce.length + box.length);
+  fullMessage.set(nonce);
+  fullMessage.set(box, nonce.length);
+
+  return naclUtil.encodeBase64(fullMessage); // Base64 encoding for easier transfer
+};
+
+// Decryption
+export const decryptMessage = (encryptedMessage: string) => {
+  const storgeKey = import.meta.env.VITE_STORAGE_KEY;
+  const secretKey = naclUtil.decodeBase64(storgeKey);
+  const messageWithNonce = naclUtil.decodeBase64(encryptedMessage);
+  const nonce = messageWithNonce.slice(0, nacl.secretbox.nonceLength);
+  const message = messageWithNonce.slice(nacl.secretbox.nonceLength);
+
+  const decrypted = nacl.secretbox.open(message, nonce, secretKey);
+
+  if (!decrypted) {
+    throw new Error("Decryption failed");
   }
 
-  /*
-    -- decrypt all messages sent as an array from the back end
-    */
-  DecryptMessage(cyphertext: string): string {
-    if (!cyphertext) {
-      return "";
-    }
-    const bytes = CryptoJS.AES.decrypt(cyphertext, this.stored_dec_key);
-    const originalMessage = bytes.toString(CryptoJS.enc.Utf8);
-    if (!originalMessage) {
-      throw new Error("Decritpion faild. Inalid key or cipher-text");
-    }
-    return originalMessage;
+  return naclUtil.encodeUTF8(decrypted);
+};
+export const decryptIncomingMessage = (encryptedMessage: string) => {
+  const transitKey = import.meta.env.VITE_INCOMING_MESSAGE_KEY;
+
+  if (!transitKey) {
+    throw new Error("Encryption key missing from environment variables.");
   }
-  /*
-    -- derypt sinlge message sent from the server of from other end (sender)
-    */
-  DecryptIncomingMessage(CypherText: string): string {
-    if (CypherText.trim() == "") {
-      return "";
-    }
-    const bytes = CryptoJS.AES.decrypt(CypherText, this.incoming_message_key);
-    const orgiginalMessage = bytes.toString(CryptoJS.enc.Utf8);
-    if (!orgiginalMessage || orgiginalMessage.length === 0) {
-      throw new Error("Error Decrypting Single Message");
-    }
-    return orgiginalMessage;
+
+  const secretKey = naclUtil.decodeBase64(transitKey);
+  const messageWithNonce = naclUtil.decodeBase64(encryptedMessage);
+
+  const nonce = messageWithNonce.slice(0, nacl.secretbox.nonceLength);
+  const message = messageWithNonce.slice(nacl.secretbox.nonceLength);
+
+  const decrypted = nacl.secretbox.open(message, nonce, secretKey);
+
+  if (!decrypted) {
+    throw new Error("Decryption failed");
   }
-}
-export default EncryptinService;
+
+  return naclUtil.encodeUTF8(decrypted);
+};

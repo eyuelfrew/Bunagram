@@ -4,8 +4,7 @@ const jwt = require("jsonwebtoken");
 
 const Login = async (req, res) => {
   const { email, password, rememberMe } = req.body;
-  console.log("Email : ", email);
-  console.log("Password: ", password);
+
   try {
     /*
     -- Check if user exists in the database
@@ -74,7 +73,7 @@ const Login = async (req, res) => {
         httpOnly: true,
         sameSite: "none",
         secure: true,
-        domain: ".welllaptops.com",
+        // domain: ".welllaptops.com",
       })
       .json({
         message: "Login Successful",

@@ -1,10 +1,18 @@
-// preload.js
-
 const { contextBridge, ipcRenderer } = require("electron");
 
-// Expose the API to the renderer process
-contextBridge.exposeInMainWorld("myApi", {
-  sendMessage: (message) => ipcRenderer.send("message", message),
-  onMessage: (callback) =>
-    ipcRenderer.on("message", (event, message) => callback(message)),
+contextBridge.exposeInMainWorld("api", {
+  send: (channel, data) => {
+    // whitelist channels
+    let validChannels = ["toMain"];
+    if (validChannels.includes(channel)) {
+      ipcRenderer.send(channel, data);
+    }
+  },
+  receive: (channel, func) => {
+    let validChannels = ["fromMain"];
+    if (validChannels.includes(channel)) {
+      // Strip event as it includes `sender` property
+      ipcRenderer.on(channel, (event, ...args) => func(...args));
+    }
+  },
 });

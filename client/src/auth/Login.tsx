@@ -4,14 +4,13 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { Root_State } from "../store/store";
 import axios, { AxiosResponse } from "axios";
 import toast from "react-hot-toast";
-import { ResetLoginState } from "../store/actions/login";
 import DOMPurify from "dompurify";
 import { LoginRequest } from "../services/authApi";
 import { SetUserInfo } from "../store/actions/UserAction";
 const Login = () => {
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
-  const { isLoading, error, account_not_found, isLocked, isTwoStep } =
-    useSelector((state: Root_State) => state.LoginReducer);
+  const [isLoading, setIsloading] = useState(false);
+
   const navigateTo = useNavigate();
   const dispatch = useDispatch();
   const [rememberMe, setRememberMe] = useState(false);
@@ -30,12 +29,13 @@ const Login = () => {
     event: FormEvent<HTMLFormElement>
   ): Promise<void> => {
     event.preventDefault();
+    setIsloading(true);
     const res = await LoginRequest(loginForm);
-    console.log(res);
-
+    setIsloading(false);
     if (res.isLocked) {
       toast.error("To many attempts, Try again later!");
     }
+    console.log(res);
     if (res.loggedIn) {
       localStorage.setItem("token", res.token);
       dispatch(SetUserInfo(res?.user));
@@ -47,41 +47,10 @@ const Login = () => {
     } else if (res.wrongCredentials) {
       toast.error(res.message);
       return;
+    } else if (res.notFound) {
+      toast.error(res.message);
     }
   };
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      toast.success("Auth Success");
-      navigateTo("/chat");
-    }
-    if (error) {
-      toast.error("Invalid credentials");
-      return;
-    }
-    if (account_not_found) {
-      toast.error("User not found!");
-
-      dispatch(ResetLoginState());
-      return;
-    }
-    if (isLocked) {
-      toast.error("To many attemps, try again later");
-      dispatch(ResetLoginState());
-      return;
-    }
-    if (isTwoStep) {
-      navigateTo("/cloudpass");
-    }
-  }, [account_not_found, error, isLocked, isTwoStep]);
-
-  /*
-  
-  ---- Check if user is logged in befor!
-
-  */
-
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -91,6 +60,7 @@ const Login = () => {
         );
         if (response.data?.status === 1) {
           setIsAuthenticated(true);
+          localStorage.setItem("token", response.data?.token);
           navigateTo("/chat");
         } else {
           navigateTo("/");
@@ -117,29 +87,25 @@ const Login = () => {
     <Navigate to="/chat" replace />
   ) : (
     <section
-      className={`${
-        darkMode ? "bg-[var(--medium-dard)]" : "bg-white"
-      } flex h-screen justify-center items-center`}
+      className={`bg-gradient-to-r from-blue-100 to-purple-300 flex h-screen justify-center items-center`}
     >
       <div
-        className={`${
-          darkMode ? "bg-[var(--light-dark-color)]" : "bg-white"
-        } md:w-[80] lg:w-[60%]  flex rounded-lg shadow-xl  dark:border md:mt-0  xl:p-0 dark:border-gray-700`}
+        className={` md:w-[80%] lg:w-[60%] flex rounded-3xl shadow-2xl   md:mt-0  xl:p-0 `}
       >
         <img
           src="/coffegram.jfif"
-          className="w-80 hidden md:flex lg:flex "
-          alt=""
+          className="w-80 hidden md:flex lg:flex rounded-l-3xl"
+          alt="Login illustration"
         />
-        <div className="p-6 space-y-4 md:space-y-6 sm:p-8 w-full">
-          <h1 className="text-center text-xl font-light leading-tight tracking-tight  text-gray-500 dark:text-gray-400">
-            Login
+        <div className="p-6 space-y-6 md:space-y-8 sm:p-10 w-full">
+          <h1 className="text-center text-2xl font-semibold leading-tight tracking-tight text-gray-700 ">
+            Welcome Back
           </h1>
-          <form className="space-y-4 md:space-y-6 " onSubmit={handleLogin}>
+          <form className="space-y-6 md:space-y-8" onSubmit={handleLogin}>
             <div>
               <label
                 htmlFor="email"
-                className="block mb-2 text-sm font-light text-gray-500 dark:text-gray-400"
+                className="block mb-2 text-sm font-medium text-gray-700 "
               >
                 Your email
               </label>
@@ -147,9 +113,7 @@ const Login = () => {
                 type="email"
                 name="email"
                 id="email"
-                className={`${
-                  darkMode ? "bg-[var(--hard-dark)] " : ""
-                } focus:outline-none text-gray-900 rounded-3xl shadow-lg  block w-full p-2.5  border-0 dark:placeholder-gray-400 dark:text-white`}
+                className={` focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 rounded-full shadow-md block w-full p-3 `}
                 placeholder="example@gmail.com"
                 required
                 onChange={handleChange}
@@ -159,7 +123,7 @@ const Login = () => {
             <div>
               <label
                 htmlFor="password"
-                className="block mb-2 text-sm  text-gray-500 dark:text-gray-400 font-light"
+                className="block mb-2 text-sm font-medium text-gray-700"
               >
                 Password
               </label>
@@ -169,9 +133,7 @@ const Login = () => {
                 name="password"
                 id="password"
                 placeholder="••••••••"
-                className={`${
-                  darkMode ? "bg-[var(--hard-dark)]" : ""
-                } focus:outline-none text-gray-900 rounded-3xl shadow-lg  block w-full p-2.5  border-0 dark:placeholder-gray-400 dark:text-white`}
+                className={` focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 rounded-full shadow-md block w-full p-3 `}
                 required
                 onChange={handleChange}
                 value={loginForm?.password}
@@ -185,13 +147,13 @@ const Login = () => {
                     id="remember"
                     aria-describedby="remember"
                     type="checkbox"
-                    className=" rounded-full w-4 h-4 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800"
+                    className="rounded-full w-4 h-4 focus:ring-3 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600"
                   />
                 </div>
                 <div className="ml-3 text-sm">
                   <label
                     htmlFor="remember"
-                    className="text-gray-500 dark:text-gray-300 font-light"
+                    className="text-gray-500  font-light"
                   >
                     Remember me
                   </label>
@@ -199,17 +161,16 @@ const Login = () => {
               </div>
               <Link
                 to={"/veri"}
-                className="disabled text-sm font-light text-primary-600 hover:underline dark:text-primary-500 text-gray-500 dark:text-gray-300"
+                className="text-sm font-light text-blue-600 hover:underline dark:text-blue-500"
               >
                 Forgot password?
               </Link>
             </div>
             <button
-              disabled={false}
               type="submit"
               className={`${
                 darkMode ? "hover:bg-[var(--dark-bg-color)]" : "hover:shadow-lg"
-              } w-full transition ease-in  delay-150   text-gray-500 dark:text-gray-400 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800`}
+              } w-full transition ease-in-out duration-150 text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 font-medium rounded-full px-5 py-3 text-center dark:bg-blue-600 dark:hover:bg-blue-700`}
             >
               {isLoading ? (
                 <div role="status" className="flex justify-center items-center">
@@ -239,7 +200,7 @@ const Login = () => {
               Don’t have an account yet?{" "}
               <Link
                 to={"/signup"}
-                className="font-medium text-primary-600 hover:underline dark:text-primary-500"
+                className="font-medium text-blue-600 hover:underline dark:text-blue-500"
               >
                 Sign up
               </Link>
