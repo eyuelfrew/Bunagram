@@ -13,11 +13,7 @@ const getConversations = require("./helpers/getConversation.js");
 const bodyParser = require("body-parser");
 dotenv.config();
 const app = express();
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://bunagram.vercel.app",
-  "http://localhost:5174",
-];
+const allowedOrigins = ["http://localhost:5173", "https://bunagram.vercel.app"];
 const corsOptions = {
   origin: allowedOrigins,
   credentials: true,
@@ -57,7 +53,7 @@ const server = app.listen(port, () => {
 //socket configuration
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "http://localhost:5174"],
+    origin: ["http://localhost:5173", "https://bunagram.vercel.app"],
     methods: ["GET", "POST"],
     credentials: true,
   },

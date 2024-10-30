@@ -1,7 +1,6 @@
 const UserModel = require("../models/UserModels.js");
 
 const CheckAuth = async (req, res) => {
-  console.log(req.userId);
   try {
     const user = await UserModel.findById(req.userId);
     if (!user) {

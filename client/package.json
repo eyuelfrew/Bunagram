@@ -3,10 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "main": "main.js",
   "scripts": {
     "dev": "vite",
-    "build-vite": "tsc -b && vite build",
+    "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "electron": "electron .",
@@ -14,34 +13,6 @@
     "pack": "electron-packager . my-electron-app --platform=win32 --arch=x64 --out=dist --overwrite",
     "build-electron": "electron-builder build",
     "start": "cross-env NODE_ENV=production electron ."
-  },
-  "build": {
-    "appId": "com.example.coffegram",
-    "asar": true,
-    "asarUnpack": [
-      "**/ffmpeg.dll"
-    ],
-    "productName": "Coffegram",
-    "directories": {
-      "buildResources": "assets",
-      "output": "desktop"
-    },
-    "files": [
-      "dist/**/*",
-      "assets/**/*",
-      "preload.js",
-      "main.js",
-      "package.json"
-    ],
-    "win": {
-      "target": "nsis",
-      "icon": "assets/bunagram.ico"
-    },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": true,
-      "allowToChangeInstallationDirectory": true
-    }
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.2.6",

@@ -1,9 +1,9 @@
-import 'package:bunaram_ap/auth/login_page.dart';
+import 'package:bunaram_ap/models/Conversation.dart';
 import 'package:bunaram_ap/service/api_service.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:bunaram_ap/service/socket_service.dart';
+import 'package:bunaram_ap/widgets/side_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'chat_box.dart';
 
 class ChatsPage extends StatefulWidget {
   const ChatsPage({super.key});
@@ -13,88 +13,52 @@ class ChatsPage extends StatefulWidget {
 }
 
 class _ChatsPageState extends State<ChatsPage> {
+  List<Conversation> allUsers = [];
   String? token;
-  late IO.Socket socket;
+  final SocketService _socketService = SocketService();
+
   final TextEditingController _searchController = TextEditingController();
-  List<String> users = [
-    'John',
-    'Jane',
-    'David',
-    'Emily',
-    'Michael'
-  ]; // Example user list
-  List<String> filteredUsers = [];
-  bool showDropdown = false; // To control the dropdown visibility
-  String? selectedUser; // To track the selected user for the chat box
 
   @override
   @override
   void initState() {
     super.initState();
-    filteredUsers = users; // Initially, show all users
     _loadToken();
+    fetchConversations();
   }
 
-  //function to load stored tokne from shared preferences
+  //load token
   Future<void> _loadToken() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       token = prefs.getString('token');
     });
-    print("Token: $token");
-    if (token != null) {
-      socket = IO.io(
-          "http://192.168.137.209:5000",
-          IO.OptionBuilder()
-              .setTransports(['websocket'])
-              .disableAutoConnect()
-              .setAuth({'token': token})
-              .build());
-      //connect to back end
-      print("Scoket connection requestd......");
-      socket.connect();
-      //handleConnection Event
-      socket.onConnect((_) {
-        print('Connected Succesfully');
-        final userId = prefs.getString('userId');
-        print("user id...:$userId");
-        socket.emit('side-bar', userId);
-      });
+    // initalize socket connection
+    _initializeSocketConnection(token);
+  }
 
-      //handle error or connection issuse
-      socket.onConnectError((data) {
-        print('Connectio Error: $data');
+  Future<void> fetchConversations() async {
+    try {
+      var dio = ApiService.getDioInstance();
+      final response =
+          await dio.get('http://192.168.1.6:5000/api/conversations');
+
+      // Assuming that response.data is directly the list of conversations
+      setState(() {
+        allUsers = (response.data as List)
+            .map((json) => Conversation.fromJson(json))
+            .toList();
       });
-      socket.on('conversation', (data) {
-        print("Conversations : $data");
-      });
-      //handle socket disconection
-      socket.onDisconnect((_) {
-        print("Socket Disconnectedd");
-      });
+    } catch (e) {
+      print('Error fetching conversations: $e');
     }
   }
 
-  // Search function to filter users list based on search query
-  void _searchUsers(String query) {
-    final results = users
-        .where((user) => user.toLowerCase().contains(query.toLowerCase()))
-        .toList();
-    setState(() {
-      filteredUsers = results;
-      showDropdown = query.isNotEmpty &&
-          selectedUser ==
-              null; // Show dropdown if there's input and no chat is selected
-    });
-  }
-
-  // Function to handle user selection and show chat box
-  void _selectUser(String user) {
-    setState(() {
-      selectedUser = user; // Set the selected user
-      showDropdown = false; // Hide dropdown when a user is selected
-      _searchController.clear(); // Clear search bar
-    });
+  // initialize rocket connection method
+  void _initializeSocketConnection(token) {
+    if (token != null) {
+      _socketService.initializeSocket(token!);
+    }
   }
 
   @override
@@ -113,15 +77,48 @@ class _ChatsPageState extends State<ChatsPage> {
           },
         ),
       ),
-      drawer: _buildSideBar(), // Sidebar
-      body: Stack(
-        children: [
-          selectedUser == null
-              ? _buildBody()
-              : ChatBox(user: selectedUser!), // Show ChatBox or user search
-          if (showDropdown)
-            _buildDropdown(), // Show dropdown if search is active and no user is selected
-        ],
+      drawer: const SideBar(),
+      body: ListView.builder(
+        itemCount: allUsers.length,
+        itemBuilder: (context, index) {
+          final conversation = allUsers[index];
+          final user =
+              conversation.receiver; // You can customize sender/receiver logic
+
+          return ListTile(
+            leading: CircleAvatar(
+              backgroundImage: user.profilePic.isNotEmpty
+                  ? NetworkImage("http://192.168.1.6:5000${user.profilePic}")
+                  : const AssetImage('assets/images/userpic.png')
+                      as ImageProvider,
+              radius: 24,
+            ),
+            title: Text(
+              user.name,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text(
+              conversation.lastMessage.text.length > 30
+                  ? '${conversation.lastMessage.text.substring(0, 30)}...'
+                  : conversation.lastMessage.text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            trailing: user.lastSeen.isNotEmpty
+                ? Icon(
+                    Icons.circle,
+                    color: DateTime.parse(user.lastSeen).isAfter(
+                            DateTime.now().subtract(const Duration(minutes: 5)))
+                        ? Colors.green
+                        : Colors.grey,
+                    size: 12,
+                  )
+                : null,
+            onTap: () {
+              // Navigate to chat screen with selected user
+            },
+          );
+        },
       ),
     );
   }
@@ -130,109 +127,11 @@ class _ChatsPageState extends State<ChatsPage> {
   Widget _buildSearchBar() {
     return TextField(
       controller: _searchController,
-      onChanged: (query) => _searchUsers(query),
       decoration: const InputDecoration(
         hintText: 'Search users...',
         border: InputBorder.none,
         suffixIcon: Icon(Icons.search),
       ),
     );
-  }
-
-  // Dropdown widget to show filtered users
-  Widget _buildDropdown() {
-    return Positioned(
-      top: kToolbarHeight, // Position dropdown just below the app bar
-      left: 0,
-      right: 0,
-      child: Card(
-        elevation: 4,
-        child: ListView.builder(
-          shrinkWrap: true,
-          itemCount: filteredUsers.length,
-          itemBuilder: (context, index) {
-            return ListTile(
-              title: Text(filteredUsers[index]),
-              onTap: () {
-                _selectUser(filteredUsers[index]); // Select user and show chat
-              },
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  // Sidebar widget
-  Widget _buildSideBar() {
-    return Drawer(
-      child: ListView(
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blue),
-            child: Text(
-              'Menu',
-              style: TextStyle(color: Colors.white, fontSize: 24),
-            ),
-          ),
-          const ListTile(
-            leading: Icon(Icons.person),
-            title: Text("Account"),
-          ),
-          const ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
-          ),
-          ListTile(
-            leading: const Icon(Icons.logout),
-            title: const Text('Logout'),
-            onTap: () {
-              _logout();
-            },
-          )
-        ],
-      ),
-    );
-  }
-
-  // Body of the chats page when no user is selected
-  Widget _buildBody() {
-    return const Center(
-      child: Text('Search conversation'),
-    );
-  }
-
-  // Logout
-  void _logout() async {
-    showDialog(
-      context: context,
-      builder: (context) => const Center(
-        child: CircularProgressIndicator(),
-      ),
-    );
-    var dio = ApiService.getDioInstance();
-    var cookieJar = ApiService.getCookieJarInstance();
-    var cookies = await cookieJar
-        .loadForRequest(Uri.parse('http://192.168.137.209:5000'));
-    print("Logout cookie = $cookies");
-    try {
-      var response = await dio.get('http://192.168.137.209:5000/api/logout');
-      print('Response Body : ${response.data}');
-      if (response.data['status'] == 1) {
-        socket.disconnect();
-        print("Logout successfull");
-        cookieJar.deleteAll();
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.remove("authToken");
-        Navigator.pop(context);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const LoginPage()),
-        );
-      }
-    } catch (err) {
-      print('Error occurred: $err');
-    }
   }
 }

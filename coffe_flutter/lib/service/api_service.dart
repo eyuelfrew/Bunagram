@@ -18,9 +18,7 @@ class ApiService {
   }
 
   static CookieJar getCookieJarInstance() {
-    if (_cookieJar == null) {
-      _cookieJar = CookieJar();
-    }
+    _cookieJar ??= CookieJar();
     return _cookieJar!;
   }
 }
