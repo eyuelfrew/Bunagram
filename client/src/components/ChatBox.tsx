@@ -26,7 +26,7 @@ import {
 } from "react-icons/md";
 import EmojiPicker from "./EmojiPicker";
 import { LiaCheckDoubleSolid } from "react-icons/lia";
-import { ImCancelCircle, ImCross } from "react-icons/im";
+import { ImCross } from "react-icons/im";
 import {
   DeleteSingleMessage,
   FetchAllMessage,
@@ -43,8 +43,6 @@ import {
 import { FaCheck } from "react-icons/fa6";
 import { DeleteSelectedMessages } from "../services/MessagesApi";
 import { TiCancelOutline } from "react-icons/ti";
-import { UnblockUser } from "../apis/UserApi";
-import { SetUserInfo } from "../store/actions/UserAction";
 
 interface Message {
   text: string;
