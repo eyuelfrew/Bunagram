@@ -4,7 +4,6 @@ import { getReceiverInit } from "../store/actions/getRecever";
 import { Recevier, User } from "../types/Types";
 import { Link } from "react-router-dom";
 import { UseSocket } from "../context/SocketContext";
-
 interface SearchUserProps {
   user: User;
   onClose: () => void;
@@ -60,7 +59,7 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
                 <>
                   <img
                     className="w-[58px] h-[58px] md:w-[77px] md:h-[77px] lg:w-[60px] lg:h-[60px] rounded-full"
-                    src="/userpic.png"
+                    src="./userpic.png"
                     alt="buna chat"
                   />
                 </>

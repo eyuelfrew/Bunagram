@@ -5,15 +5,20 @@ const router = require("./routers/routes.js");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const path = require("path");
-const multer = require("multer");
 const { Server } = require("socket.io");
 const getUserDetailFromToken = require("./helpers/getUserDetailsFromToken.js");
-const { MessageModel } = require("./models/ConversationModel.js");
+const {
+  MessageModel,
+  ConversationModel,
+} = require("./models/ConversationModel.js");
 const getConversations = require("./helpers/getConversation.js");
 const bodyParser = require("body-parser");
 dotenv.config();
 const app = express();
-const allowedOrigins = ["http://localhost:5173", "https://bunagram.vercel.app"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://bunagram.onrender.com",
+];
 const corsOptions = {
   origin: allowedOrigins,
   credentials: true,
@@ -53,7 +58,7 @@ const server = app.listen(port, () => {
 //socket configuration
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "https://bunagram.vercel.app"],
+    origin: ["http://localhost:5173", "https://bunagram.onrender.com"],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -138,6 +143,47 @@ io.on("connection", async (socket) => {
       }
     }
   );
+  /*
+  -- All Message Seen 
+  */
+  socket.on("all-seen", async (data) => {
+    const roomName = `conversation_${data?.conversationId}`;
+    const receiverSocketId = userToSocketMap[data?.senderId];
+    try {
+      if (roomUsers[roomName] && roomUsers[roomName].has(receiverSocketId)) {
+        console.log("Requested Seen Functionality!!");
+
+        // Fetch all messages for the conversation and update their seen status if unseen
+        const updateResult = await MessageModel.updateMany(
+          {
+            _id: {
+              $in: (
+                await ConversationModel.findById(data?.conversationId)
+              ).messages,
+            },
+            seen: false,
+          },
+          { seen: true }
+        );
+        io.to(roomName).emit("all-seen", {
+          roomName,
+        });
+        // Check if any messages were updated
+        if (updateResult.nModified > 0) {
+          // Emit the 'all-seen' event to the room with roomName and conversationId
+          io.to(roomName).emit("all-seen", {
+            roomName,
+          });
+
+          console.log(
+            `All unseen messages in conversation ${data?.conversationId} marked as seen by ${receiverId}`
+          );
+        }
+      }
+    } catch (error) {
+      console.error("Error updating message seen status:", error);
+    }
+  });
 
   /*
   -- Typing futures

@@ -24,9 +24,8 @@ import ProtectedAnimation from "../components/animations/ProtectedAnimation";
 const Home = () => {
   const navigateTo = useNavigate();
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
-  const { setSocket, setOnlineUsers, clearSocketState } = UseSocket();
+  const { setSocket, setOnlineUsers } = UseSocket();
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
-  // const user = useSelector((state: Root_State) => state.UserReducers);
   const dispatch = useDispatch();
   const token = localStorage.getItem("token");
 
@@ -40,6 +39,7 @@ const Home = () => {
       );
 
       if (response.data?.status === 1) {
+        localStorage.clear();
         navigateTo("/");
       }
     };
@@ -58,11 +58,6 @@ const Home = () => {
       socketConnection.on("onlineuser", (data) => {
         setOnlineUsers(data);
       });
-
-      return () => {
-        socketConnection.disconnect();
-        clearSocketState();
-      };
     }
   }, [token]);
   useEffect(() => {
@@ -80,6 +75,7 @@ const Home = () => {
           { withCredentials: true }
         );
         if (response.data?.status === 1) {
+          localStorage.setItem("token", response.data?.token);
           dispatch(SetUserInfo(response?.data?.user));
           navigateTo("/chat");
         } else {

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cofferam</title>
+    <style>
+      body,
+      html {
+        height: 100%;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #282c34;
+        color: #ffffff;
+        font-family: Arial, sans-serif;
+      }
+
+      .container {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        background-color: #333;
+        border-radius: 8px;
+        box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+        max-width: 600px;
+      }
+
+      .logo {
+        width: 100px;
+        height: 100px;
+        background-image: url("./bunagram.ico"); /* Update with your logo path */
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+        margin-right: 20px;
+      }
+
+      .text {
+        flex-grow: 1;
+      }
+
+      .title {
+        font-size: 28px;
+        font-weight: bold;
+        margin: 0;
+        color: #d4d4d1; /* Customize color as desired */
+      }
+
+      .subtitle {
+        font-size: 18px;
+        margin: 5px 0 15px;
+      }
+
+      .loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        border-top: 4px solid #ffcc00; /* Customize as desired */
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+
+      @keyframes spin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="logo"></div>
+      <div class="text">
+        <h1 class="title">Welcome to Coffeegram</h1>
+        <p class="subtitle">super fast chat app</p>
+      </div>
+      <div class="loading"></div>
+    </div>
+  </body>
+</html>

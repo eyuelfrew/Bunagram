@@ -1,5 +1,4 @@
 const jwt = require("jsonwebtoken");
-const UserModel = require("../models/UserModels.js");
 
 const getUserDetailFromToken = async (token) => {
   try {
@@ -9,10 +8,13 @@ const getUserDetailFromToken = async (token) => {
         logout: true,
       };
     }
+    console.log("token", token);
     const decode = await jwt.verify(token, process.env.JWT_SECRET_KEY);
     const user = decode.id;
+    console.log("User");
     return user;
   } catch (error) {
+    console.log(error);
     return error.message;
   }
 };

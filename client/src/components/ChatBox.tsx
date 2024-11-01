@@ -19,6 +19,7 @@ import ChatMenu from "./ChatMenu";
 import LottieAnimation from "./LottieAnimation";
 import SendImage from "./SendImage";
 import {
+  MdArrowDownward,
   MdContentCopy,
   MdDelete,
   MdModeEdit,
@@ -70,6 +71,7 @@ interface ContextMenuProps {
 }
 const ChatBox = () => {
   // array of selected message handle state
+  const [showButton, setShowButton] = useState(false);
   const [selectedMessages, setSelectedMessages] = useState<string[]>([]);
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const [contextMenu, setContextMenu] = useState<ContextMenuProps | null>(null);
@@ -177,11 +179,15 @@ const ChatBox = () => {
       // Join the new room
       const newRoom = `conversation_${Recever.conversation_id}`;
       SocketConnection.emit("join-room", { roomName: newRoom });
-
+      SocketConnection.emit("all-seen", {
+        senderId: Recever.recever_id,
+        conversationId: Recever.conversation_id,
+      });
+      console.log("State Changeing here!!!");
       // Update the current room reference
       setPreviousRoom(newRoom);
     }
-  }, [Recever.conversation_id]);
+  }, [Recever.recever_id]);
   useEffect(() => {
     if (SocketConnection) {
       // Join the new room
@@ -200,9 +206,22 @@ const ChatBox = () => {
       });
     }
   }, [allMessages]);
-  /*
-  --- Emmit typing event when a user is typing and stop typing!!
-  */
+  const handleScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const scrollTop = (event.currentTarget as HTMLDivElement).scrollTop; // Assert type to HTMLDivElement
+    if (scrollTop <= 2000) {
+      setShowButton(true);
+    } else {
+      setShowButton(false);
+    }
+  };
+  const handleBackToLatestMessge = () => {
+    if (currentMessage.current) {
+      currentMessage.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  };
 
   useEffect(() => {
     setMessage({ ...message, text: "" });
@@ -281,10 +300,20 @@ const ChatBox = () => {
       const handleClearChatSocket = () => {
         setAllMessage([]);
       };
+      const handleSeenAllMessage = () => {
+        console.log("All Seen Functionality");
+        setAllMessage((prevMessages) =>
+          prevMessages.map((msg) => ({
+            ...msg,
+            seen: true,
+          }))
+        );
+      };
       SocketConnection.on("newconversation", handleNewConveration);
       SocketConnection.on("new-message", NewMessageHandler);
       SocketConnection.on("updated-message", handleUpdatedMessage);
       SocketConnection.on("clear-chat", handleClearChatSocket);
+      SocketConnection.on("all-seen", handleSeenAllMessage);
       SocketConnection.on("mutli-message-deleted", (deletedMessages) => {
         setAllMessage((prevMessages) =>
           prevMessages.filter((msg) => !deletedMessages.includes(msg._id))
@@ -549,7 +578,7 @@ const ChatBox = () => {
               <>
                 <img
                   className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
-                  src={`/savedmessage.jpg`}
+                  src={`./savedmessage.jpg`}
                   alt={`${Recever.full_name}`}
                 />
               </>
@@ -559,7 +588,7 @@ const ChatBox = () => {
                   <>
                     <img
                       className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
-                      src={`/deletedccount.jpg`}
+                      src={`./deletedccount.jpg`}
                       alt={`${Recever.full_name}`}
                     />
                   </>
@@ -569,7 +598,7 @@ const ChatBox = () => {
                       <>
                         <img
                           className="w-[55px] lg:w-[75px] lg:h-[75px] rounded-full "
-                          src={`/userpic.png`}
+                          src={`./userpic.png`}
                           alt={`${Recever.full_name}`}
                         />
                       </>
@@ -653,6 +682,7 @@ const ChatBox = () => {
         </div>
       </header>
       <section
+        onScroll={handleScroll}
         onClick={handleClickOutside}
         className={`h-[calc(100vh-160px)] ${
           darkMode ? "bg-[var(--light-dark-color)]" : "bg-[var(--blue-grotto)]"
@@ -890,7 +920,7 @@ const ChatBox = () => {
             );
           })}
 
-        <div ref={messageEndRef}></div>
+        <div className="relative" ref={messageEndRef}></div>
       </section>
 
       <section
@@ -898,47 +928,32 @@ const ChatBox = () => {
           darkMode ? " bg-[var(--medium-dard)]" : "bg-[var(--cobalt-blue)]"
         } relative flex items-center h-16 `}
       >
-        {/* {showScrollButton && ( */}
-        {/* <button
-          onClick={scrollDown}
-          className={`!{} bg-green-400 z-[3000] absolute -mt-28 rounded-full text-3xl right-8 p-3`}
-        >
-          <MdArrowDownward />
-        </button> */}
-        {/* )} */}
-
         {isEdit ? (
           <div
             className={`${
               darkMode
-                ? "bg-[var(--messge-input-dark)] text-slate-300"
-                : "bg-slate-300 w-full text-slate-600"
-            } flex justify-between px-4  z-[5000] absolute w-[99%]  top-0 -mt-16 h-16  items-center`}
+                ? "bg-gray-900 text-slate-300 shadow-lg"
+                : "bg-sky-400 text-slate-100 shadow-md"
+            } flex justify-between items-center px-6 py-4 z-[2000] absolute w-[99%] top-0 -mt-16 h-16 rounded-t-lg transition duration-300`}
           >
-            <div
-              className={`w-full ${
-                darkMode
-                  ? "bg-[var(--messge-input-dark)] text-slate-300"
-                  : "bg-slate-300 w-full text-slate-600"
-              }`}
-            >
-              <div className="flex justify-between items-center">
-                <div className="flex">
-                  <div className="w-1 bg-green-300  h-6"></div>
-                  <h1 className=" text-md">Edit message </h1>
-                </div>
+            <div className="w-full">
+              <div className="flex items-center space-x-2">
+                <div className="w-1 bg-green-300 h-8 rounded-md"></div>
+                <h1 className="text-sm md:text-md lg:text-lg font-semibold">
+                  Edit Message
+                </h1>
               </div>
 
-              <p className="truncate ... ">
+              <p className="truncate text-sm mt-1">
                 <span>{editMessage.text}</span>
               </p>
             </div>
             <div className="flex">
               <button
                 onClick={handleCancelEdit}
-                className="rounded-full text-slate-500  text-md  hover:bg-[var(--light-dark-color)]"
+                className="flex items-center justify-center w-10 h-10 rounded-full text-slate-500 transition duration-200 hover:bg-[var(--light-dark-color)] hover:text-slate-900"
               >
-                <ImCross />
+                <ImCross className="w-5 h-5" />
               </button>
             </div>
           </div>
@@ -999,6 +1014,18 @@ const ChatBox = () => {
               </>
             ) : (
               <>
+                <div className="relative">
+                  {showButton && (
+                    <button
+                      onClick={handleBackToLatestMessge}
+                      className={`${
+                        darkMode ? "bg-gray-600" : "bg-blue-950"
+                      } text-white z-[3000] fixed rounded-full text-3xl -mt-24 right-0 p-3`}
+                    >
+                      <MdArrowDownward />
+                    </button>
+                  )}
+                </div>
                 <div className=" flex justify-around items-center ">
                   <SendImage />
                 </div>
@@ -1011,7 +1038,7 @@ const ChatBox = () => {
                       id="message_input"
                       onInput={handleInput}
                       name="text"
-                      className={` absolute bottom-2 ${
+                      className={`z-[3000] absolute bottom-2 ${
                         darkMode
                           ? "bg-[var(--messge-input-dark)] text-slate-300"
                           : "text-slate-600"

@@ -69,7 +69,7 @@ const Profile = () => {
                   <>
                     <img
                       className="w-24 h-24 rounded-full "
-                      src="/userpic.png"
+                      src="./userpic.png"
                       alt=""
                     />
                   </>

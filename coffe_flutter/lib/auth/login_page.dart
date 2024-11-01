@@ -2,16 +2,19 @@ import 'package:bunaram_ap/service/api_service.dart';
 import 'package:bunaram_ap/auth/forgot_password.dart';
 import 'package:bunaram_ap/auth/sign_up.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../chats_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
   @override
+  // ignore: library_private_types_in_public_api
   _LoginPageState createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
+  String? apiUrl = dotenv.env['BACKEND_API_URL'];
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -51,7 +54,7 @@ class _LoginPageState extends State<LoginPage> {
                       BoxShadow(
                         color: Colors.black.withOpacity(0.1),
                         blurRadius: 20,
-                        offset: Offset(0, 10),
+                        offset: const Offset(0, 10),
                       ),
                     ],
                   ),
@@ -71,7 +74,7 @@ class _LoginPageState extends State<LoginPage> {
                         controller: _emailController,
                         decoration: InputDecoration(
                           labelText: "Email",
-                          labelStyle: TextStyle(fontSize: 14),
+                          labelStyle: const TextStyle(fontSize: 14),
                           filled: true,
                           fillColor: Colors.grey[200],
                           border: OutlineInputBorder(
@@ -79,7 +82,7 @@ class _LoginPageState extends State<LoginPage> {
                             borderSide: BorderSide.none,
                           ),
                           prefixIcon:
-                              Icon(Icons.email, color: Color(0xFF4A90E2)),
+                              const Icon(Icons.email, color: Color(0xFF4A90E2)),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -94,7 +97,7 @@ class _LoginPageState extends State<LoginPage> {
                         obscureText: _obscurePassword,
                         decoration: InputDecoration(
                           labelText: "Password",
-                          labelStyle: TextStyle(fontSize: 14),
+                          labelStyle: const TextStyle(fontSize: 14),
                           filled: true,
                           fillColor: Colors.grey[200],
                           border: OutlineInputBorder(
@@ -102,13 +105,13 @@ class _LoginPageState extends State<LoginPage> {
                             borderSide: BorderSide.none,
                           ),
                           prefixIcon:
-                              Icon(Icons.lock, color: Color(0xFF4A90E2)),
+                              const Icon(Icons.lock, color: Color(0xFF4A90E2)),
                           suffixIcon: IconButton(
                             icon: Icon(
                               _obscurePassword
                                   ? Icons.visibility
                                   : Icons.visibility_off,
-                              color: Color(0xFF4A90E2),
+                              color: const Color(0xFF4A90E2),
                             ),
                             onPressed: () {
                               setState(() {
@@ -133,7 +136,7 @@ class _LoginPageState extends State<LoginPage> {
                         child: ElevatedButton(
                           onPressed: _login,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF0061FF),
+                            backgroundColor: const Color(0xFF0061FF),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(30),
                             ),
@@ -183,7 +186,7 @@ class _LoginPageState extends State<LoginPage> {
  ---- Login Function
 */
   void _login() async {
-    void _showSnackBar(BuildContext context, String message, Color color) {
+    void showSnackBar(BuildContext context, String message, Color color) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
@@ -212,7 +215,7 @@ class _LoginPageState extends State<LoginPage> {
 
         // Send login request
         var response = await dio.post(
-          'http://192.168.1.6:5000/api/login',
+          '$apiUrl:5000/api/login',
           data: {
             'email': email,
             'password': password,
@@ -220,21 +223,21 @@ class _LoginPageState extends State<LoginPage> {
         );
 
         // Dismiss loading dialog
+        // ignore: use_build_context_synchronously
         Navigator.pop(context);
 
         var responseData = response.data;
-        print(responseData);
-        await cookieJar.loadForRequest(Uri.parse('http://192.168.1.6:5000'));
 
+        await cookieJar.loadForRequest(Uri.parse('$apiUrl:5000'));
         // Handling different responses
         if (responseData['wrongCredentials'] == true) {
-          _showSnackBar(
+          showSnackBar(
               context, 'Wrong Credentials. Please try again.', Colors.red);
         } else if (responseData['isLocked'] == true) {
-          _showSnackBar(
+          showSnackBar(
               context, 'Too many attempts. Try again later!', Colors.red);
         } else if (responseData['notFound'] == true) {
-          _showSnackBar(context, 'User not found!', Colors.red);
+          showSnackBar(context, 'User not found!', Colors.red);
         } else if (responseData['loggedIn'] == true) {
           // Successfully logged in
           final userId = responseData['user']['_id'];
@@ -252,7 +255,7 @@ class _LoginPageState extends State<LoginPage> {
           );
         } else {
           // Handle any unexpected response
-          _showSnackBar(context,
+          showSnackBar(context,
               'An unexpected error occurred. Please try again.', Colors.red);
         }
       } catch (e) {
@@ -263,7 +266,7 @@ class _LoginPageState extends State<LoginPage> {
         print('Error occurred: $e');
 
         // Display a generic error message
-        _showSnackBar(context, 'An error occurred: $e', Colors.red);
+        showSnackBar(context, 'An error occurred: $e', Colors.red);
       }
     }
   }

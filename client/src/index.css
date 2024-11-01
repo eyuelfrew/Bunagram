@@ -14,7 +14,8 @@
   --royale-blue: #0074b7;
   --blue-de-france: #318ce7;
   --brandeis-blue: #0070ff;
-  --cobalt-blue: #0047ab;
+  --cobalt-blue: #07326e;
+  /* --cobalt-blue: #0047ab; */
 }
 .scrollbar::-webkit-scrollbar {
   width: 10px;

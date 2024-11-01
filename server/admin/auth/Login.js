@@ -30,7 +30,6 @@ const AdminLogin = async (req, res) => {
         httpOnly: true,
         sameSite: "none",
         secure: true,
-        domain: ".welllaptops.com",
       })
       .json({
         message: "Login Successful",

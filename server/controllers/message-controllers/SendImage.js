@@ -2,19 +2,19 @@ const {
   ConversationModel,
   MessageModel,
 } = require("../../models/ConversationModel");
-const Encryption = require("../../service/EncriptionServce");
+const {
+  decryptMessage,
+  encryptMessageToStore,
+  decryptStoredMessage,
+  encryptMessage,
+  messageEncryptToClient,
+} = require("../../service/EncriptionServce");
 
 // Ensure upload is defined here
 
 const SendMessage = async (req, res) => {
-  // The multer upload will handle the file upload before this function is invoked
-  const { reciver_id, text, replyToMessageId } = req.body; // Extract necessary fields from req.body
+  const { reciver_id, text, replyToMessageId } = req.body;
   const SenderId = req.userId;
-  const EncService = new Encryption(
-    process.env.TRANSIT_SECERETE_KEY,
-    process.env.STORAGE_SECRETE_KEY,
-    process.env.BACK_TO_CLIENT_KEY
-  );
 
   try {
     let conversation = await ConversationModel.findOne({
@@ -35,8 +35,8 @@ const SendMessage = async (req, res) => {
     // Encrypt the text (if provided)
     let encryptedText = "";
     if (text.trim() != "") {
-      const PlainText = EncService.decryptIncomingSingleMessage(text);
-      encryptedText = EncService.encryptForStorage(PlainText);
+      const PlainText = decryptMessage(text);
+      encryptedText = encryptMessageToStore(PlainText);
     }
 
     // Get the uploaded file's path (if an image was uploaded)
@@ -53,14 +53,13 @@ const SendMessage = async (req, res) => {
       msgByUserId: SenderId,
       replyToMessageId: replyToMessageId ? replyToMessageId : null,
     });
-
     const savedMessage = await message.save();
 
     // Decrypt the stored message and re-encrypt it using a different key
     let messageToBeSent = "";
     if (savedMessage.text) {
-      messageToBeSent = EncService.decrypteStoredMessage(savedMessage.text);
-      messageToBeSent = EncService.encryptSingleMessage(messageToBeSent);
+      messageToBeSent = decryptStoredMessage(savedMessage.text);
+      messageToBeSent = messageEncryptToClient(messageToBeSent);
       savedMessage.text = messageToBeSent; // Re-encrypt the text for client-side
     }
 

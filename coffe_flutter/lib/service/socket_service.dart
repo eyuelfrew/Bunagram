@@ -1,11 +1,12 @@
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SocketService {
   late IO.Socket socket;
-
+  String? apiUrl = dotenv.env['BACKEND_API_URL'];
   void initializeSocket(String token) {
     socket = IO.io(
-      "http://192.168.1.6:5000",
+      "${apiUrl}:5000",
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
@@ -25,7 +26,10 @@ class SocketService {
     });
   }
 
+  bool get isConnected => socket.connected;
   void disconnect() {
-    socket.disconnect();
+    if (isConnected) {
+      socket.disconnect();
+    }
   }
 }

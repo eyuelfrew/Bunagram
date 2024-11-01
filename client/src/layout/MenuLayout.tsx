@@ -40,6 +40,7 @@ const MenuLayout = () => {
     );
 
     if (response.data?.status === 1) {
+      localStorage.clear();
       navigateTo("/");
     }
     dispatch(ResetUserInfo());
@@ -97,7 +98,7 @@ const MenuLayout = () => {
                 <>
                   <img
                     className="w-16 h-16 lg:w-20 lg:h-20  rounded-full"
-                    src={"/userpic.png"}
+                    src={"./userpic.png"}
                     alt={`${user.profile_pic}`}
                   />
                 </>
@@ -155,11 +156,11 @@ const MenuLayout = () => {
           </button>
         </div>
         <div
-          className={`${
-            darkMode ? "text-slate-400 " : "text-slate-700"
-          } mt-[84%] flex flex-col font-light text-center`}
+          className={`fixed bottom-0 ${
+            darkMode ? "text-slate-400 " : "text-slate-300"
+          }  flex flex-col font-light text-center w-full`}
         >
-          <span>Coffegram Desktop</span>
+          <span className="">Coffegram Web</span>
           <span>Version 0.0.1</span>
         </div>
       </div>

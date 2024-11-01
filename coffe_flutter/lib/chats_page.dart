@@ -4,6 +4,7 @@ import 'package:bunaram_ap/service/socket_service.dart';
 import 'package:bunaram_ap/widgets/side_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatsPage extends StatefulWidget {
   const ChatsPage({super.key});
@@ -13,6 +14,8 @@ class ChatsPage extends StatefulWidget {
 }
 
 class _ChatsPageState extends State<ChatsPage> {
+  String? apiUrl = dotenv.env['BACKEND_API_URL'];
+
   List<Conversation> allUsers = [];
   String? token;
   final SocketService _socketService = SocketService();
@@ -40,14 +43,19 @@ class _ChatsPageState extends State<ChatsPage> {
   Future<void> fetchConversations() async {
     try {
       var dio = ApiService.getDioInstance();
-      final response =
-          await dio.get('http://192.168.1.6:5000/api/conversations');
-
+      final response = await dio.get('${apiUrl}:5000/api/conversations');
+      print("Conersaions = ${response.data}");
       // Assuming that response.data is directly the list of conversations
       setState(() {
-        allUsers = (response.data as List)
-            .map((json) => Conversation.fromJson(json))
-            .toList();
+        if (response.data != null && response.data is List) {
+          allUsers = (response.data as List)
+              .map((json) => (Conversation.fromJson(json)))
+              .toList();
+          print("All User  =  ${allUsers}");
+        } else {
+          print('Unexpected response format: ${response.data}');
+          allUsers = [];
+        }
       });
     } catch (e) {
       print('Error fetching conversations: $e');
@@ -82,13 +90,14 @@ class _ChatsPageState extends State<ChatsPage> {
         itemCount: allUsers.length,
         itemBuilder: (context, index) {
           final conversation = allUsers[index];
+          print("conversation = ${conversation}");
           final user =
               conversation.receiver; // You can customize sender/receiver logic
 
           return ListTile(
             leading: CircleAvatar(
               backgroundImage: user.profilePic.isNotEmpty
-                  ? NetworkImage("http://192.168.1.6:5000${user.profilePic}")
+                  ? NetworkImage("${apiUrl}:5000${user.profilePic}")
                   : const AssetImage('assets/images/userpic.png')
                       as ImageProvider,
               radius: 24,
@@ -104,16 +113,14 @@ class _ChatsPageState extends State<ChatsPage> {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            trailing: user.lastSeen.isNotEmpty
-                ? Icon(
-                    Icons.circle,
-                    color: DateTime.parse(user.lastSeen).isAfter(
-                            DateTime.now().subtract(const Duration(minutes: 5)))
-                        ? Colors.green
-                        : Colors.grey,
-                    size: 12,
-                  )
-                : null,
+            trailing: const Icon(
+              Icons.circle,
+              // color: user.lastSeen.isAfter(
+              //         DateTime.now().subtract(const Duration(minutes: 5)))
+              //     ? Colors.green
+              //     : Colors.grey,
+              size: 12,
+            ),
             onTap: () {
               // Navigate to chat screen with selected user
             },

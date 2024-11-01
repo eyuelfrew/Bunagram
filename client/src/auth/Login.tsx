@@ -93,7 +93,7 @@ const Login = () => {
         className={` md:w-[80%] lg:w-[60%] flex rounded-3xl shadow-2xl   md:mt-0  xl:p-0 `}
       >
         <img
-          src="/coffegram.jfif"
+          src="./coffegram.jfif"
           className="w-80 hidden md:flex lg:flex rounded-l-3xl"
           alt="Login illustration"
         />

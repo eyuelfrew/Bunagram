@@ -41,7 +41,6 @@ const Sidebar = () => {
     ConversationWithUserDetails[] | null
   >(null);
   const user = useSelector((state: Root_State) => state.UserReducers);
-  // const encryptionService = new WebCryptoEncryptionService();
   const handleSearchUser = async (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setInputValue({ ...searchUser, [name]: value });
@@ -325,14 +324,14 @@ const Sidebar = () => {
                                 : "hover:bg-gray-600"
                             }  flex px-2 py-1 justify-between items-center`}
                           >
-                            <div className="flex">
+                            <div className="flex items-center">
                               <div className="flex px-2 py-1 relative">
                                 {user._id === conv?.userDetails._id ? (
                                   <>
                                     <>
                                       <img
                                         className="w-16 h-16 rounded-full "
-                                        src={`/savedmessage.jpg`}
+                                        src={`./savedmessage.jpg`}
                                         alt={`${Recever.full_name}`}
                                       />
                                     </>
@@ -342,8 +341,8 @@ const Sidebar = () => {
                                     {conv?.userDetails.deletedAccount ? (
                                       <>
                                         <img
-                                          className="w-16 h-16 rounded-full"
-                                          src={`/deletedccount.jpg`}
+                                          className="w-16 md:w-10 lg:w-16 rounded-full"
+                                          src={`./deletedccount.jpg`}
                                           alt=""
                                         />
                                       </>
@@ -353,15 +352,15 @@ const Sidebar = () => {
                                         "" ? (
                                           <>
                                             <img
-                                              className="w-16 h-16 rounded-full"
-                                              src={`/userpic.png`}
+                                              className="w-16 md:w-10 lg:w-16  rounded-full"
+                                              src={`./userpic.png`}
                                               alt=""
                                             />
                                           </>
                                         ) : (
                                           <>
                                             <img
-                                              className="w-16 h-16 rounded-full"
+                                              className="w-16 md:w-10 lg:w-16 rounded-full"
                                               src={`${URL}${conv?.userDetails.profile_pic}`}
                                               alt=""
                                             />
@@ -377,18 +376,18 @@ const Sidebar = () => {
                                       conv?.userDetails._id
                                     ) ? (
                                       <>
-                                        <div className="absolute w-3 h-3 rounded-full bg-green-400 right-1 top-11 "></div>
+                                        <div className="absolute w-3 h-3 rounded-full bg-green-400 right-1 top-11  md:top-4 lg:top-11 "></div>
                                       </>
                                     ) : (
                                       <>
-                                        <div className="absolute w-3 h-3 rounded-full bg-red-400 right-1 top-11  "></div>
+                                        <div className="absolute w-3 h-3 rounded-full bg-red-400 right-1 top-11 md:top-4 lg:top-11  "></div>
                                       </>
                                     )}
                                   </>
                                 )}
                               </div>
                               <div className="mt-2">
-                                <p className="text-lg font-semibold">
+                                <p className="md:text-sm lg:text-lg font-semibold">
                                   {user._id !== conv?.userDetails._id &&
                                   !conv?.userDetails?.deletedAccount ? (
                                     <>{conv?.userDetails?.name}</>

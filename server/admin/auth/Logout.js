@@ -27,7 +27,6 @@ const AdminLogout = async (req, res) => {
       httpOnly: true,
       sameSite: "none",
       secure: true,
-      domain: ".welllaptops.com",
     };
 
     return res
