@@ -18,7 +18,6 @@ const PreviewComponent: React.FC<PreviewComponentProps> = ({
   onSend,
   isLoading,
 }) => {
-  console.log(isLoading);
   if (!preview) return null;
   return (
     <>

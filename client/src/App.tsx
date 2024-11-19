@@ -1,8 +1,6 @@
 import { Navigate, Route, Routes, useNavigate } from "react-router-dom";
 import "./App.css";
-
 import Login from "./auth/Login";
-
 import Home from "./pages/Home";
 import { useEffect, useState } from "react";
 import axios, { AxiosResponse } from "axios";
@@ -11,10 +9,12 @@ import VerifyAccount from "./auth/VerifyAccount";
 import { Toaster } from "react-hot-toast";
 import DeleteAccountSuccess from "./pages/DeleteAccountSuccess";
 import ForgotPassword from "./auth/ForgotPassword";
-import ResetPassword from "./auth/ResetPassword";
 import CloudPassword from "./pages/CloudPassword";
 import { useDispatch } from "react-redux";
 import { SetUserInfo } from "./store/actions/UserAction";
+import VerifiyPasswordReset from "./pages/VerifiyPasswordReset";
+import NewPassword from "./pages/NewPassword";
+import ComplimentForm from "./pages/ComplientPage";
 
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const dispatch = useDispatch();
@@ -28,7 +28,6 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
           `${import.meta.env.VITE_BACK_END_URL}/api/check-auth`,
           { withCredentials: true }
         );
-        console.log(response.data);
         if (response.data?.status === 1) {
           dispatch(SetUserInfo(response.data?.user));
           setIsAuthenticated(true);
@@ -75,11 +74,14 @@ function App() {
         <Route path="/verify-email" element={<VerifyAccount />}></Route>
         <Route path="/user-sorry" element={<DeleteAccountSuccess />}></Route>
         <Route path="/cloudpass" element={<CloudPassword />}></Route>
-        <Route path="/veri" element={<ForgotPassword />}></Route>
+        <Route path="/newpass" element={<NewPassword />}></Route>
         <Route
-          path="/reset-password/:token"
-          element={<ResetPassword />}
+          path="/verify-pass-rest"
+          element={<VerifiyPasswordReset />}
         ></Route>
+        <Route path="/veri" element={<ForgotPassword />}></Route>
+
+        <Route path="/issuse" element={<ComplimentForm />}></Route>
       </Routes>
       <Toaster />
     </main>

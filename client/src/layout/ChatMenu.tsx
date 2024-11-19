@@ -10,9 +10,9 @@ import { getReceiverInit } from "../store/actions/getRecever";
 import { CgProfile } from "react-icons/cg";
 import { ViewProfile } from "../store/actions/ViewProfile";
 import { RiChatDeleteFill } from "react-icons/ri";
-import { ClearChats, DeleteConversation } from "../services/API";
 import toast from "react-hot-toast";
 import { BlockUser, UnblockUser } from "../apis/UserApi";
+import { ClearChats, DeleteConversation } from "../apis/Chat";
 
 const ChatMenu: React.FC = () => {
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
@@ -136,7 +136,7 @@ const ChatMenu: React.FC = () => {
   };
   return (
     <div className="relative z-[2000]">
-      <button onClick={handleOpenMenu} className="text-white text-2xl">
+      <button onClick={handleOpenMenu} className="text-slate-400 text-2xl">
         <CiMenuKebab />
       </button>
       {openMenu && (
@@ -145,7 +145,7 @@ const ChatMenu: React.FC = () => {
           ref={menuRef}
           className={`${
             darkMode ? "bg-gray-700 " : "bg-[var(--blue-de-france)]"
-          } absolute h-fit -ml-32  p-3 flex flex-col gap-3 w-36`}
+          } absolute h-fit -ml-32  p-3 flex flex-col gap-3 w-36 text-white`}
         >
           <button
             onClick={() => dispatch(ViewProfile())}

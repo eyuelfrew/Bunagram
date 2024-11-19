@@ -51,3 +51,35 @@ export const FetchBlockedUsers = async () => {
     console.log(error);
   }
 };
+/**
+ *
+ * Search users
+ */
+export const SearchUsers = async (query: string) => {
+  try {
+    const response: AxiosResponse = await axios.post(`${URI}/api/search`, {
+      query: query,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};
+/*
+-- Upload Profile Picture
+*/
+export const UploadProfile = async (file: File) => {
+  try {
+    const formData = new FormData();
+    formData.append("image", file);
+    const response = await axios.post(`${URI}/api/profile-pic`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+      withCredentials: true,
+    });
+    return response.data;
+  } catch (error) {
+    console.log(error);
+  }
+};

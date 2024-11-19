@@ -23,7 +23,7 @@ const initState: Recevier = {
 };
 const receiverReducer = (
   state = initState,
-  action: { type: string; payload: Recevier }
+  action: { type: string; payload: any }
 ) => {
   switch (action.type) {
     case GET_RECEVER_INIT:

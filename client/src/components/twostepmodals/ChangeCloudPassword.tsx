@@ -3,8 +3,8 @@ import { ChangeEvent, useState } from "react";
 import { FaTimes } from "react-icons/fa";
 import { FaArrowLeft } from "react-icons/fa6";
 import { EmailSvg } from "../../auth/TwoStepVerification";
-import { ChagneCloudPass } from "../../services/API";
 import toast from "react-hot-toast";
+import { ChagneCloudPass } from "../../apis/Auth";
 
 interface ChangePasswordInterface {
   changePasswordForm: boolean;

@@ -20,6 +20,7 @@ const BlockedUsers: React.FC<BlockedUserParams> = ({
   blockedUsers,
 }) => {
   const URI = import.meta.env.VITE_BACK_END_URL;
+  const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
   const user = useSelector((state: Root_State) => state.UserReducers);
   const dispatch = useDispatch();
@@ -62,7 +63,11 @@ const BlockedUsers: React.FC<BlockedUserParams> = ({
           blockedUsers ? "" : "hidden"
         } absolute flex w-full justify-center items-center h-screen`}
       >
-        <div className="p-3 -mt-40 w-[65%] md:w-[40%] lg:w-[27%] bg-[var(--light-dark-color)] z-[6000] rounded-md">
+        <div
+          className={`p-3 -mt-40 w-[65%] md:w-[40%] lg:w-[27%] ${
+            darkMode ? "bg-[var(--light-dark-color)]" : "bg-blue-500"
+          } z-[6000] rounded-md`}
+        >
           <div className="flex justify-between">
             <button
               onClick={() => handleToggle(false)}
@@ -79,7 +84,7 @@ const BlockedUsers: React.FC<BlockedUserParams> = ({
           </div>
           <div className="flex justify-center mb-3">
             <h1 className="text-slate-200 text-center text-xl font-light flex items-center">
-              <img src="/ban-user.png" className="w-14" alt="Blocked Users" />{" "}
+              <img src="./ban-user.png" className="w-14" alt="Blocked Users" />{" "}
               Blocked Users
             </h1>
           </div>

@@ -1,10 +1,9 @@
-import axios from "axios";
 import { ChangeEvent, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { SetUserInfo } from "../store/actions/UserAction";
-import { LogoutRequest } from "../services/authApi";
 import { Root_State } from "../store/store";
+import { CloudPasswordLogin, LogoutRequest } from "../apis/Auth";
 
 const CloudPassword = () => {
   const hint = useSelector((state: Root_State) => state.UserReducers.hint);
@@ -17,19 +16,14 @@ const CloudPassword = () => {
       setPasswordError("insert your cloud password!");
       return;
     }
-    const response = await axios.post(
-      `${import.meta.env.VITE_BACK_END_URL}/api/verify-cloud-password`,
-      { cloud_password: password },
-      { withCredentials: true }
-    );
-    if (response.data?.loggedIn) {
+    const response = await CloudPasswordLogin(password);
+    if (response?.data?.loggedIn) {
       localStorage.setItem("token", response.data?.token);
       dispatch(SetUserInfo(response.data?.user));
       navigateTo("/chat");
     } else {
-      setPasswordError(response.data?.message);
+      setPasswordError(response?.data?.message);
     }
-    console.log(response.data);
   };
   const handlePasswordChange = (e: ChangeEvent<HTMLInputElement>) => {
     setPassword(e.target.value);

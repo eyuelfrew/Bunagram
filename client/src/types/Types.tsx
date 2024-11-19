@@ -22,6 +22,7 @@ export interface User {
   twoStepVerification: boolean;
   createdAt: string;
   deletedAccount: boolean;
+  banded: boolean;
 }
 export interface UserState {
   user: User;
@@ -77,7 +78,6 @@ export interface Conversation {
   receiver: User;
   sender: User;
   unseenMessages: number;
-
   _id: string;
 }
 

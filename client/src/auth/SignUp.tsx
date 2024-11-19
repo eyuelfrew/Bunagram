@@ -77,7 +77,7 @@ const SignUp = () => {
     <section className="bg-gradient-to-r from-blue-100 to-purple-300 flex h-screen justify-center items-center">
       <div className="flex rounded-3xl shadow-2xl  md:w-[80%] lg:w-[60%]">
         <img
-          src="/coffegram.jfif"
+          src="./coffegram.jfif"
           className="w-80 hidden md:flex lg:flex rounded-l-3xl"
           alt="Signup illustration"
         />

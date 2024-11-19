@@ -20,11 +20,10 @@ import {
   OpenEditUserName,
 } from "../store/actions/AccountAction";
 import { ViewMenu } from "../store/actions/MenuControllers";
-// import toast from "react-hot-toast";
 import { MdDelete } from "react-icons/md";
-import { UploadProfile } from "../services/API";
 import toast from "react-hot-toast";
 import moment from "moment";
+import { UploadProfile } from "../apis/UserApi";
 
 const ContactInfo = () => {
   const URI = import.meta.env.VITE_BACK_END_URL;

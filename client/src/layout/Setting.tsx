@@ -14,9 +14,9 @@ import { CiLock } from "react-icons/ci";
 import axios from "axios";
 import { SetUserInfo } from "../store/actions/UserAction";
 import { GearIcon, VerificationMenuSVG } from "../components/svgs/Svgs";
-import { VerifyCloudPassword } from "../services/API";
 import VerifyCloudPasswordComponent from "../components/twostepmodals/VerifyCloudPassword";
 import ChangeCloudPassword from "../components/twostepmodals/ChangeCloudPassword";
+import { VerifyCloudPassword } from "../apis/Auth";
 
 const Setting = () => {
   const [changePasswordForm, setChangePasswordForm] = useState(false);

@@ -1,10 +1,10 @@
 import axios, { AxiosResponse } from "axios";
 import { ChangeEvent, FormEvent, useState } from "react";
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
 
 const ForgotPassword = () => {
-  const [emailNotFound, setEmaiError] = useState(false);
-  const [linkSent, setLinkSet] = useState(false);
-  const [message, setMessage] = useState("");
+  const navigateTo = useNavigate();
   const [email, setEmail] = useState("");
   const [isLoading, setLoadig] = useState(false);
   const handleSubmit = async (e: FormEvent) => {
@@ -14,14 +14,15 @@ const ForgotPassword = () => {
       `${import.meta.env.VITE_BACK_END_URL}/api/forgot-pass`,
       { email: email }
     );
+    if (response.data?.notFound) {
+      toast.error("Email not found!");
+    }
+    if (response.data?.status === 1) {
+      toast.success("Code Sent!");
+      navigateTo("/verify-pass-rest");
+    }
     console.log(response.data);
     setLoadig(false);
-    if (response.data.status === 1) {
-      setLinkSet(true);
-      setMessage(response.data.message);
-    } else if (response.data?.notFound) {
-      setEmaiError(true);
-    }
   };
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setEmail(e.target.value);
@@ -29,25 +30,29 @@ const ForgotPassword = () => {
 
   return (
     <>
-      {!linkSent && (
-        <div className="bg-[var(--hard-dark)] h-screen flex items-center justify-center">
-          <div className="bg-[var(--dark-bg-color)] p-11">
-            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-              <h1 className="text-2xl text-white">
-                Enter your email to reset password
-              </h1>
-              <input
-                onChange={handleChange}
-                className="text-xl px-2 h-12 rounded-xl bg-[var(--light-dark-color)] text-white"
-                type="email"
-                required
-              />
-              {emailNotFound && (
-                <p className="text-red-500">Email not found !</p>
-              )}
+      <div className="bg-gradient-to-b from-blue-500 to-white min-h-screen flex items-center justify-center p-4">
+        <div className="bg-gradient-to-r from-indigo-800 to-purple-900 bg-opacity-50 backdrop-filter backdrop-blur-xl p-8 sm:p-10 lg:p-12 rounded-lg w-full max-w-md shadow-lg">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+            <h1 className="text-lg text-white text-center">
+              Enter your email to reset password
+            </h1>
+            <input
+              onChange={handleChange}
+              className="w-full h-12 px-4 bg-[var(--input-bg)] text-white text-center rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 transition duration-150 ease-in-out"
+              type="email"
+              required
+              placeholder="example@gmail.com"
+            />
+            <div className="flex mt-4">
+              <Link
+                className="w-full text-white rounded-lg py-3 text-lg sm:text-xl"
+                to={"/"}
+              >
+                back to login
+              </Link>
               <button
                 type="submit"
-                className="bg-green-700 w-full text-white rounded-lg py-3 text-xl"
+                className=" w-full text-white rounded-lg py-3 text-lg sm:text-xl"
               >
                 {isLoading ? (
                   <div
@@ -56,7 +61,7 @@ const ForgotPassword = () => {
                   >
                     <svg
                       aria-hidden="true"
-                      className="w-8 h-8 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                      className="w-8 h-8 text-gray-200 animate-spin  fill-blue-600"
                       viewBox="0 0 100 101"
                       fill="none"
                       xmlns="http://www.w3.org/2000/svg"
@@ -70,29 +75,19 @@ const ForgotPassword = () => {
                         fill="currentFill"
                       />
                     </svg>
-                    <span className="text-xl mr-2 ml-4">Loading...</span>
+                    <span className="text-lg sm:text-xl mr-2 ml-4">
+                      Loading...
+                    </span>
                   </div>
                 ) : (
                   <>Verify Email</>
                 )}
               </button>
-            </form>
-          </div>
+            </div>
+          </form>
+          <div></div>
         </div>
-      )}
-
-      {linkSent && (
-        <div className="bg-[var(--hard-dark)] h-screen flex items-center justify-center">
-          <div className="flex flex-col">
-            <h1 className="bg-[var(--dark-bg-color)] text-white text-3xl p-2">
-              {message}
-            </h1>
-            <span className="text-white text-xl text-center">
-              check your email please!
-            </span>
-          </div>
-        </div>
-      )}
+      </div>
     </>
   );
 };

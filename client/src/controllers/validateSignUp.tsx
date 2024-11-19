@@ -11,7 +11,6 @@ export const validateSignUp = (
       return "";
     case "email":
       if (!value) return "Email is required";
-      // eslint-disable-next-line no-case-declarations
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(value)) return "Invalid email address";
       return "";

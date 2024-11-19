@@ -3,10 +3,11 @@ import PreviewComponent from "./Modals/PreviewComponent";
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import { Root_State } from "../store/store";
-import { SendCaption } from "../services/API";
-import { encryptMessage } from "../utils/EncryptionService";
+import { EncryptMessageToServer } from "../utils/EncryptionService";
+import { SendCaption } from "../apis/Chat";
 
 const SendImage = () => {
+  const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const [isLoading, setIsLoading] = useState(false);
   const Recever = useSelector((state: Root_State) => state.receiverReducer);
   const [image, setSelectedFile] = useState<File | null>(null);
@@ -31,7 +32,7 @@ const SendImage = () => {
     if (image) {
       setIsLoading(true);
       const formData = new FormData();
-      const cypherText = await encryptMessage(caption);
+      const cypherText = await EncryptMessageToServer(caption);
       if (caption.trim() != "") {
         formData.append("text", cypherText);
       } else {
@@ -55,7 +56,10 @@ const SendImage = () => {
         htmlFor="send_pic"
         className="hover:bg-slate-800 p-2 cursor-pointer rounded-full"
       >
-        <MdOutlineAttachFile size={30} className="text-white" />
+        <MdOutlineAttachFile
+          size={30}
+          className={`${darkMode ? "text-[#fefefe]" : ""}`}
+        />
         <input
           className="hidden"
           onChange={handleImageChange}

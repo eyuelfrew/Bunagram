@@ -1,13 +1,12 @@
 import { useDispatch, useSelector } from "react-redux";
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Root_State } from "../../store/store";
 import {
   CloseContactInfo,
   CloseDeleteAccount,
 } from "../../store/actions/AccountAction";
-import { DeleteUserAccount } from "../../services/API";
+import { DeleteUserAccount, LogoutRequest } from "../../apis/Auth";
 
 const DeleteAccount = () => {
   const dispatch = useDispatch();
@@ -22,9 +21,7 @@ const DeleteAccount = () => {
     const response = await DeleteUserAccount(_id);
     if (response.status == 1) {
       setIsLoading(false);
-      await axios.get(`${import.meta.env.VITE_BACK_END_URL}/api/logout`, {
-        withCredentials: true,
-      });
+      await LogoutRequest();
       dispatch(CloseDeleteAccount());
       dispatch(CloseContactInfo());
       navigateTo("/");

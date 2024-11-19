@@ -67,22 +67,18 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
             </>
           )}
 
-          <div className="block">
+          <div className="block relative">
             <p>{logedInUser !== user._id && <>{user.name}</>}</p>
             <>
               {logedInUser !== user._id && (
                 <>
                   {isOnline ? (
                     <>
-                      <div className="bg-green-600 w-fit px-2  mt-0 rounded">
-                        <p className="text-[12px] text-white">online</p>
-                      </div>
+                      <div className="absolute -left-5 bg-green-600 w-3 h-3 px-2  mt-0 rounded"></div>
                     </>
                   ) : (
                     <>
-                      <div className="bg-red-600 w-fit rounded">
-                        <p className="text-[12px] text-white">offline</p>
-                      </div>
+                      <div className="absolute -left-5 bg-red-600 w-3 h-3 rounded-full"></div>
                     </>
                   )}
                 </>

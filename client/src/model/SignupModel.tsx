@@ -4,9 +4,6 @@ export interface SignUpForm {
   password: string;
   confirmPassword: string;
 }
-export const createUser = (user: SignUpForm) => {
-  console.log("User created:", user);
-};
 
 export interface FormErrors {
   nameError: string;

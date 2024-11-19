@@ -17,6 +17,7 @@ const initState: User = {
   createdAt: "",
   deletedAccount: false,
   hint: "",
+  banded: false,
 };
 const UserReducers = (
   state = initState,

@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect } from "react";
-import { BsEmojiSmileFill } from "react-icons/bs";
 
 interface EmojiPickerProps {
   onEmojiClick: (emoji: string) => void;
@@ -201,7 +200,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiClick }) => {
     "🫦",
   ];
   const handleOpenEmoji = (event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent the event from bubbling up
+    event.stopPropagation();
     setOpenMenu(!openEmoji);
   };
   const handleClickOutside = (event: MouseEvent) => {
@@ -246,7 +245,7 @@ const EmojiPicker: React.FC<EmojiPickerProps> = ({ onEmojiClick }) => {
         )}
       </div>
       <button onClick={handleOpenEmoji} className="text-3xl p-2">
-        <BsEmojiSmileFill className="text-white" />
+        🙂
       </button>
     </>
   );

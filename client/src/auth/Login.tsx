@@ -5,8 +5,9 @@ import { Root_State } from "../store/store";
 import axios, { AxiosResponse } from "axios";
 import toast from "react-hot-toast";
 import DOMPurify from "dompurify";
-import { LoginRequest } from "../services/authApi";
 import { SetUserInfo } from "../store/actions/UserAction";
+import { BiSupport } from "react-icons/bi";
+import { LoginRequest, LogoutRequest } from "../apis/Auth";
 const Login = () => {
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const [isLoading, setIsloading] = useState(false);
@@ -30,25 +31,36 @@ const Login = () => {
   ): Promise<void> => {
     event.preventDefault();
     setIsloading(true);
-    const res = await LoginRequest(loginForm);
-    setIsloading(false);
-    if (res.isLocked) {
-      toast.error("To many attempts, Try again later!");
-    }
-    console.log(res);
-    if (res.loggedIn) {
-      localStorage.setItem("token", res.token);
-      dispatch(SetUserInfo(res?.user));
-      if (res.twoStepVerification) {
-        navigateTo("/cloudpass");
-      } else {
-        navigateTo("/chat");
+    try {
+      const res = await LoginRequest(loginForm);
+      setIsloading(false);
+      if (res?.isLocked) {
+        toast.error("To many attempts, Try again later!");
+        return;
       }
-    } else if (res.wrongCredentials) {
-      toast.error(res.message);
-      return;
-    } else if (res.notFound) {
-      toast.error(res.message);
+      if (res?.loggedIn && !res.user.banded) {
+        localStorage.setItem("token", res.token);
+        dispatch(SetUserInfo(res?.user));
+        if (res?.twoStepVerification) {
+          navigateTo("/cloudpass");
+        } else {
+          navigateTo("/chat");
+        }
+      } else if (res?.wrongCredentials) {
+        toast.error(res.message);
+        return;
+      } else if (res?.loggedIn && res?.user.banded) {
+        await LogoutRequest();
+        navigateTo("/");
+        toast.error(
+          "You are Baned From using this app. Contact the team Please"
+        );
+        return;
+      } else if (res?.notFound) {
+        toast.error(res.message);
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
   useEffect(() => {
@@ -196,13 +208,20 @@ const Login = () => {
                 <>Login</>
               )}
             </button>
-            <p className="text-sm font-light text-gray-500 dark:text-gray-400">
-              Don’t have an account yet?{" "}
-              <Link
-                to={"/signup"}
-                className="font-medium text-blue-600 hover:underline dark:text-blue-500"
-              >
-                Sign up
+            <p className="text-sm font-light text-gray-500 dark:text-gray-400 flex justify-between">
+              <span>
+                {" "}
+                Don’t have an account yet?{" "}
+                <Link
+                  to={"/signup"}
+                  className="font-medium text-blue-600 hover:underline dark:text-blue-500"
+                >
+                  Sign up
+                </Link>
+              </span>
+              <Link to={"/issuse"} className="flex items-center">
+                <BiSupport />
+                report issue!
               </Link>
             </p>
           </form>
