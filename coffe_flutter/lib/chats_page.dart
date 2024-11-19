@@ -1,10 +1,11 @@
+import 'package:bunaram_ap/chat_box.dart';
 import 'package:bunaram_ap/models/Conversation.dart';
 import 'package:bunaram_ap/service/api_service.dart';
 import 'package:bunaram_ap/service/socket_service.dart';
+import 'package:bunaram_ap/utils/encryption_service.dart';
 import 'package:bunaram_ap/widgets/side_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class ChatsPage extends StatefulWidget {
   const ChatsPage({super.key});
@@ -14,12 +15,10 @@ class ChatsPage extends StatefulWidget {
 }
 
 class _ChatsPageState extends State<ChatsPage> {
-  String? apiUrl = dotenv.env['BACKEND_API_URL'];
-
   List<Conversation> allUsers = [];
+  Set<String> onlineUsers = {};
   String? token;
   final SocketService _socketService = SocketService();
-
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -28,6 +27,11 @@ class _ChatsPageState extends State<ChatsPage> {
     super.initState();
     _loadToken();
     fetchConversations();
+    _socketService.onOnlineUsersReceived = (List<String> users) {
+      setState(() {
+        onlineUsers = users.toSet();
+      });
+    };
   }
 
   //load token
@@ -41,17 +45,30 @@ class _ChatsPageState extends State<ChatsPage> {
   }
 
   Future<void> fetchConversations() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getString("userId");
     try {
       var dio = ApiService.getDioInstance();
-      final response = await dio.get('${apiUrl}:5000/api/conversations');
-      print("Conersaions = ${response.data}");
-      // Assuming that response.data is directly the list of conversations
+      final response = await dio
+          .get('https://www.chatapp.welllaptops.com/api/conversations');
+
       setState(() {
         if (response.data != null && response.data is List) {
           allUsers = (response.data as List)
-              .map((json) => (Conversation.fromJson(json)))
+              .map((json) {
+                final conversation = Conversation.fromJson(json);
+                if (conversation.receiver.id == userId) {
+                  return conversation.copyWith(
+                      userDetails: conversation.sender);
+                } else if (conversation.sender.id == userId) {
+                  return conversation.copyWith(
+                      userDetails: conversation.receiver);
+                } else {
+                  return null;
+                }
+              })
+              .whereType<Conversation>()
               .toList();
-          print("All User  =  ${allUsers}");
         } else {
           print('Unexpected response format: ${response.data}');
           allUsers = [];
@@ -62,7 +79,7 @@ class _ChatsPageState extends State<ChatsPage> {
     }
   }
 
-  // initialize rocket connection method
+  // initialize socket connection method
   void _initializeSocketConnection(token) {
     if (token != null) {
       _socketService.initializeSocket(token!);
@@ -90,14 +107,13 @@ class _ChatsPageState extends State<ChatsPage> {
         itemCount: allUsers.length,
         itemBuilder: (context, index) {
           final conversation = allUsers[index];
-          print("conversation = ${conversation}");
-          final user =
-              conversation.receiver; // You can customize sender/receiver logic
-
+          final user = conversation.userDetails;
+          final isOnline = onlineUsers.contains(user!.id);
           return ListTile(
             leading: CircleAvatar(
               backgroundImage: user.profilePic.isNotEmpty
-                  ? NetworkImage("${apiUrl}:5000${user.profilePic}")
+                  ? NetworkImage(
+                      "https://www.chatapp.welllaptops.com${user.profilePic}")
                   : const AssetImage('assets/images/userpic.png')
                       as ImageProvider,
               radius: 24,
@@ -107,22 +123,28 @@ class _ChatsPageState extends State<ChatsPage> {
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             subtitle: Text(
-              conversation.lastMessage.text.length > 30
-                  ? '${conversation.lastMessage.text.substring(0, 30)}...'
-                  : conversation.lastMessage.text,
+              EncryptionService.decrypt(conversation.lastMessage.text).length >
+                      30
+                  ? '${EncryptionService.decrypt(conversation.lastMessage.text).substring(0, 30)}...'
+                  : EncryptionService.decrypt(conversation.lastMessage.text),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
             ),
-            trailing: const Icon(
+            trailing: Icon(
               Icons.circle,
-              // color: user.lastSeen.isAfter(
-              //         DateTime.now().subtract(const Duration(minutes: 5)))
-              //     ? Colors.green
-              //     : Colors.grey,
+              color: isOnline ? Colors.green : Colors.grey,
               size: 12,
             ),
             onTap: () {
-              // Navigate to chat screen with selected user
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ChatBox(
+                      conversationId: conversation.id,
+                      reciverId: user.id,
+                      userName: user.name),
+                ),
+              );
             },
           );
         },

@@ -32,6 +32,10 @@ const userSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+    banded: {
+      type: Boolean,
+      default: false,
+    },
     public_id: { type: String, default: "" },
     lastLogin: {
       type: Date,

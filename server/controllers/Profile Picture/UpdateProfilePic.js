@@ -1,4 +1,4 @@
-const UserModel = require("../models/UserModels.js");
+const UserModel = require("../../models/UserModels.js");
 
 const UpdateProfilePicture = async (req, res) => {
   const { public_id, pic_url, user_id } = req.body;

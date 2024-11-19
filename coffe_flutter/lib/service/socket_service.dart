@@ -1,12 +1,11 @@
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SocketService {
   late IO.Socket socket;
-  String? apiUrl = dotenv.env['BACKEND_API_URL'];
+
   void initializeSocket(String token) {
     socket = IO.io(
-      "${apiUrl}:5000",
+      "https://www.chatapp.welllaptops.com",
       IO.OptionBuilder()
           .setTransports(['websocket'])
           .disableAutoConnect()
@@ -24,12 +23,25 @@ class SocketService {
     socket.onDisconnect((_) {
       print("Socket Disconnected");
     });
+    socket.on('onlineuser', (data) {
+      if (data != null && data is List) {
+        _handleOnlineUsers(List<String>.from(data));
+      }
+    });
   }
 
   bool get isConnected => socket.connected;
   void disconnect() {
     if (isConnected) {
       socket.disconnect();
+    }
+  }
+
+  Function(List<String>)? onOnlineUsersReceived;
+
+  void _handleOnlineUsers(List<String> onlineUsers) {
+    if (onOnlineUsersReceived != null) {
+      onOnlineUsersReceived!(onlineUsers);
     }
   }
 }

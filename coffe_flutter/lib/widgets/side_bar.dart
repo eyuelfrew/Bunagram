@@ -3,7 +3,6 @@ import 'package:bunaram_ap/service/api_service.dart';
 import 'package:bunaram_ap/service/socket_service.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class SideBar extends StatefulWidget {
   const SideBar({super.key});
@@ -12,7 +11,6 @@ class SideBar extends StatefulWidget {
 }
 
 class _SideBar extends State<SideBar> {
-  String? apiUrl = dotenv.env['BACKEND_API_URL'];
   final socketService = SocketService();
   Future<void> initializeSocketService() async {
     final prefs = await SharedPreferences.getInstance();
@@ -30,10 +28,12 @@ class _SideBar extends State<SideBar> {
 
     final dio = ApiService.getDioInstance();
     final cookieJar = ApiService.getCookieJarInstance();
-    final cookies = await cookieJar.loadForRequest(Uri.parse('${apiUrl}:5000'));
+    final cookies = await cookieJar
+        .loadForRequest(Uri.parse('https://www.chatapp.welllaptops.com'));
     print("Cookies = ${cookies}");
     try {
-      var response = await dio.get('${apiUrl}:5000/api/logout');
+      var response =
+          await dio.get('https://www.chatapp.welllaptops.com/api/logout');
       if (response.data['status'] == 1) {
         if (!socketService.isConnected) {
           initializeSocketService();

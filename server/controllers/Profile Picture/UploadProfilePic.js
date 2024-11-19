@@ -1,4 +1,4 @@
-const UserModel = require("../models/UserModels");
+const UserModel = require("../../models/UserModels");
 const fs = require("fs");
 const path = require("path");
 const UploadProfilePic = async (req, res) => {

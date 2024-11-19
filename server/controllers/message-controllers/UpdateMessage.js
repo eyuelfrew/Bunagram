@@ -1,7 +1,7 @@
 const { MessageModel } = require("../../models/ConversationModel");
 const {
-  decryptMessage,
-  encryptMessageToStore,
+  DecryptIncomingMessage,
+  EncryptMessageToStore,
 } = require("../../service/EncriptionServce");
 
 const UpdateMessage = async (req, res) => {
@@ -11,8 +11,8 @@ const UpdateMessage = async (req, res) => {
     /*
      * Decrypt the coming message and encrypt it for storage
      * */
-    const PlainText = await decryptMessage(message);
-    const cypgerText = await encryptMessageToStore(PlainText);
+    const PlainText = await DecryptIncomingMessage(message);
+    const cypgerText = await EncryptMessageToStore(PlainText);
     const updatedMessage = await MessageModel.findByIdAndUpdate(
       message_id,
       {

@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Home from "./pages/Home";
 import { useEffect, useState } from "react";
 import axios, { AxiosResponse } from "axios";
+import { Toaster } from "react-hot-toast";
 const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
   const navigateTo = useNavigate();
   const URL = import.meta.env.VITE_BACK_END;
@@ -46,17 +47,21 @@ const ProtectedRoute = ({ children }: { children: JSX.Element }) => {
 };
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Login />} />
-      <Route
-        path="/home/*"
-        element={
-          <ProtectedRoute>
-            <Home />
-          </ProtectedRoute>
-        }
-      />
-    </Routes>
+    <>
+      {" "}
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route
+          path="/home/*"
+          element={
+            <ProtectedRoute>
+              <Home />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+      <Toaster />
+    </>
   );
 }
 

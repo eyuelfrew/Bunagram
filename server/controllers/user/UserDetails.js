@@ -1,4 +1,4 @@
-const UserModel = require("../models/UserModels");
+const UserModel = require("../../models/UserModels");
 
 const UserDetails = async (req, res) => {
   const { user_id } = req.body;

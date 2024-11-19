@@ -3,10 +3,10 @@ const {
   MessageModel,
 } = require("../../models/ConversationModel");
 const {
-  decryptMessage,
-  encryptMessageToStore,
-  decryptStoredMessage,
-  messageEncryptToClient,
+  DecryptIncomingMessage,
+  EncryptMessageToStore,
+  DecryptStoredMessage,
+  EncryptToClient,
 } = require("../../service/EncriptionServce");
 
 const SendMessage = async (req, res) => {
@@ -45,11 +45,12 @@ const SendMessage = async (req, res) => {
     /*
      * Decrypt the coming message and encrypt it for storage
      * */
-    const PlainText = decryptMessage(text);
-    const cypgerText = encryptMessageToStore(PlainText);
+    const PlainText = DecryptIncomingMessage(text);
+
+    const cipherText = EncryptMessageToStore(PlainText);
     //store the sent message in data base
     const message = new MessageModel({
-      text: cypgerText,
+      text: cipherText,
       imageURL: "",
       sender: SenderId,
       msgByUserId: SenderId,
@@ -67,8 +68,8 @@ const SendMessage = async (req, res) => {
      * Decrypted the saved message or stored message and encrypt it using
      * Different Key and Send to each user(conversation)
      * */
-    let messageToBeSent = decryptStoredMessage(savedMessageWithReply.text);
-    messageToBeSent = messageEncryptToClient(messageToBeSent);
+    let messageToBeSent = DecryptStoredMessage(savedMessageWithReply.text);
+    messageToBeSent = EncryptToClient(messageToBeSent);
     savedMessageWithReply.text = messageToBeSent;
     const payload = {
       sender_id: SenderId,

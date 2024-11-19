@@ -2,6 +2,8 @@ import axios, { AxiosResponse } from "axios";
 import { PiSignOutFill } from "react-icons/pi";
 import { Link, useNavigate } from "react-router-dom";
 import { UseSocket } from "../context/SocketProvider";
+import { BiSupport } from "react-icons/bi";
+import { FaUsers } from "react-icons/fa";
 
 const Sidebar = () => {
   const { toggleSideBar } = UseSocket();
@@ -67,6 +69,26 @@ const Sidebar = () => {
                 <path d="M12.5 0c-.157 0-.311.01-.565.027A1 1 0 0 0 11 1.02V10h8.975a1 1 0 0 0 1-.935c.013-.188.028-.374.028-.565A8.51 8.51 0 0 0 12.5 0Z" />
               </svg>
               <span className="flex-1 ms-3 whitespace-nowrap">Charts</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to={"/home/users"}
+              onClick={() => toggleSideBar()}
+              className="flex items-center p-2  text-gray-900 rounded-lg  hover:bg-gray-100  group"
+            >
+              <FaUsers />
+              <span className="flex-1 ms-3 whitespace-nowrap">Users</span>
+            </Link>
+          </li>
+          <li>
+            <Link
+              to={"/home/support"}
+              onClick={() => toggleSideBar()}
+              className="flex items-center p-2  text-gray-900 rounded-lg  hover:bg-gray-100  group"
+            >
+              <BiSupport />
+              <span className="flex-1 ms-3 whitespace-nowrap">Support</span>
             </Link>
           </li>
 

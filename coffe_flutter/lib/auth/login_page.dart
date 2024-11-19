@@ -2,7 +2,6 @@ import 'package:bunaram_ap/service/api_service.dart';
 import 'package:bunaram_ap/auth/forgot_password.dart';
 import 'package:bunaram_ap/auth/sign_up.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../chats_page.dart';
 
@@ -14,7 +13,6 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  String? apiUrl = dotenv.env['BACKEND_API_URL'];
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -145,7 +143,10 @@ class _LoginPageState extends State<LoginPage> {
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          child: const Text("Login"),
+                          child: const Text(
+                            "Login",
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -215,7 +216,7 @@ class _LoginPageState extends State<LoginPage> {
 
         // Send login request
         var response = await dio.post(
-          '$apiUrl:5000/api/login',
+          'https://www.chatapp.welllaptops.com/api/login',
           data: {
             'email': email,
             'password': password,
@@ -228,7 +229,8 @@ class _LoginPageState extends State<LoginPage> {
 
         var responseData = response.data;
 
-        await cookieJar.loadForRequest(Uri.parse('$apiUrl:5000'));
+        await cookieJar
+            .loadForRequest(Uri.parse('https://www.chatapp.welllaptops.com'));
         // Handling different responses
         if (responseData['wrongCredentials'] == true) {
           showSnackBar(
@@ -286,6 +288,4 @@ class _LoginPageState extends State<LoginPage> {
     Navigator.push(
         context, MaterialPageRoute(builder: (context) => const SignUpPage()));
   }
-
-  // Helper function for displaying a snackbar message
 }

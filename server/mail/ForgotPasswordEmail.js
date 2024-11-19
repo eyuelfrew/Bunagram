@@ -30,7 +30,7 @@ const ForgotPasswordEmail = async (email, resetToken) => {
     service: "gmail",
     auth: {
       user: "eyumanfrew@gmail.com",
-      pass: "xykssntmmdwpicao",
+      pass: `${process.env.EMAIL_PASS}`,
     },
   });
 

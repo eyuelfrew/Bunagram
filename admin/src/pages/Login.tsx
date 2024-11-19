@@ -18,18 +18,22 @@ const Login = () => {
   };
   const handleLogin = async (e: ChangeEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const response: AxiosResponse = await axios.post(
-      `${URI}/api/admin-login`,
-      form,
-      {
-        withCredentials: true,
+    try {
+      const response: AxiosResponse = await axios.post(
+        `${URI}/api/admin-login`,
+        form,
+        {
+          withCredentials: true,
+        }
+      );
+      if (response.data.loggedIn) {
+        localStorage.setItem("token", response.data?.token);
+        navigateTo("home/");
+      } else {
+        alert(response.data?.message);
       }
-    );
-    if (response.data.loggedIn) {
-      localStorage.setItem("token", response.data?.token);
-      navigateTo("home/");
-    } else {
-      alert(response.data?.message);
+    } catch (error) {
+      console.log(error);
     }
   };
   return (

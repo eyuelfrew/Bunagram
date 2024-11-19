@@ -1,99 +1,91 @@
-const nacl = require("tweetnacl");
-const naclUtil = require("tweetnacl-util");
-
-// Encryption
-const encryptMessage = (message) => {
-  const transitKey = process.env.TRANSIT_SECERETE_KEY;
-  const secretKey = naclUtil.decodeBase64(transitKey);
-  const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
-  const messageUint8 = naclUtil.decodeUTF8(message);
-  const box = nacl.secretbox(messageUint8, nonce, key);
-
-  // Combine nonce and box
-  const fullMessage = new Uint8Array(nonce.length + box.length);
-  fullMessage.set(nonce);
-  fullMessage.set(box, nonce.length);
-
-  return naclUtil.encodeBase64(fullMessage); // Base64 encoding for easier transfer
-};
-
-// Decryption
-const decryptMessage = (encryptedMessage) => {
-  const transitKey = process.env.TRANSIT_SECERETE_KEY;
-  const secretKey = naclUtil.decodeBase64(transitKey);
-  const fullMessage = naclUtil.decodeBase64(encryptedMessage);
-  const nonce = fullMessage.slice(0, nacl.secretbox.nonceLength);
-  const box = fullMessage.slice(nacl.secretbox.nonceLength);
-
-  const decrypted = nacl.secretbox.open(box, nonce, secretKey);
-  if (!decrypted) {
-    throw new Error("Decryption failed!");
+const CryptoJS = require("crypto-js");
+const dotenv = require("dotenv");
+dotenv.config();
+const IncomingSecretKey = `${process.env.INCOMING_MESSAGE}`;
+const StorageSecretKey = `${process.env.STORAGE_SECRETE_KEY}`;
+const OutGoingKey = `${process.env.TRANSIT_SECERETE_KEY}`;
+const iv = CryptoJS.enc.Utf8.parse("1234567890123456");
+const DecryptIncomingMessage = (CipherText) => {
+  if (CipherText?.trim() == "") {
+    return "";
   }
-
-  return naclUtil.encodeUTF8(decrypted);
-};
-
-const encryptMessageToStore = (message) => {
-  const storageKey = process.env.STORAGE_SECRETE_KEY;
-  const secreteKey = naclUtil.decodeBase64(storageKey);
-  const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
-  const messageUint8 = naclUtil.decodeUTF8(message);
-  const box = nacl.secretbox(messageUint8, nonce, secreteKey);
-
-  // Combine nonce and box
-  const fullMessage = new Uint8Array(nonce.length + box.length);
-  fullMessage.set(nonce);
-  fullMessage.set(box, nonce.length);
-
-  return naclUtil.encodeBase64(fullMessage); // Base64 encoding for easier transfer
-};
-/*
----- decrypt storeed message
-*/
-const decryptStoredMessage = (encryptedMessage) => {
-  const storgeKey = process.env.STORAGE_SECRETE_KEY;
-  const secretKey = naclUtil.decodeBase64(storgeKey);
-  const fullMessage = naclUtil.decodeBase64(encryptedMessage);
-  const nonce = fullMessage.slice(0, nacl.secretbox.nonceLength);
-  const box = fullMessage.slice(nacl.secretbox.nonceLength);
-
-  const decrypted = nacl.secretbox.open(box, nonce, secretKey);
-  if (!decrypted) {
-    throw new Error("Decryption failed!");
+  try {
+    const decrypted = CryptoJS.AES.decrypt(
+      CipherText,
+      CryptoJS.enc.Utf8.parse(IncomingSecretKey),
+      {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+      }
+    );
+    const plainText = decrypted.toString(CryptoJS.enc.Utf8);
+    return plainText;
+  } catch (error) {
+    console.log(error);
+    return "";
   }
-
-  return naclUtil.encodeUTF8(decrypted);
 };
-/*
--- messgae to clinet 
-*/
-const messageEncryptToClient = (plainText) => {
-  const storageKey = process.env.BACK_TO_CLIENT_KEY;
-  const secreteKey = naclUtil.decodeBase64(storageKey);
-  const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
-  const messageUint8 = naclUtil.decodeUTF8(plainText);
-  const box = nacl.secretbox(messageUint8, nonce, secreteKey);
-
-  // Combine nonce and box
-  const fullMessage = new Uint8Array(nonce.length + box.length);
-  fullMessage.set(nonce);
-  fullMessage.set(box, nonce.length);
-
-  return naclUtil.encodeBase64(fullMessage);
+const EncryptMessageToStore = (plainText) => {
+  console.log("Plain Text = ", plainText);
+  if (plainText.trim() == "") {
+    return "";
+  }
+  var ciphertext = CryptoJS.AES.encrypt(
+    plainText,
+    CryptoJS.enc.Utf8.parse(StorageSecretKey),
+    {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+    }
+  ).toString();
+  console.log("Cipher Text = ", ciphertext);
+  return ciphertext;
 };
-function arrayToBase64(arr) {
-  return Buffer.from(arr).toString("base64");
-}
-function base64ToArray(base64Str) {
-  return Uint8Array.from(Buffer.from(base64Str, "base64"));
-}
+const DecryptStoredMessage = (CipherText) => {
+  console.log("Stored Message : ", CipherText);
+  if (CipherText.trim() == "") {
+    return "";
+  }
+  try {
+    const decrypted = CryptoJS.AES.decrypt(
+      CipherText,
+      CryptoJS.enc.Utf8.parse(StorageSecretKey),
+      {
+        iv: iv,
+        mode: CryptoJS.mode.CBC,
+        padding: CryptoJS.pad.Pkcs7,
+      }
+    );
+    const planText = decrypted.toString(CryptoJS.enc.Utf8);
+    console.log("Stored Plain Text : ", planText);
+    return planText;
+  } catch (error) {
+    console.log(error);
+    return "";
+  }
+};
+const EncryptToClient = (plainText) => {
+  console.log("Out Going Plain Text = ", plainText);
+  if (plainText.trim() == "") {
+    return "";
+  }
+  var ciphertext = CryptoJS.AES.encrypt(
+    plainText,
+    CryptoJS.enc.Utf8.parse(OutGoingKey),
+    {
+      iv: iv,
+      mode: CryptoJS.mode.CBC,
+      padding: CryptoJS.pad.Pkcs7,
+    }
+  ).toString();
+  console.log("Out Going Cipher Text = ", ciphertext);
+  return ciphertext;
+};
 module.exports = {
-  decryptMessage,
-  encryptMessage,
-  encryptMessageToStore,
-  decryptStoredMessage,
-  messageEncryptToClient,
+  DecryptIncomingMessage,
+  EncryptMessageToStore,
+  DecryptStoredMessage,
+  EncryptToClient,
 };
-// const secretKey = nacl.randomBytes(nacl.secretbox.keyLength);
-// const base64Key = arrayToBase64(secretKey);
-// console.log(base64Key);

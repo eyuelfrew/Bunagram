@@ -1,26 +1,25 @@
 const express = require("express");
 
-const searchUser = require("../controllers/SearchUsers.js");
+const searchUser = require("../controllers/user/SearchUsers.js");
 const Logout = require("../auth/Logout.js");
 const Login = require("../auth/Login.js");
 const VerifyToken = require("../middleware/VerifyToken.js");
 const CheckAuth = require("../auth/CheckAuth.js");
-const RegisterUser = require("../controllers/RegisterUsers.js");
+const RegisterUser = require("../auth/RegisterUsers.js");
 const VerifyAccount = require("../auth/VerifyEmail.js");
 const {
   CheckUserName,
   EditBio,
   EditUserName,
   UpdateName,
-} = require("../controllers/UpdateUser.js");
+} = require("../controllers/UpdateAccount.js");
 const ForgotPassword = require("../auth/ForgotPassword.js");
 const ResetPassword = require("../auth/ResetPassword.js");
-const BlockUser = require("../controllers/BlockUser.js");
-const UnblockUser = require("../controllers/UnblockUser.js");
-const UpdateProfilePicture = require("../controllers/UpdateProfilePic.js");
+const BlockUser = require("../controllers/user/BlockUser.js");
+const UnblockUser = require("../controllers/user/UnblockUser.js");
 const DeleteProfilePic = require("../controllers/Profile Picture/DeleteProfilePicture.js");
 const TwoStepVerification = require("../auth/TwoStepVerification.js");
-const SendToStepVerificationEmail = require("../controllers/TwoStepVerificationEmail.js");
+const SendToStepVerificationEmail = require("../auth/TwoStepVerificationEmail.js");
 const VerifyCloud = require("../auth/VerifyCloud.js");
 const DisableTwo = require("../auth/DisableTwoStep.js");
 const GetAllMessages = require("../controllers/message-controllers/GetAllMessages.js");
@@ -31,14 +30,13 @@ const path = require("path");
 const FetchConversations = require("../controllers/conversation-controllers/FetchConversations.js");
 const DeleteMessage = require("../controllers/message-controllers/DeleteMessage.js");
 const UpdateMessage = require("../controllers/message-controllers/UpdateMessage.js");
-const UserDetails = require("../controllers/UserDetails.js");
+const UserDetails = require("../controllers/user/UserDetails.js");
 const ChangeCloudPass = require("../auth/ChangeCloudPass.js");
-const UploadProfilePic = require("../controllers/ProflePic");
+const UploadProfilePic = require("../controllers/Profile Picture/UploadProfilePic.js");
 const DeleteConversation = require("../controllers/conversation-controllers/DeleteConversation.js");
-const DeleteAccount = require("../controllers/users/DeleteAccount.js");
 const DeleteAllMessages = require("../controllers/message-controllers/DeleteAllMessages.js");
 const DeleteSelectedMessages = require("../controllers/message-controllers/DeleteSelectedMessages.js");
-const GetBlockedUsers = require("../controllers/users/GetBlockedUsers.js");
+const GetBlockedUsers = require("../controllers/user/GetBlockedUsers.js");
 const MessageVolumeData = require("../admin/dashbord/MessageVolumeData.js");
 const UserStatus = require("../admin/dashbord/UsersStatus.js");
 const ConversationData = require("../admin/dashbord/ConversationData.js");
@@ -48,6 +46,18 @@ const AdminLogin = require("../admin/auth/Login.js");
 const checkAdmin = require("../admin/auth/checkAdmin.js");
 const AdminLogout = require("../admin/auth/Logout.js");
 const CheckAdminAuth = require("../admin/auth/CheckAdminAuth.js");
+
+const SingleComplient = require("../controllers/compliment/GetSingleComplaint.js");
+const GetAllComplaint = require("../controllers/compliment/GetAllComplaint.js");
+const CreateComplaint = require("../controllers/compliment/CreateComplaint.js");
+const DeleteCompliant = require("../controllers/compliment/DelteCompliant.js");
+const GetAllUsers = require("../admin/controllers/GetAllUsers.js");
+const BanUser = require("../admin/controllers/BanUser.js");
+const UnBanUser = require("../admin/controllers/UnbanUser.js");
+const FilterUsers = require("../admin/controllers/FilterUsers.js");
+const DeleteUser = require("../admin/controllers/DeleteUser.js");
+const UpdateProfilePicture = require("../controllers/Profile Picture/UpdateProfilePic.js");
+const DeleteAccount = require("../controllers/DeleteAccount.js");
 const router = express.Router();
 /*
 -- configure route for upoading images if there is image sent form the clinet side
@@ -82,7 +92,7 @@ router.post("/verify-email", VerifyAccount);
 router.post("/forgot-pass", ForgotPassword);
 
 // Reset password
-router.post("/reset-password/:token", ResetPassword);
+router.post("/reset-password", VerifyToken, ResetPassword);
 
 // Block user
 router.post("/block-user", VerifyToken, BlockUser);
@@ -156,4 +166,20 @@ router.post("/admin", CreateAdminAccount);
 router.post("/admin-login", AdminLogin);
 router.get("/admin", AdminLogout);
 router.get("/admin-auth", checkAdmin, CheckAdminAuth);
+
+/*
+-- Manage Users
+*/
+router.get("/users", checkAdmin, GetAllUsers);
+router.get("/users/:id", checkAdmin, BanUser);
+router.get("/users/activate/:id", checkAdmin, UnBanUser);
+router.post("/filter", checkAdmin, FilterUsers);
+router.delete("/users/:id", checkAdmin, DeleteUser);
+/*
+-- Users Complients 
+*/
+router.post("/compliments", CreateComplaint);
+router.get("/compliments", checkAdmin, GetAllComplaint);
+router.get("/compliments/:id", checkAdmin, SingleComplient);
+router.delete("/compliments/:id", checkAdmin, DeleteCompliant);
 module.exports = router;

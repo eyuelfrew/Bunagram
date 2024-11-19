@@ -12,7 +12,7 @@ interface ChartData {
 const Graphs = () => {
   const uri = import.meta.env.VITE_BACK_END;
   const [isLoadingMessageVolume, setIsLoadingVolume] = useState(false);
-  const [selectedDay, setSelectedDay] = useState(1); // Default to 1 (Today)
+  const [selectedDay, setSelectedDay] = useState(7); // Default to 1 (Today)
   const [messageVolumeData, setMessageVolumeData] = useState<ChartData>({
     labels: [],
     values: [],

@@ -12,7 +12,7 @@ const VerifyAccount = async (req, res) => {
   // Check if the unverified user exists
   if (!user) {
     return res.json({
-      message: "Not registered",
+      message: "Incorrect Code!",
       notRegistered: true,
       status: 0,
     });
@@ -40,7 +40,6 @@ const VerifyAccount = async (req, res) => {
     .cookie("token", token, {
       httpOnly: true,
       sameSite: "none",
-      secure: true,
     })
     .json({
       message: "Account Verified Successfully!",

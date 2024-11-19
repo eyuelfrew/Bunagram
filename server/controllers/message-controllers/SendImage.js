@@ -3,11 +3,10 @@ const {
   MessageModel,
 } = require("../../models/ConversationModel");
 const {
-  decryptMessage,
-  encryptMessageToStore,
-  decryptStoredMessage,
-  encryptMessage,
-  messageEncryptToClient,
+  EncryptToClient,
+  DecryptStoredMessage,
+  DecryptIncomingMessage,
+  EncryptMessageToStore,
 } = require("../../service/EncriptionServce");
 
 // Ensure upload is defined here
@@ -35,8 +34,8 @@ const SendMessage = async (req, res) => {
     // Encrypt the text (if provided)
     let encryptedText = "";
     if (text.trim() != "") {
-      const PlainText = decryptMessage(text);
-      encryptedText = encryptMessageToStore(PlainText);
+      const PlainText = DecryptIncomingMessage(text);
+      encryptedText = EncryptMessageToStore(PlainText);
     }
 
     // Get the uploaded file's path (if an image was uploaded)
@@ -58,8 +57,8 @@ const SendMessage = async (req, res) => {
     // Decrypt the stored message and re-encrypt it using a different key
     let messageToBeSent = "";
     if (savedMessage.text) {
-      messageToBeSent = decryptStoredMessage(savedMessage.text);
-      messageToBeSent = messageEncryptToClient(messageToBeSent);
+      messageToBeSent = DecryptStoredMessage(savedMessage.text);
+      messageToBeSent = EncryptToClient(messageToBeSent);
       savedMessage.text = messageToBeSent; // Re-encrypt the text for client-side
     }
 
@@ -73,7 +72,8 @@ const SendMessage = async (req, res) => {
     req.io.to(SenderId.toString()).emit("new-message", payload);
     req.io.to(reciver_id.toString()).emit("new-message", payload);
     req.io.to(reciver_id.toString()).emit("notif");
-
+    req.io.to(reciver_id.toString()).emit("conversation");
+    req.io.to(SenderId.toString()).emit("conversation");
     // Update the conversation with the new message ID
     await ConversationModel.findOneAndUpdate(
       { _id: conversation?._id },

@@ -38,7 +38,6 @@ const getConversations = async (currentUserId) => {
       return conversation;
     } else {
       return [];
-      // socket.emit("conversation", []);
     }
   } catch (error) {
     return error.message;

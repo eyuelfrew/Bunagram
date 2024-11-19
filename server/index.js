@@ -15,10 +15,7 @@ const getConversations = require("./helpers/getConversation.js");
 const bodyParser = require("body-parser");
 dotenv.config();
 const app = express();
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://bunagram.onrender.com",
-];
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
 const corsOptions = {
   origin: allowedOrigins,
   credentials: true,
@@ -58,7 +55,7 @@ const server = app.listen(port, () => {
 //socket configuration
 const io = new Server(server, {
   cors: {
-    origin: ["http://localhost:5173", "https://bunagram.onrender.com"],
+    origin: ["http://localhost:5173", "http://localhost:5174"],
     methods: ["GET", "POST"],
     credentials: true,
   },
@@ -73,7 +70,7 @@ io.on("connection", async (socket) => {
   const user_id = await getUserDetailFromToken(token);
   const userId = user_id?.toString();
   if (user_id) {
-    userToSocketMap[userId.toString()] = socket.id; // Map user ID to socket ID
+    userToSocketMap[userId.toString()] = socket.id;
   }
   socket.join(userId);
   onLineUser.add(userId);

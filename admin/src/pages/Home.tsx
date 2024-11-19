@@ -5,6 +5,9 @@ import Sidebar from "../components/Sidebar";
 import { useEffect } from "react";
 import { io } from "socket.io-client";
 import { UseSocket } from "../context/SocketProvider";
+import ComplientList from "../components/ComplientList";
+import Complaint from "./Complaint";
+import Users from "./Users";
 
 const Home = () => {
   const { setSocket, setOnlineUsers, clearSocketState, toggleSideBar } =
@@ -55,6 +58,9 @@ const Home = () => {
         <Route path="/" element={<Statistics />} />
         <Route path="stat" element={<Statistics />} />
         <Route path="graphs" element={<Graphs />} />
+        <Route path="support" element={<ComplientList />}></Route>
+        <Route path="comp/:id" element={<Complaint />}></Route>
+        <Route path="users" element={<Users />}></Route>
       </Routes>
     </>
   );

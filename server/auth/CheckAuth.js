@@ -22,7 +22,6 @@ const CheckAuth = async (req, res) => {
       .cookie("token", token, {
         httpOnly: true,
         sameSite: "none",
-        secure: true,
       })
       .json({
         message: "Authenticated",

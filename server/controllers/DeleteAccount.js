@@ -1,5 +1,5 @@
-const UserModel = require("../../models/UserModels.js");
 const crypto = require("crypto");
+const UserModel = require("../models/UserModels");
 const DeleteAccount = async (req, res) => {
   const { id } = req.params;
 

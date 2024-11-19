@@ -34,7 +34,7 @@ const Statistics = () => {
   return (
     <>
       <div className="p-4 sm:ml-64">
-        <div className="p-4 border-2 border-gray-200 border-dashed rounded-lg dark:border-gray-700">
+        <div className="p-4    rounded-lg dark:border-gray-700">
           <div className="flex justify-between mb-3">
             <h1 className="border-l-4 border-green-400 text-2xl">Statistics</h1>
             <button

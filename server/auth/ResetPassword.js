@@ -3,29 +3,23 @@ const UserModel = require("../models/UserModels.js");
 const bcryptjs = require("bcryptjs");
 
 const ResetPassword = async (req, res) => {
-  const { token } = req.params;
   const { password } = req.body;
-
+  const userId = req.userId;
   try {
     // Find user by the generated token
-    const user = await UserModel.findOne({
-      resetPasswordToken: token,
-      resetPasswordExpiresAt: { $gt: Date.now() },
-    });
+    const user = await UserModel.findById(userId);
 
     // Check if the user exists or the token is not expired
     if (!user) {
       return res.json({
         status: 0,
-        message: "Invalid or expired reset token!",
+        message: "User not found or expired reset token!",
       });
     }
 
     // Update password
     const hashedPassword = await bcryptjs.hash(password, 10);
     user.password = hashedPassword;
-    user.resetPasswordToken = undefined;
-    user.resetPasswordExpiresAt = undefined;
 
     // Save new user info in the database
     await user.save();
