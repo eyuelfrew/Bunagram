@@ -24,7 +24,7 @@ const Home = () => {
   const navigateTo = useNavigate();
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const { setSocket, setOnlineUsers } = UseSocket();
-  const Recever = useSelector((state: Root_State) => state.receiverReducer);
+  const Recever = useSelector((state: Root_State) => state.ReceiverReducer);
   const dispatch = useDispatch();
   const token = localStorage.getItem("token");
 

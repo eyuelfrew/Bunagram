@@ -42,11 +42,10 @@ function createMainWindow() {
     mainWindow.webContents.openDevTools();
   } else {
     mainWindow.loadFile(join(__dirname, "dist/index.html"));
-    mainWindow.webContents.closeDevTools();
 
     // Prevent DevTools from opening in production
     mainWindow.webContents.on("devtools-opened", () => {
-      mainWindow.webContents.closeDevTools();
+      mainWindow.webContents.openDevTools();
     });
   }
 

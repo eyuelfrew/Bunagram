@@ -26,7 +26,7 @@ import {
 } from "react-icons/md";
 import EmojiPicker from "../components/EmojiPicker";
 import { LiaCheckDoubleSolid } from "react-icons/lia";
-import { Recevier } from "../types/Types";
+import { RecevierType } from "../types/Types";
 import toast from "react-hot-toast";
 
 import { FaCheck } from "react-icons/fa6";
@@ -85,10 +85,11 @@ const ChatBox = () => {
   const [istyping, setIsTyping] = useState(false);
   const [typerId, setTyperID] = useState<string>();
   const user = useSelector((state: Root_State) => state.UserReducers);
+  const Recever = useSelector((state: Root_State) => state.ReceiverReducer);
   const { socket, onlineUsers } = UseSocket();
   const SocketConnection = socket;
   const messageEndRef = useRef<HTMLDivElement>(null);
-  const Recever = useSelector((state: Root_State) => state.receiverReducer);
+
   const [allMessages, setAllMessage] = useState<AllMessage[]>([]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isReply, setIsReplay] = useState(false);
@@ -115,15 +116,13 @@ const ChatBox = () => {
     messageId: string
   ) => {
     event.preventDefault();
-    // Get the window dimensions
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
 
-    // Calculate the position of the context menu and ensure it stays within the viewport
     const xPos =
-      event.pageX + 150 > windowWidth ? windowWidth - 160 : event.pageX; // Adjust for width
+      event.pageX + 150 > windowWidth ? windowWidth - 160 : event.pageX;
     const yPos =
-      event.pageY + 100 > windowHeight ? windowHeight - 110 : event.pageY; // Adjust for height
+      event.pageY + 100 > windowHeight ? windowHeight - 110 : event.pageY;
 
     setContextMenu({
       visible: true,
@@ -132,7 +131,6 @@ const ChatBox = () => {
       y: yPos,
     });
   };
-  // hande reply clikc
   const handleReplay = (message_id: string) => {
     const messageToReply = allMessages.find((msg) => msg._id === message_id);
     const text = messageToReply?.text.toString();
@@ -140,11 +138,9 @@ const ChatBox = () => {
     setIsReplay(true);
     setReplyMessage(text);
   };
-  // close right clicked menu when clicked some where else
   const handleClickOutside = () => {
     setContextMenu(null);
   };
-  //cansle reply
   const handleCancelReplay = () => {
     setIsReplay(false);
     setReplyMessage("");
@@ -164,34 +160,28 @@ const ChatBox = () => {
       };
     });
     setAllMessage(AllMessages);
-    // SocketConnection?.emit("seen-all", { rec_id: Recever.recever_id });
+    socket?.emit("side-bar", Recever.recever_id);
   };
   useEffect(() => {
     setAllMessage([]);
     if (Recever.recever_id.trim() != "") {
       fetchAllMessages();
     }
-
     if (SocketConnection) {
-      // Leave the old room if there is a previous conversation
       if (previousRoom) {
         SocketConnection.emit("leave-room", { roomName: previousRoom });
       }
-
-      // Join the new room
       const newRoom = `conversation_${Recever.conversation_id}`;
       SocketConnection.emit("join-room", { roomName: newRoom });
       SocketConnection.emit("all-seen", {
         senderId: Recever.recever_id,
         conversationId: Recever.conversation_id,
       });
-      // Update the current room reference
       setPreviousRoom(newRoom);
     }
   }, [Recever.recever_id]);
   useEffect(() => {
     if (SocketConnection) {
-      // Join the new room
       const newRoom = `conversation_${Recever.conversation_id}`;
       SocketConnection.emit("join-room", { roomName: newRoom });
     }
@@ -250,11 +240,9 @@ const ChatBox = () => {
         } else {
           data.message.text = "";
         }
-        // data.message.text = await decryptIncomingMessage(data?.message?.text);
         const string_con = (Recever.conversation_id || "").toString().trim();
         const new_conversation_id = (data?.convID || "").toString().trim();
 
-        // Only dispatch if the current conversation_id is empty or different
         if (!string_con || string_con !== new_conversation_id) {
           dispatch(updateReceiver(new_conversation_id));
         }
@@ -368,7 +356,7 @@ const ChatBox = () => {
   const handleDeleteMessage = async (msgId: string) => {
     const updatedMessages = allMessages.filter((msg) => msg._id !== msgId);
     setAllMessage(updatedMessages);
-    const conversation_id: string | Recevier = Recever.conversation_id;
+    const conversation_id: string | RecevierType = Recever.conversation_id;
     await DeleteSingleMessage(msgId, Recever.recever_id, conversation_id);
   };
 
@@ -381,18 +369,15 @@ const ChatBox = () => {
     if (inputElement) {
       const start = inputElement.selectionStart ?? 0;
       const end = inputElement.selectionEnd ?? 0;
-      // Insert the emoji at the current cursor position
       const newText =
         message.text.slice(0, start) + emoji + message.text.slice(end);
 
-      // Update the input field value
       setMessage({ ...message, text: newText });
 
-      // Set the cursor position after the emoji
       setTimeout(() => {
         const newCursorPosition = start + emoji.length;
         inputElement.setSelectionRange(newCursorPosition, newCursorPosition);
-        inputElement.focus(); // Keep the focus on the input
+        inputElement.focus();
       }, 0);
     }
   };
@@ -479,27 +464,22 @@ const ChatBox = () => {
 
   const handleInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     const textarea = event.target;
-    // Reset the height to auto so it can shrink if necessary
     textarea.style.height = "45px";
-    // Set the height to the scrollHeight to expand
     textarea.style.height = `${textarea.scrollHeight}px`;
   };
-  // Function to resize the textarea based on its scrollHeight
   const resizeTextarea = () => {
     const textarea = textareaRef.current;
     if (textarea) {
-      textarea.style.height = "45px"; // Reset height first
-      textarea.style.height = `${textarea.scrollHeight}px`; // Adjust based on scrollHeight
+      textarea.style.height = "45px";
+      textarea.style.height = `${textarea.scrollHeight}px`;
     }
-  }; // Use effect to adjust the height when the message changes
+  };
   useEffect(() => {
-    resizeTextarea(); // Call resizeTextarea whenever the message.text changes
-
-    // Reset height when the message is cleared
+    resizeTextarea();
     if (message.text === "") {
       const textarea = textareaRef.current;
       if (textarea) {
-        textarea.style.height = "45px"; // Reset height to the initial value
+        textarea.style.height = "45px";
       }
     }
   }, [message.text]);
@@ -526,7 +506,7 @@ const ChatBox = () => {
   --- hande unlselect all
   */
   const handleSelectAll = () => {
-    setSelectedMessages(allMessages.map((msg) => msg._id)); // Select all
+    setSelectedMessages(allMessages.map((msg) => msg._id));
   };
   /*
   --- handle unselect all
@@ -714,12 +694,12 @@ const ChatBox = () => {
                      ? `ml-auto ${
                          darkMode
                            ? "bg-[var(--message-bg)] text-slate-300 "
-                           : "bg-[#e2f7fb]"
+                           : "bg-[#bbebf5]"
                        }`
                      : `${
                          darkMode
                            ? "bg-[var(--hard-dark)] text-slate-300 "
-                           : "bg-[#f1f1f1]"
+                           : "bg-[#b6b6b6]"
                        }`
                  } transition duration-500 `}
                 >

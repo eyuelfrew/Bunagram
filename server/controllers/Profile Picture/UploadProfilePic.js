@@ -26,6 +26,7 @@ const UploadProfilePic = async (req, res) => {
     }
     await user.save();
     const updatedUser = await UserModel.findById(userId).select("-password");
+    req.io.emit("conversation");
     return res.json({
       message: "Profile Updated Successfully!",
       status: 1,

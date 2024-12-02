@@ -1,52 +1,74 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
-
-import 'package:coffegram/auth/verifi_reset_otp.dart';
+import 'package:coffegram/auth/reset_password.dart';
 import 'package:coffegram/service/api_service.dart';
 import 'package:flutter/material.dart';
 
-class ForgotPassword extends StatefulWidget {
-  const ForgotPassword({super.key});
+class OtpPage extends StatefulWidget {
+  const OtpPage({super.key});
 
   @override
-  _ForgotPasswordState createState() => _ForgotPasswordState();
+  _OtpPageState createState() => _OtpPageState();
 }
 
-class _ForgotPasswordState extends State<ForgotPassword> {
-  final TextEditingController _emailController = TextEditingController();
+class _OtpPageState extends State<OtpPage> {
+  final TextEditingController _otpController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isLoading = false;
   String? _errorMessage;
 
-  // Simulated function to verify email
-  Future<void> _verifyEmail() async {
-    final email = _emailController.text;
+  // Simulated function to verify OTP
+  Future<bool> _verifyOtp(String otp) async {
+    await Future.delayed(const Duration(seconds: 2)); // Simulate API delay
+    return otp == "123456";
+  }
+
+  void showSnackBar(BuildContext context, String message, Color color) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: color,
+      ),
+    );
+  }
+
+  void _handleVerifyOtp() async {
+    final verficaion_code = _otpController.text;
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         _isLoading = true;
         _errorMessage = null;
       });
-    }
-    void showSnackBar(BuildContext context, String message, Color color) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: color,
-        ),
-      );
-    }
 
-    var dio = ApiService.getDioInstance();
-    final response = await dio.post(
-        'https://chatapp.welllaptops.com/api/forgot-pass',
-        data: {'email': email});
-    setState(() {
-      _isLoading = false;
-    });
-    if (response.data['notFound'] == true) {
-      showSnackBar(context, 'Email does not exist.', Colors.red);
-    } else if (response.data['status'] == 1) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const OtpPage()));
+      var dio = ApiService.getDioInstance();
+      var cookieJar = ApiService.getCookieJarInstance();
+      var response = await dio.post(
+        'https://chatapp.welllaptops.com/api/verify-email',
+        data: {
+          'verification_code': verficaion_code,
+        },
+      );
+      await cookieJar
+          .loadForRequest(Uri.parse('https://chatapp.welllaptops.com'));
+      setState(() {
+        _isLoading = false;
+      });
+      if (response.data['notRegistered'] == true) {
+        showSnackBar(context, 'Incorrect Code.', Colors.red);
+      }
+      if (response.data['status'] == 200) {
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const ResetPasswordPage()));
+      }
+
+      // if (isOtpValid) {
+      //   ScaffoldMessenger.of(context).showSnackBar(
+      //     const SnackBar(content: Text("OTP Verified Successfully!")),
+      //   );
+      //   // Navigate to reset password or success page
+      // } else {
+      //   setState(() {
+      //     _errorMessage = "Invalid OTP. Please try again.";
+      //   });
+      // }
     }
   }
 
@@ -84,7 +106,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Text(
-                        "Forgot Password",
+                        "Enter OTP",
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w600,
@@ -93,7 +115,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       ),
                       const SizedBox(height: 10),
                       const Text(
-                        "Enter your email address to receive an OTP.",
+                        "Enter the 6-digit OTP sent to your email.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16,
@@ -102,10 +124,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       ),
                       const SizedBox(height: 30),
                       TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
+                        controller: _otpController,
+                        keyboardType: TextInputType.number,
                         decoration: InputDecoration(
-                          labelText: "Email Address",
+                          labelText: "OTP",
                           filled: true,
                           fillColor: Colors.grey[200],
                           border: OutlineInputBorder(
@@ -113,18 +135,19 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                             borderSide: BorderSide.none,
                           ),
                           prefixIcon: const Icon(
-                            Icons.email,
+                            Icons.lock,
                             color: Color(0xFF4A90E2),
                           ),
                         ),
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return "Please enter your email address.";
+                            return "Please enter the OTP.";
                           }
-                          final emailRegex = RegExp(
-                              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-                          if (!emailRegex.hasMatch(value)) {
-                            return "Please enter a valid email address.";
+                          if (value.length != 6) {
+                            return "OTP must be exactly 6 digits.";
+                          }
+                          if (!RegExp(r"^\d{6}$").hasMatch(value)) {
+                            return "OTP must contain only numbers.";
                           }
                           return null;
                         },
@@ -143,7 +166,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                               width: double.infinity,
                               height: 50,
                               child: ElevatedButton(
-                                onPressed: _verifyEmail,
+                                onPressed: _handleVerifyOtp,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF0061FF),
                                   shape: RoundedRectangleBorder(

@@ -26,6 +26,7 @@ const Logout = async (req, res) => {
     const cookieOptions = {
       httpOnly: true,
       sameSite: "none",
+      secure: true,
     };
 
     return res

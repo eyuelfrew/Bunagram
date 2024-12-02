@@ -77,7 +77,6 @@ const SendMessage = async (req, res) => {
       convID: conversation?._id,
       message: savedMessageWithReply,
     };
-    //send the single message to both socket conenction
     const roomName = `conversation_${conversation._id}`;
     req.io.to(roomName).emit("new-message", payload);
     req.io.to(reciver_id.toString()).emit("conversation");

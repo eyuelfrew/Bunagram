@@ -38,7 +38,7 @@ export interface LogingState {
 }
 
 // recevier type
-export interface Recevier {
+export interface RecevierType {
   full_name: string;
   rece_email: string;
   conversation_id: string;

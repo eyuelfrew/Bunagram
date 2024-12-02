@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from "axios";
-import { Recevier } from "../types/Types";
+import { RecevierType } from "../types/Types";
 const URI = import.meta.env.VITE_BACK_END_URL;
 
 /**
@@ -10,14 +10,13 @@ const URI = import.meta.env.VITE_BACK_END_URL;
 export const SendMessage = async (message: {
   reciver_id: string;
   text: string | undefined;
-  conversation: string | Recevier;
+  conversation: string | RecevierType;
 }) => {
   const response = await axios.post(`${URI}/api/create-message`, message, {
     withCredentials: true,
   });
   return response;
 };
-
 /**
  *
  * Delete Selected Message
@@ -138,7 +137,7 @@ export const SendCaption = async (formData: FormData) => {
 export const DeleteSingleMessage = async (
   msgId: string,
   reciver_id: string,
-  conversation_id: string | Recevier
+  conversation_id: string | RecevierType
 ) => {
   const paylaod = {
     message_id: msgId,

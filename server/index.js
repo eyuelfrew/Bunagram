@@ -15,7 +15,10 @@ const getConversations = require("./helpers/getConversation.js");
 const bodyParser = require("body-parser");
 dotenv.config();
 const app = express();
-const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://coffegram.welllaptops.com",
+];
 const corsOptions = {
   origin: allowedOrigins,
   credentials: true,
@@ -104,8 +107,16 @@ io.on("connection", async (socket) => {
 
   //sidenar event
   socket.on("side-bar", async (currentUserId) => {
-    const conversation = await getConversations(currentUserId.toString());
-    socket.emit("conversation", conversation || []);
+    const Reciverconversation = await getConversations(
+      currentUserId.toString()
+    );
+    const Senderconversation = await getConversations(currentUserId.toString());
+
+    io.to(user_id.toString()).emit("conversation", Reciverconversation || []);
+    io.to(currentUserId.toString()).emit(
+      "conversation",
+      Senderconversation || []
+    );
   });
   /*
   -- message seen socket request
@@ -165,16 +176,14 @@ io.on("connection", async (socket) => {
         io.to(roomName).emit("all-seen", {
           roomName,
         });
+        io.to(roomName).emit("all-seen", {
+          roomName,
+        });
+
         // Check if any messages were updated
         if (updateResult.nModified > 0) {
           // Emit the 'all-seen' event to the room with roomName and conversationId
-          io.to(roomName).emit("all-seen", {
-            roomName,
-          });
-
-          console.log(
-            `All unseen messages in conversation ${data?.conversationId} marked as seen by ${receiverId}`
-          );
+          io.to(data?.senderId.toString()).emit("conversation");
         }
       }
     } catch (error) {

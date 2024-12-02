@@ -1,11 +1,11 @@
-import { Recevier } from "../../types/Types";
+import { RecevierType } from "../../types/Types";
 import {
   CLEAR_RECEVIER_STATE,
   GET_RECEVER_INIT,
   UPDATE_RECIVER_INFO,
 } from "../actionTypes/actionTypes";
 
-const initState: Recevier = {
+const initState: RecevierType = {
   full_name: "",
   rece_email: "",
   conversation_id: "",
@@ -21,9 +21,9 @@ const initState: Recevier = {
   createdAt: "",
   deletedAccount: false,
 };
-const receiverReducer = (
+const ReceiverReducer = (
   state = initState,
-  action: { type: string; payload: any }
+  action: { type: string; payload: RecevierType }
 ) => {
   switch (action.type) {
     case GET_RECEVER_INIT:
@@ -32,9 +32,9 @@ const receiverReducer = (
       return { ...state, conversation_id: action.payload };
 
     case CLEAR_RECEVIER_STATE:
-      return initState;
+      return { ...initState };
     default:
       return state;
   }
 };
-export default receiverReducer;
+export default ReceiverReducer;

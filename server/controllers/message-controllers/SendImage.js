@@ -18,8 +18,8 @@ const SendMessage = async (req, res) => {
   try {
     let conversation = await ConversationModel.findOne({
       $or: [
-        { sender: SenderId.toString(), receiver: reciver_id.toString() },
-        { sender: reciver_id.toString(), receiver: SenderId.toString() },
+        { sender: SenderId.toString(), receiver: reciver_id?.toString() },
+        { sender: reciver_id.toString(), receiver: SenderId?.toString() },
       ],
     });
 

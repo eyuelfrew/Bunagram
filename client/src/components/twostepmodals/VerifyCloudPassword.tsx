@@ -27,7 +27,7 @@ const VerifyCloudPasswordComponent: React.FC<VerifyPasswordInterface> = ({
   loginInError,
   setPassword,
 }) => {
-  const handeleForgotPassword = () => {};
+  // const handeleForgotPassword = () => {};
   useEffect(() => {
     setPassword("");
   }, [setPassword, verifyTwoStep]);
@@ -95,9 +95,9 @@ const VerifyCloudPasswordComponent: React.FC<VerifyPasswordInterface> = ({
                 <span className="text-red-500">{loginInError}</span>
               </div>
               <div className="w-full px-2">
-                <button onClick={handeleForgotPassword} className="text-sm">
+                {/* <button onClick={handeleForgotPassword} className="text-sm">
                   Forgot password?
-                </button>
+                </button> */}
               </div>
             </div>
             <div

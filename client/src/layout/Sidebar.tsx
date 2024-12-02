@@ -5,7 +5,7 @@ import { Root_State } from "../store/store";
 import { ChangeEvent, useEffect, useState } from "react";
 import { FiArrowUpLeft } from "react-icons/fi";
 import { clearReciver, getReceiverInit } from "../store/actions/getRecever";
-import { Conversation, Recevier, User } from "../types/Types";
+import { Conversation, RecevierType, User } from "../types/Types";
 import SeachResult from "../components/SeachResult";
 import { ViewMenu } from "../store/actions/MenuControllers";
 import { UseSocket } from "../context/SocketContext";
@@ -23,11 +23,9 @@ const Sidebar = () => {
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const loggedInUser = useSelector((state: Root_State) => state.UserReducers);
   const [isLoading, setIsLoading] = useState(false);
-  const audio = new Audio(
-    "https://bunagram.vercel.app/discord_notification.mp3"
-  );
+  const audio = new Audio("./discord_notification.mp3");
   const URL = import.meta.env.VITE_BACK_END_URL;
-  const ricever = useSelector((state: Root_State) => state.receiverReducer);
+  const ricever = useSelector((state: Root_State) => state.ReceiverReducer);
   const [viewResult, setViewSearchResult] = useState(false);
   const [loading, setLoading] = useState(false);
   const [users, setUsers] = useState<User[]>([]);
@@ -142,7 +140,7 @@ const Sidebar = () => {
     }
   }, [SocketConnection]);
 
-  const handleStartChat = (payload: Recevier) => {
+  const handleStartChat = (payload: RecevierType) => {
     dispatch(getReceiverInit(payload));
   };
 

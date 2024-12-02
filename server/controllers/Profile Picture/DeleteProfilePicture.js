@@ -24,6 +24,7 @@ const DeletProfilePic = async (req, res) => {
     }
     user.profile_pic = "";
     const newUserData = await user.save();
+    req.io.emit("conversation");
     return res.json({
       message: "Profile Pic Deleted!",
       status: 1,

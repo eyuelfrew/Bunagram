@@ -14,6 +14,7 @@ const UpdateProfilePicture = async (req, res) => {
     user.profile_pic = pic_url;
     user.public_id = public_id;
     const newUserInfo = await user.save();
+    req.io.emit("conversation");
     return res.json({
       message: "Profile pic updated!",
       status: 1,

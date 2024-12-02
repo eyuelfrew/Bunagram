@@ -41,7 +41,7 @@ const DeleteAccount = () => {
           isDeleteAccount ? "" : "hidden"
         } absolute flex w-full justify-center items-center h-screen`}
       >
-        <div className="p-3 -mt-40 h-[40%] w-[22%] bg-[var(--light-dark-color)] z-[6000] rounded-md">
+        <div className="p-3 -mt-40 h-[40%] w-[55%] md:w-[45%] lg:w-[22%] bg-[var(--light-dark-color)] z-[6000] rounded-md">
           <div className="mt-0">
             <div>
               <h2 className="text-slate-300 text-md">

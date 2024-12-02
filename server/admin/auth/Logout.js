@@ -26,7 +26,7 @@ const AdminLogout = async (req, res) => {
     const cookieOptions = {
       httpOnly: true,
       sameSite: "none",
-      secure: false,
+      secure: true,
     };
 
     return res

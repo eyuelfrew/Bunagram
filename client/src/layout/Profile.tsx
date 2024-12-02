@@ -12,7 +12,7 @@ const Profile = () => {
   const URI = import.meta.env.VITE_BACK_END_URL;
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const dispatch = useDispatch();
-  const Reciver = useSelector((state: Root_State) => state.receiverReducer);
+  const Reciver = useSelector((state: Root_State) => state.ReceiverReducer);
   const isProfileview = useSelector(
     (state: Root_State) => state.ProfileReducer.isviewProfile
   );

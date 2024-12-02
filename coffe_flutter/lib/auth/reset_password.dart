@@ -1,52 +1,50 @@
-// ignore_for_file: library_private_types_in_public_api, use_build_context_synchronously
+// ignore_for_file: use_build_context_synchronously, library_private_types_in_public_api
 
-import 'package:coffegram/auth/verifi_reset_otp.dart';
+import 'package:coffegram/auth/login_page.dart';
 import 'package:coffegram/service/api_service.dart';
 import 'package:flutter/material.dart';
 
-class ForgotPassword extends StatefulWidget {
-  const ForgotPassword({super.key});
+class ResetPasswordPage extends StatefulWidget {
+  const ResetPasswordPage({super.key});
 
   @override
-  _ForgotPasswordState createState() => _ForgotPasswordState();
+  _ResetPasswordPageState createState() => _ResetPasswordPageState();
 }
 
-class _ForgotPasswordState extends State<ForgotPassword> {
-  final TextEditingController _emailController = TextEditingController();
+class _ResetPasswordPageState extends State<ResetPasswordPage> {
   final _formKey = GlobalKey<FormState>();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
-  String? _errorMessage;
 
-  // Simulated function to verify email
-  Future<void> _verifyEmail() async {
-    final email = _emailController.text;
+  void _handleResetPassword() async {
+    final password = _passwordController.text;
     if (_formKey.currentState?.validate() ?? false) {
       setState(() {
         _isLoading = true;
-        _errorMessage = null;
       });
-    }
-    void showSnackBar(BuildContext context, String message, Color color) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: color,
-        ),
-      );
-    }
 
-    var dio = ApiService.getDioInstance();
-    final response = await dio.post(
-        'https://chatapp.welllaptops.com/api/forgot-pass',
-        data: {'email': email});
-    setState(() {
-      _isLoading = false;
-    });
-    if (response.data['notFound'] == true) {
-      showSnackBar(context, 'Email does not exist.', Colors.red);
-    } else if (response.data['status'] == 1) {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (context) => const OtpPage()));
+      // Simulate API call
+      var dio = ApiService.getDioInstance();
+      // var cookieJar = ApiService.getCookieJarInstance();
+      var response = await dio.post(
+        'https://chatapp.welllaptops.com/api/reset-password',
+        data: {
+          'password': password,
+        },
+      );
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      if (response.data['status'] == 1) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Password reset successfully!")),
+        );
+        Navigator.push(context,
+            MaterialPageRoute(builder: (context) => const LoginPage()));
+      }
     }
   }
 
@@ -84,7 +82,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       const Text(
-                        "Forgot Password",
+                        "Reset Password",
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.w600,
@@ -93,7 +91,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       ),
                       const SizedBox(height: 10),
                       const Text(
-                        "Enter your email address to receive an OTP.",
+                        "Enter your new password to reset your account.",
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontSize: 16,
@@ -102,10 +100,10 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                       ),
                       const SizedBox(height: 30),
                       TextFormField(
-                        controller: _emailController,
-                        keyboardType: TextInputType.emailAddress,
+                        controller: _passwordController,
+                        obscureText: true,
                         decoration: InputDecoration(
-                          labelText: "Email Address",
+                          labelText: "New Password",
                           filled: true,
                           fillColor: Colors.grey[200],
                           border: OutlineInputBorder(
@@ -113,37 +111,55 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                             borderSide: BorderSide.none,
                           ),
                           prefixIcon: const Icon(
-                            Icons.email,
+                            Icons.lock,
                             color: Color(0xFF4A90E2),
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.trim().isEmpty) {
-                            return "Please enter your email address.";
+                          if (value == null || value.isEmpty) {
+                            return "Please enter a password.";
                           }
-                          final emailRegex = RegExp(
-                              r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
-                          if (!emailRegex.hasMatch(value)) {
-                            return "Please enter a valid email address.";
+                          if (value.length < 8) {
+                            return "Password must be at least 8 characters long.";
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: 20),
-                      if (_errorMessage != null)
-                        Text(
-                          _errorMessage!,
-                          style: const TextStyle(color: Colors.green),
-                          textAlign: TextAlign.center,
+                      TextFormField(
+                        controller: _confirmPasswordController,
+                        obscureText: true,
+                        decoration: InputDecoration(
+                          labelText: "Confirm Password",
+                          filled: true,
+                          fillColor: Colors.grey[200],
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(30),
+                            borderSide: BorderSide.none,
+                          ),
+                          prefixIcon: const Icon(
+                            Icons.lock_outline,
+                            color: Color(0xFF4A90E2),
+                          ),
                         ),
-                      const SizedBox(height: 10),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return "Please confirm your password.";
+                          }
+                          if (value != _passwordController.text) {
+                            return "Passwords do not match.";
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 20),
                       _isLoading
                           ? const CircularProgressIndicator()
                           : SizedBox(
                               width: double.infinity,
                               height: 50,
                               child: ElevatedButton(
-                                onPressed: _verifyEmail,
+                                onPressed: _handleResetPassword,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: const Color(0xFF0061FF),
                                   shape: RoundedRectangleBorder(
@@ -151,7 +167,7 @@ class _ForgotPasswordState extends State<ForgotPassword> {
                                   ),
                                 ),
                                 child: const Text(
-                                  "Verify",
+                                  "Reset Password",
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 18,

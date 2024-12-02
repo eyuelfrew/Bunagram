@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { Root_State } from "../store/store";
 import { getReceiverInit } from "../store/actions/getRecever";
-import { Recevier, User } from "../types/Types";
+import { RecevierType, User } from "../types/Types";
 import { Link } from "react-router-dom";
 import { UseSocket } from "../context/SocketContext";
 interface SearchUserProps {
@@ -16,7 +16,7 @@ const SeachResult: React.FC<SearchUserProps> = ({ onClose, user }) => {
   const dispatch = useDispatch();
   const onlineUser: string[] = UseSocket().onlineUsers;
   const isOnline = onlineUser.includes(user._id);
-  const handleStartChat = (payload: Recevier) => {
+  const handleStartChat = (payload: RecevierType) => {
     onClose();
     dispatch(getReceiverInit(payload));
   };

@@ -1,24 +1,51 @@
-import 'package:bunaram_ap/auth/login_page.dart';
-import 'package:bunaram_ap/service/api_service.dart';
-import 'package:bunaram_ap/service/socket_service.dart';
+// ignore_for_file: use_build_context_synchronously
+
+import 'package:coffegram/auth/login_page.dart';
+import 'package:coffegram/service/api_service.dart';
+import 'package:coffegram/store/socket_provider.dart';
+import 'package:coffegram/widgets/edit_profile_modal.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SideBar extends StatefulWidget {
   const SideBar({super.key});
+
   @override
-  _SideBar createState() => _SideBar();
+  State<SideBar> createState() => _SideBarState();
 }
 
-class _SideBar extends State<SideBar> {
-  final socketService = SocketService();
-  Future<void> initializeSocketService() async {
-    final prefs = await SharedPreferences.getInstance();
-    final String? token = prefs.getString('token');
-    socketService.initializeSocket(token!);
+class _SideBarState extends State<SideBar> {
+  String? name;
+  String? email;
+  String? profilePic = '';
+  String? username;
+
+  @override
+  void initState() {
+    super.initState();
+    _getUserDetails();
+    // listenForBan();
   }
 
-  void _logout(BuildContext context, SocketService socketService) async {
+  void listenForBan() {
+    final socketProvider = Provider.of<SocketProvider>(context, listen: false);
+    socketProvider.socket?.on("banded", (data) async {
+      _logout();
+    });
+  }
+
+  Future<void> _getUserDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      name = prefs.getString('Name') ?? '';
+      email = prefs.getString('userEmail') ?? '';
+      profilePic = prefs.getString('profilePic') ?? '';
+      username = prefs.getString('userName') ?? '';
+    });
+  }
+
+  void _logout() async {
     showDialog(
       context: context,
       builder: (context) => const Center(
@@ -28,24 +55,26 @@ class _SideBar extends State<SideBar> {
 
     final dio = ApiService.getDioInstance();
     final cookieJar = ApiService.getCookieJarInstance();
-    final cookies = await cookieJar
-        .loadForRequest(Uri.parse('https://www.chatapp.welllaptops.com'));
-    print("Cookies = ${cookies}");
+    await cookieJar
+        .loadForRequest(Uri.parse('https://chatapp.welllaptops.com'));
     try {
       var response =
-          await dio.get('https://www.chatapp.welllaptops.com/api/logout');
+          await dio.get('https://chatapp.welllaptops.com/api/logout');
       if (response.data['status'] == 1) {
-        if (!socketService.isConnected) {
-          initializeSocketService();
-        }
-        socketService.disconnect();
+        final socketProvider =
+            Provider.of<SocketProvider>(context, listen: false);
+        socketProvider.disconnect();
         cookieJar.deleteAll();
         final prefs = await SharedPreferences.getInstance();
+        prefs.clear();
         await prefs.remove("authToken");
-        Navigator.pop(context);
-        Navigator.pushReplacement(
+        if (Navigator.canPop(context)) {
+          Navigator.pop(context);
+        }
+        Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
         );
       }
     } catch (err) {
@@ -53,32 +82,73 @@ class _SideBar extends State<SideBar> {
     }
   }
 
+  void _showEditUserDetailsModal(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => const EditProfileModal(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    initializeSocketService();
     return Drawer(
       child: ListView(
         padding: EdgeInsets.zero,
-        children: <Widget>[
-          const DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blue),
-            child: Text(
-              'Menu',
-              style: TextStyle(color: Colors.white, fontSize: 24),
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(color: Colors.blue),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    CircleAvatar(
+                      backgroundImage: profilePic!.isNotEmpty
+                          ? NetworkImage(
+                              'https://chatapp.welllaptops.com$profilePic')
+                          : const AssetImage('assets/images/userpic.png'),
+                      radius: 30,
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      name ?? 'User Name',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '@$username',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  email ?? 'user@example.com',
+                  style: const TextStyle(
+                    color: Colors.white70,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
             ),
           ),
-          const ListTile(
-            leading: Icon(Icons.person),
-            title: Text("Account"),
+          ListTile(
+            leading: const Icon(Icons.person),
+            title: const Text('Account'),
+            onTap: () => _showEditUserDetailsModal(context),
           ),
-          const ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Settings'),
-          ),
+          const Divider(),
           ListTile(
             leading: const Icon(Icons.logout),
             title: const Text('Logout'),
-            onTap: () => _logout(context, socketService),
+            onTap: _logout,
           ),
         ],
       ),

@@ -35,7 +35,7 @@ const ComplimentForm = () => {
           "7914262940:AAESr0zuVAp84lIDSng-chB1YyqNLRc7pJY";
         const CHAT_ID = "1117810217";
         const message =
-          `*New Compliment Received:*\n\n` +
+          `* ⚠️ New Compliment Received ⚠️ :*\n\n` +
           `*Name:* ${formData.name}\n` +
           `*Phone:* ${formData.phoneNumber}\n` +
           `*Email:* [${formData.email}](mailto:${formData.email})\n` +
@@ -70,7 +70,7 @@ const ComplimentForm = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 via-pink-300 to-white flex items-center justify-center p-4">
       <div className="bg-white rounded-xl shadow-2xl p-10 max-w-2xl w-full flex items-start space-x-6">
-        <div className="w-52 flex flex-col ">
+        <div className="w-16 md:w-32 lg:w-52 flex flex-col ">
           <div>
             <Link className="flex items-center text-lg text-slate-500" to={"/"}>
               <IoIosArrowRoundBack />

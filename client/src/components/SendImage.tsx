@@ -9,7 +9,7 @@ import { SendCaption } from "../apis/Chat";
 const SendImage = () => {
   const darkMode = useSelector((state: Root_State) => state.theme.darkMode);
   const [isLoading, setIsLoading] = useState(false);
-  const Recever = useSelector((state: Root_State) => state.receiverReducer);
+  const Recever = useSelector((state: Root_State) => state.ReceiverReducer);
   const [image, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string>("");
   const [caption, setCaption] = useState<string>("");

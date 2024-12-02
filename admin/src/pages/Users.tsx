@@ -6,7 +6,7 @@ import { FaUserAltSlash, FaUserCheck, FaUsers } from "react-icons/fa";
 interface User {
   _id: string;
   name: string;
-  emial: string;
+  email: string;
   phone_number: string;
   banded: boolean;
   deletedAccount: boolean;
@@ -160,7 +160,7 @@ const Users = () => {
               <thead className="sticky top-0 bg-blue-200 z-10">
                 <tr>
                   <th className="px-4 py-2 text-left">Full Name</th>
-                  <th className="px-0 py-2 text-left">Phone Number</th>
+                  <th className="px-0 py-2 text-left">Email</th>
                   <th className="px-8 py-2 text-left">Status</th>
                   <th className="px-4 py-2 text-left">Actions</th>
                 </tr>
@@ -193,7 +193,7 @@ const Users = () => {
                             {user.name}
                           </td>
                           <td className="px-4 py-2 max-w-28 truncate ...">
-                            ------
+                            {user.email}
                           </td>
                           <td
                             className={`

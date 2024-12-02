@@ -88,10 +88,36 @@ const EditBio = async (req, res) => {
     res.json({ message: error.message || error });
   }
 };
-
+// update user name optionall case(Flutter)
+const UpdateUserData = async (req, res) => {
+  const { name, user_name, bio, user_id } = req.body;
+  try {
+    const user = await UserModel.findById(user_id);
+    if (!user)
+      return res.json({
+        message: "User not found!",
+        status: 0,
+        notFound: true,
+      });
+    user.bio = bio;
+    user.name = name;
+    user.user_name = user_name;
+    const updated = await user.save();
+    if (updated) console.log("User Updated From Flutter!");
+    return res.json({
+      message: "user info updated",
+      status: 1,
+      user: { ...user._doc, password: undefined },
+    });
+  } catch (error) {
+    console.log(error);
+    res.json({ message: error.message || error });
+  }
+};
 module.exports = {
   UpdateName,
   CheckUserName,
   EditUserName,
   EditBio,
+  UpdateUserData,
 };

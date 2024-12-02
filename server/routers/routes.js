@@ -12,6 +12,7 @@ const {
   EditBio,
   EditUserName,
   UpdateName,
+  UpdateUserData,
 } = require("../controllers/UpdateAccount.js");
 const ForgotPassword = require("../auth/ForgotPassword.js");
 const ResetPassword = require("../auth/ResetPassword.js");
@@ -130,7 +131,7 @@ router.delete("/del-acc/:id", VerifyToken, DeleteAccount);
 router.post("/update-pp", VerifyToken, UpdateProfilePicture);
 router.delete("/delete-profile/:user_id", VerifyToken, DeleteProfilePic);
 router.get("/blocked-users", VerifyToken, GetBlockedUsers);
-
+router.post("/user/update", VerifyToken, UpdateUserData);
 // Search users
 router.post("/search", searchUser);
 

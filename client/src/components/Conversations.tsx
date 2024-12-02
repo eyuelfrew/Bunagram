@@ -1,14 +1,16 @@
 import { Link } from "react-router-dom";
 import { BiCheckDouble } from "react-icons/bi";
 import { FaCheck } from "react-icons/fa";
-import { Conversation, Recevier, User } from "../types/Types";
+import { Conversation, RecevierType, User } from "../types/Types";
+import { useSelector } from "react-redux";
+import { Root_State } from "../store/store";
 interface ConversationWithUserDetails extends Conversation {
   userDetails: User;
 }
 interface ConversationsProps {
   conv: ConversationWithUserDetails;
   user: User;
-  recever: Recevier;
+  recever: RecevierType | any;
   darkMode: boolean;
   onlineUsers: string[];
   handleStartChat: (chatDetails: {
@@ -40,11 +42,16 @@ const Conversations: React.FC<ConversationsProps> = ({
   DecryptAllMessage,
   URL,
 }) => {
+  const loggedInUser = useSelector((state: Root_State) => state.UserReducers);
   const isCurrentUser = user._id === conv.userDetails._id;
   const isDeletedAccount = conv.userDetails.deletedAccount;
   const isSelected = recever.recever_id === conv.userDetails._id;
   const isOnline = onlineUsers.includes(conv.userDetails._id);
 
+  const blockedByReciver = conv.userDetails.blockedUsers.includes(
+    loggedInUser._id
+  );
+  console.log(blockedByReciver);
   const handleClick = () => {
     handleStartChat({
       full_name: conv.userDetails.name,
@@ -92,7 +99,7 @@ const Conversations: React.FC<ConversationsProps> = ({
           {!isCurrentUser && (
             <div
               className={`absolute w-3 h-3 rounded-full ${
-                isOnline ? "bg-green-400" : "bg-red-400"
+                isOnline && !blockedByReciver ? "bg-green-400" : "bg-red-400"
               } right-1 top-11 md:top-4 lg:top-11`}
             ></div>
           )}

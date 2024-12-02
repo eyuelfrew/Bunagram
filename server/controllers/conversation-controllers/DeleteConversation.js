@@ -20,9 +20,7 @@ const DeleteConversation = async (req, res) => {
     });
     await ConversationModel.deleteOne({ _id: conversation_id });
     const roomName = `conversation_${conversation._id}`;
-    // req.io
-    //   .to(userId.toString())
-    //   .emit("con-del", { conversation_id: conversation_id });
+    req.io.to(userId.toString()).emit("conversation");
     req.io.to(roomName).emit("con-del", { conversation_id: conversation_id });
     req.io
       .to(reciver_id.toString())

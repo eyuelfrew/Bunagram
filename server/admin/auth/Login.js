@@ -29,7 +29,7 @@ const AdminLogin = async (req, res) => {
       .cookie("token", token, {
         httpOnly: true,
         sameSite: "none",
-        secure: false,
+        secure: true,
       })
       .json({
         message: "Login Successful",

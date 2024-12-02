@@ -1,6 +1,6 @@
 const nodejsmailer = require("nodemailer");
 
-const SendVerificationEmail = async (email, _verificationCode) => {
+const ChangePasswordVerification = async (email, _verificationCode) => {
   console.log("Email sending ... ...");
 
   const mailOptions = {
@@ -59,4 +59,4 @@ const SendVerificationEmail = async (email, _verificationCode) => {
   });
 };
 
-module.exports = SendVerificationEmail;
+module.exports = ChangePasswordVerification;

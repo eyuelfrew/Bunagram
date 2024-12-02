@@ -19,13 +19,15 @@ const ChatMenu: React.FC = () => {
   const { socket } = UseSocket();
   const user = useSelector((state: Root_State) => state.UserReducers);
   const dispatch = useDispatch();
-  const reciver = useSelector((state: Root_State) => state.receiverReducer);
-  const conversation_id = reciver.conversation_id.toString();
+  const reciverFetch = useSelector(
+    (state: Root_State) => state.ReceiverReducer
+  );
+  const conversation_id = reciverFetch.conversation_id.toString();
   const [openMenu, setOpenMenu] = useState<boolean>(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const handleOpenMenu = (event: React.MouseEvent) => {
-    event.stopPropagation(); // Prevent the event from bubbling up
+    event.stopPropagation();
     setOpenMenu(!openMenu);
   };
 
@@ -48,7 +50,7 @@ const ChatMenu: React.FC = () => {
   }, [openMenu]);
   const handleBlockUser = async () => {
     const payload = {
-      blocked_id: reciver.recever_id,
+      blocked_id: reciverFetch.recever_id,
     };
     const response = await BlockUser(payload);
 
@@ -56,17 +58,17 @@ const ChatMenu: React.FC = () => {
       dispatch(SetUserInfo(response?.user));
       const payload = {
         blocker: user._id,
-        blocked: reciver.recever_id,
+        blocked: reciverFetch.recever_id,
       };
       socket?.emit("blockuser", payload);
     }
   };
 
-  const isBlocked = user.blockedUsers.includes(reciver.recever_id);
+  const isBlocked = user.blockedUsers.includes(reciverFetch.recever_id);
   const handleUnblockUser = async () => {
     const payload = {
       blocker_id: user._id,
-      blocked_id: reciver.recever_id,
+      blocked_id: reciverFetch.recever_id,
     };
     const response = await UnblockUser(payload);
     if (response?.status === 1) {
@@ -76,14 +78,26 @@ const ChatMenu: React.FC = () => {
 
   const handleDeleteConversation = async () => {
     const payload = {
-      reciver_id: reciver.recever_id,
+      reciver_id: reciverFetch.recever_id,
       conversation_id: conversation_id,
     };
     await DeleteConversation(payload);
   };
   useEffect(() => {
-    socket?.on("blockedby", (data) => {
-      if (reciver.recever_id === data._id) {
+    const recid = String(reciverFetch.recever_id).trim();
+    const handleBlockedBy = (data: {
+      _id: string;
+      name: string;
+      email: string;
+      profile_pic: string;
+      user_name: string;
+      phone_number: string;
+      blockedUsers: string[];
+      bio: string;
+      deletedAccount: boolean;
+    }) => {
+      const check = recid === String(data._id).trim();
+      if (check) {
         dispatch(
           getReceiverInit({
             full_name: data.name,
@@ -102,10 +116,24 @@ const ChatMenu: React.FC = () => {
             deletedAccount: data?.deletedAccount,
           })
         );
+      } else {
+        return;
       }
-    });
-    socket?.on("unblockedby", (data) => {
-      if (reciver.recever_id === data._id) {
+    };
+
+    const handleUnBlockedBy = (data: {
+      _id: any;
+      name: any;
+      email: any;
+      profile_pic: any;
+      bio: any;
+      user_name: any;
+      phone_number: any;
+      blockedUsers: any;
+      deletedAccount: any;
+    }) => {
+      const check = recid === String(data._id).trim();
+      if (check) {
         dispatch(
           getReceiverInit({
             full_name: data.name,
@@ -124,12 +152,20 @@ const ChatMenu: React.FC = () => {
             deletedAccount: data?.deletedAccount,
           })
         );
+      } else {
+        return;
       }
-    });
-  }, [socket]);
+    };
+    socket?.on("blockedby", handleBlockedBy);
+    socket?.on("unblockedby", handleUnBlockedBy);
+    return () => {
+      socket?.off("blockedby", handleBlockedBy);
+      socket?.off("unblockedby", handleUnBlockedBy);
+    };
+  }, [reciverFetch.recever_id, socket, dispatch]);
 
   const handleClearChat = async () => {
-    const response = await ClearChats(reciver?.conversation_id.toString());
+    const response = await ClearChats(reciverFetch?.conversation_id.toString());
     if (response.status == 1) {
       toast.success(response.message);
     }

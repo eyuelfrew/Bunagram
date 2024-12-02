@@ -3,7 +3,11 @@ class User {
   final String name;
   final String profilePic;
   final String lastSeen;
+  final String bio;
+  final String email;
+  final String username;
   final bool deletedAccount;
+  final String joinedDate;
 
   User({
     required this.id,
@@ -11,6 +15,10 @@ class User {
     required this.profilePic,
     required this.lastSeen,
     required this.deletedAccount,
+    required this.email,
+    required this.bio,
+    required this.username,
+    required this.joinedDate,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -19,6 +27,10 @@ class User {
       name: json['name'] ?? 'Unknown',
       profilePic: json['profile_pic'] ?? '',
       lastSeen: json['lastSeen'] ?? '',
+      bio: json['bio'] ?? '',
+      email: json['email'] ?? '',
+      username: json['username'] ?? '',
+      joinedDate: json['createdAt'] ?? '',
       deletedAccount: json['deletedAccount'] ?? false,
     );
   }
@@ -26,13 +38,11 @@ class User {
 
 class Message {
   final String text;
-
-  Message({required this.text});
+  final bool seen;
+  Message({required this.text, required this.seen});
 
   factory Message.fromJson(Map<String, dynamic> json) {
-    return Message(
-      text: json['text'] ?? '', // Default to empty string
-    );
+    return Message(text: json['text'] ?? '', seen: false);
   }
 }
 
@@ -42,6 +52,7 @@ class Conversation {
   final User receiver;
   final Message lastMessage;
   final User? userDetails; // Optional field for storing user details
+  final int unseenMessages;
 
   Conversation({
     required this.id,
@@ -49,6 +60,7 @@ class Conversation {
     required this.receiver,
     required this.lastMessage,
     this.userDetails,
+    this.unseenMessages = 0,
   });
 
   factory Conversation.fromJson(Map<String, dynamic> json) {
@@ -57,16 +69,17 @@ class Conversation {
       sender: User.fromJson(json['sender'] ?? {}),
       receiver: User.fromJson(json['receiver'] ?? {}),
       lastMessage: Message.fromJson(json['lastMessage'] ?? {}),
+      unseenMessages: json['unseenMessages'] ?? 0,
     );
   }
 
-  // The copyWith method
   Conversation copyWith({
     String? id,
     User? sender,
     User? receiver,
     Message? lastMessage,
     User? userDetails,
+    int? unseenMessages,
   }) {
     return Conversation(
       id: id ?? this.id,
@@ -74,6 +87,7 @@ class Conversation {
       receiver: receiver ?? this.receiver,
       lastMessage: lastMessage ?? this.lastMessage,
       userDetails: userDetails ?? this.userDetails,
+      unseenMessages: unseenMessages ?? this.unseenMessages,
     );
   }
 }
